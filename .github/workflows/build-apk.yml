@@ -23,24 +23,48 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
+          gradle-version: '8.10.2'
 
-      - name: Build Release APK
-        run: gradle --no-daemon --stacktrace :app:assembleRelease
+      - name: Create release signing key
+        shell: bash
+        run: |
+          set -e
+
+          KEYSTORE_PATH="$RUNNER_TEMP/daftar-release.keystore"
+          KEYSTORE_PASSWORD="$(openssl rand -hex 24)"
+          KEY_PASSWORD="$(openssl rand -hex 24)"
+          KEY_ALIAS="daftar-release"
+
+          keytool -genkeypair \
+            -v \
+            -keystore "$KEYSTORE_PATH" \
+            -storetype PKCS12 \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            -alias "$KEY_ALIAS" \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Daftar Kelasi, OU=Android, O=Daftar Kelasi, L=Minab, ST=Hormozgan, C=IR"
+
+          echo "RELEASE_KEYSTORE=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+          echo "RELEASE_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "RELEASE_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "RELEASE_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+
+      - name: Build signed Release APK
+        run: |
+          gradle --no-daemon --stacktrace :app:assembleRelease
 
       - name: Find APK
         shell: bash
         run: |
           set -e
+
           echo "Searching for APK files..."
           find . -type f -name "*.apk" -print
 
-      - name: Prepare APK
-        shell: bash
-        run: |
-          set -e
-
-          APK=$(find app/build/outputs/apk -type f -name "*.apk" | head -n 1)
+          APK=$(find . -type f -name "*.apk" | head -n 1)
 
           if [ -z "$APK" ]; then
             echo "ERROR: No APK was produced."
@@ -52,13 +76,25 @@ jobs:
           mkdir -p release
           cp "$APK" release/DaftarKelasi.apk
 
-      - name: Verify APK
+      - name: Verify APK signature
         shell: bash
         run: |
           set -e
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose release/DaftarKelasi.apk
 
-      - name: Upload APK
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" \
+            -type f \
+            -name apksigner \
+            | sort -V \
+            | tail -n 1)
+
+          if [ -z "$APKSIGNER" ]; then
+            echo "ERROR: apksigner was not found."
+            exit 1
+          fi
+
+          "$APKSIGNER" verify --verbose release/DaftarKelasi.apk
+
+      - name: Upload final APK
         uses: actions/upload-artifact@v4
         with:
           name: DaftarKelasi-APK
