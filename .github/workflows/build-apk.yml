@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android Release APK
 
 on:
   workflow_dispatch:
@@ -25,11 +25,11 @@ jobs:
         with:
           gradle-version: '8.14.5'
 
-      - name: Build APK
-        run: gradle assembleDebug
+      - name: Build Release APK
+        run: gradle assembleRelease
 
-      - name: Upload APK
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: daftar-kelasi-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: daftar-kelasi-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
