@@ -52,7 +52,7 @@ jobs:
           echo "RELEASE_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
           echo "RELEASE_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
 
-      - name: Build signed Release APK
+      - name: Build Release APK
         run: |
           gradle --no-daemon --stacktrace :app:assembleRelease
 
@@ -73,26 +73,57 @@ jobs:
 
           echo "Found APK: $APK"
 
+          echo "APK_SOURCE=$APK" >> "$GITHUB_ENV"
+
+      - name: Sign Release APK
+        shell: bash
+        run: |
+          set -e
+
+          BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)
+
+          ZIPALIGN="$BUILD_TOOLS/zipalign"
+          APKSIGNER="$BUILD_TOOLS/apksigner"
+
+          if [ ! -f "$ZIPALIGN" ]; then
+            echo "ERROR: zipalign not found."
+            exit 1
+          fi
+
+          if [ ! -f "$APKSIGNER" ]; then
+            echo "ERROR: apksigner not found."
+            exit 1
+          fi
+
           mkdir -p release
-          cp "$APK" release/DaftarKelasi.apk
+
+          echo "Aligning APK..."
+          "$ZIPALIGN" -f -p 4 \
+            "$APK_SOURCE" \
+            release/DaftarKelasi-aligned.apk
+
+          echo "Signing APK..."
+          "$APKSIGNER" sign \
+            --ks "$RELEASE_KEYSTORE" \
+            --ks-key-alias "$RELEASE_KEY_ALIAS" \
+            --ks-pass "pass:$RELEASE_KEYSTORE_PASSWORD" \
+            --key-pass "pass:$RELEASE_KEY_PASSWORD" \
+            --out release/DaftarKelasi.apk \
+            release/DaftarKelasi-aligned.apk
+
+          rm -f release/DaftarKelasi-aligned.apk
 
       - name: Verify APK signature
         shell: bash
         run: |
           set -e
 
-          APKSIGNER=$(find "$ANDROID_HOME/build-tools" \
-            -type f \
-            -name apksigner \
-            | sort -V \
-            | tail -n 1)
-
-          if [ -z "$APKSIGNER" ]; then
-            echo "ERROR: apksigner was not found."
-            exit 1
-          fi
+          BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)
+          APKSIGNER="$BUILD_TOOLS/apksigner"
 
           "$APKSIGNER" verify --verbose release/DaftarKelasi.apk
+
+          echo "APK signature verification successful."
 
       - name: Upload final APK
         uses: actions/upload-artifact@v4
