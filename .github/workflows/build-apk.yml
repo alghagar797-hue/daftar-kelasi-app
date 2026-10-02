@@ -23,13 +23,45 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.14.5'
+          gradle-version: '8.7'
 
       - name: Build Release APK
-        run: gradle assembleRelease
+        run: gradle --no-daemon --stacktrace :app:assembleRelease
 
-      - name: Upload Release APK
+      - name: Find APK
+        shell: bash
+        run: |
+          set -e
+          echo "Searching for APK files..."
+          find . -type f -name "*.apk" -print
+
+      - name: Prepare APK
+        shell: bash
+        run: |
+          set -e
+
+          APK=$(find app/build/outputs/apk -type f -name "*.apk" | head -n 1)
+
+          if [ -z "$APK" ]; then
+            echo "ERROR: No APK was produced."
+            exit 1
+          fi
+
+          echo "Found APK: $APK"
+
+          mkdir -p release
+          cp "$APK" release/DaftarKelasi.apk
+
+      - name: Verify APK
+        shell: bash
+        run: |
+          set -e
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose release/DaftarKelasi.apk
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: daftar-kelasi-release-apk
-          path: app/build/outputs/apk/release/app-release.apk
+          name: DaftarKelasi-APK
+          path: release/DaftarKelasi.apk
+          if-no-files-found: error
+          retention-days: 30
