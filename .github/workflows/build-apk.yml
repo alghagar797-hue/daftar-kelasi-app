@@ -43,9 +43,21 @@ jobs:
 
           echo "Permanent release keystore restored."
 
-      - name: Build Release APK
+      - name: Build signed Release APK
+        shell: bash
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          gradle --no-daemon --stacktrace :app:assembleRelease
+          set -e
+
+          gradle --no-daemon --stacktrace \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/daftar-release-v2.keystore" \
+            -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KEY_PASSWORD" \
+            :app:assembleRelease
 
       - name: Find APK
         shell: bash
@@ -79,41 +91,6 @@ jobs:
 
           echo "BUILD_TOOLS=$BUILD_TOOLS" >> "$GITHUB_ENV"
 
-      - name: Align APK
-        shell: bash
-        run: |
-          set -e
-
-          mkdir -p release
-
-          echo "Aligning APK..."
-
-          "$BUILD_TOOLS/zipalign" \
-            -f -p 4 \
-            "$APK_SOURCE" \
-            release/DaftarKelasi-aligned.apk
-
-      - name: Sign APK with permanent release key
-        shell: bash
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          set -e
-
-          echo "Signing APK with permanent release key..."
-
-          "$BUILD_TOOLS/apksigner" sign \
-            --ks "$RUNNER_TEMP/daftar-release-v2.keystore" \
-            --ks-key-alias "$KEY_ALIAS" \
-            --ks-pass "pass:$KEYSTORE_PASSWORD" \
-            --key-pass "pass:$KEY_PASSWORD" \
-            --out release/DaftarKelasi.apk \
-            release/DaftarKelasi-aligned.apk
-
-          rm -f release/DaftarKelasi-aligned.apk
-
       - name: Verify APK signature
         shell: bash
         run: |
@@ -124,11 +101,23 @@ jobs:
           "$BUILD_TOOLS/apksigner" verify \
             --verbose \
             --print-certs \
-            release/DaftarKelasi.apk
+            "$APK_SOURCE"
 
           echo "========================================="
           echo "APK SIGNATURE VERIFIED SUCCESSFULLY"
           echo "========================================="
+
+      - name: Copy final APK
+        shell: bash
+        run: |
+          set -e
+
+          mkdir -p release
+
+          cp "$APK_SOURCE" release/DaftarKelasi.apk
+
+          echo "Final APK:"
+          ls -lh release/DaftarKelasi.apk
 
       - name: Upload final APK
         uses: actions/upload-artifact@v4
