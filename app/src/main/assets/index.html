@@ -1566,7 +1566,7 @@ body{min-height:100dvh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scroll
       <button class="auth-secondary" type="button" onclick="showAuthMode('register')">➕ ساخت حساب جدید برای یک معلم</button>
     </div>
     <div id="authRegisterPane" style="display:none">
-      <div class="auth-field"><label>نام کاربری دلخواه</label><input id="authRegisterUsername" autocomplete="new-username" placeholder="مثلاً teacher_mohammad"></div>
+      <div class="auth-field"><label>نام کاربری دلخواه</label><input id="authRegisterUsername" autocomplete="username" placeholder="مثلاً teacher_mohammad"></div>
       <div class="auth-field"><label>رمز عبور دلخواه</label><input id="authRegisterPassword" type="password" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر"></div>
       <div class="auth-field"><label>تکرار رمز عبور</label><input id="authRegisterPassword2" type="password" autocomplete="new-password" placeholder="رمز را دوباره وارد کنید"></div>
       <div id="authRegisterMessage" class="auth-message"></div>
@@ -3412,9 +3412,16 @@ async function getAuthAccounts(){
             req.onerror=function(){reject(req.error)};
         });
         if(rows.length){
-            const cleaned=dedupeAuthAccounts(rows);
-            if(cleaned.length!==rows.length){ try{ await saveAuthAccounts(cleaned); }catch(e){} }
-            return cleaned.sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0)});
+            const seen=new Set();
+            const clean=rows.filter(function(a){
+                const u=normalizeAccountUsername(a && a.username);
+                if(!validAccountUsername(u)) return false;
+                const key=u.toLowerCase();
+                if(seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+            return clean.sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0)});
         }
         // مهاجرت یک‌باره فهرست حساب‌های نسخه‌های قدیمی
         let legacy=[];
@@ -3501,25 +3508,8 @@ function deleteAccountDatabase(username){
         });
     });
 }
-function normalizeAccountUsername(value){
-    try{ return String(value||"").trim().normalize("NFC"); }catch(e){ return String(value||"").trim(); }
-}
-function validAccountUsername(value){ return /^[^\s]{3,32}$/.test(String(value||"")); }
-function accountUsernameEquals(a,b){
-    return normalizeAccountUsername(a).toLocaleLowerCase()===normalizeAccountUsername(b).toLocaleLowerCase();
-}
-function dedupeAuthAccounts(accounts){
-    const out=[]; const seen=new Set();
-    (Array.isArray(accounts)?accounts:[]).forEach(function(a){
-        const u=normalizeAccountUsername(a && a.username);
-        if(!validAccountUsername(u)) return;
-        const key=u.toLocaleLowerCase();
-        if(seen.has(key)) return;
-        seen.add(key);
-        out.push(Object.assign({},a,{username:u}));
-    });
-    return out;
-}
+function normalizeAccountUsername(value){ return String(value||"").trim(); }
+function validAccountUsername(value){ return /^[^\s]{3,32}$/.test(value); }
 function validAccountPassword(value){ return String(value||"").length >= 6; }
 async function hashAccountPassword(password){
     const data=new TextEncoder().encode(String(password));
@@ -3530,70 +3520,6 @@ async function hashAccountPassword(password){
     let h=2166136261; for(let i=0;i<String(password).length;i++){h^=String(password).charCodeAt(i);h=Math.imul(h,16777619);} return "fallback-"+(h>>>0).toString(16);
 }
 function accountDataKey(username){ return ACCOUNT_STORAGE_PREFIX+encodeURIComponent(username); }
-
-/* ذخیره مستقل و مقاوم فهرست دانش‌آموزان در IndexedDB */
-const ROSTER_DB_NAME = "DaftarKelasiRosterStore";
-const ROSTER_STORE = "rosters";
-let rosterDbPromise = null;
-function openRosterDB(){
-    if(rosterDbPromise) return rosterDbPromise;
-    rosterDbPromise=new Promise(function(resolve,reject){
-        if(!window.indexedDB){ reject(new Error("IndexedDB پشتیبانی نمی‌شود.")); return; }
-        const req=indexedDB.open(ROSTER_DB_NAME,1);
-        req.onupgradeneeded=function(){
-            const db=req.result;
-            if(!db.objectStoreNames.contains(ROSTER_STORE)) db.createObjectStore(ROSTER_STORE,{keyPath:"key"});
-        };
-        req.onsuccess=function(){resolve(req.result)};
-        req.onerror=function(){reject(req.error||new Error("Roster DB unavailable"))};
-    });
-    return rosterDbPromise;
-}
-function rosterKey(username,classNumber){ return String(username||"")+"::"+String(classNumber); }
-async function writeRosterIndexedDB(username,classNumber,students){
-    if(!username) return;
-    const db=await openRosterDB();
-    const safe=Array.isArray(students)?students.map(function(student){
-        return {id:student&&student.id,firstName:student&&student.firstName||"",lastName:student&&student.lastName||"",grade:student&&student.grade||"",notes:student&&student.notes||"",photo:(student&&typeof student.photo==="string"&&student.photo.indexOf("media://")===0)?student.photo:""};
-    }):[];
-    await new Promise(function(resolve,reject){
-        const tx=db.transaction(ROSTER_STORE,"readwrite");
-        tx.objectStore(ROSTER_STORE).put({key:rosterKey(username,classNumber),username:String(username),classNumber:String(classNumber),students:safe,updatedAt:Date.now()});
-        tx.oncomplete=function(){resolve()};
-        tx.onerror=function(){reject(tx.error||new Error("Roster write failed"))};
-    });
-}
-async function readRosterIndexedDB(username,classNumber){
-    if(!username) return null;
-    const db=await openRosterDB();
-    return new Promise(function(resolve,reject){
-        const tx=db.transaction(ROSTER_STORE,"readonly");
-        const req=tx.objectStore(ROSTER_STORE).get(rosterKey(username,classNumber));
-        req.onsuccess=function(){
-            if(!req.result){resolve(null);return;}
-            resolve({exists:true,students:Array.isArray(req.result.students)?req.result.students:[]});
-        };
-        req.onerror=function(){reject(req.error||new Error("Roster read failed"))};
-    });
-}
-async function saveStudentRosterIndexedDB(username,data){
-    if(!username || !data) return;
-    const keys=["1","2","3","4","5","6","multi"];
-    await Promise.all(keys.map(function(k){ return writeRosterIndexedDB(username,k,data[k]&&data[k].students); }));
-}
-async function restoreStudentRosterIndexedDB(username,data){
-    if(!username || !data) return data;
-    try{
-        for(const k of ["1","2","3","4","5","6","multi"]){
-            const result=await readRosterIndexedDB(username,k);
-            if(!result || !result.exists) continue;
-            if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
-            // اگر رکورد مستقل وجود دارد، همان فهرست منبع قطعی است؛ حتی اگر خالی باشد.
-            data[k].students=Array.isArray(result.students)?result.students:[];
-        }
-    }catch(e){ console.warn("Independent roster restore skipped",e); }
-    return data;
-}
 
 /* پشتیبان سبکِ فهرست دانش‌آموزان؛ مستقل از عکس‌ها و رسانه‌ها.
    هدف: حتی اگر WebView نتواند Snapshot بزرگ را نگه دارد، فهرست دانش‌آموزان
@@ -3640,6 +3566,89 @@ function restoreStudentRosterBackups(username,data){
     }
     return data;
 }
+
+/* =====================================================
+   منبع پایدار فهرست دانش‌آموزان (IndexedDB مستقل)
+   این Store عمداً از localStorage و Snapshot اصلی جداست.
+===================================================== */
+const ROSTER_DB_NAME="DaftarKelasiRosterStore_v2";
+const ROSTER_STORE_NAME="rosters";
+let rosterDbPromise=null;
+function openRosterDB(){
+    if(rosterDbPromise) return rosterDbPromise;
+    rosterDbPromise=new Promise(function(resolve,reject){
+        if(!window.indexedDB){reject(new Error("IndexedDB پشتیبانی نمی‌شود."));return;}
+        const req=indexedDB.open(ROSTER_DB_NAME,1);
+        req.onupgradeneeded=function(){
+            const db=req.result;
+            if(!db.objectStoreNames.contains(ROSTER_STORE_NAME)){
+                const store=db.createObjectStore(ROSTER_STORE_NAME,{keyPath:"key"});
+                store.createIndex("username","username",{unique:false});
+                store.createIndex("classNumber","classNumber",{unique:false});
+            }
+        };
+        req.onsuccess=function(){
+            const db=req.result;
+            db.onversionchange=function(){try{db.close()}catch(e){}};
+            resolve(db);
+        };
+        req.onerror=function(){reject(req.error||new Error("پایگاه فهرست دانش‌آموزان باز نشد."));};
+    });
+    return rosterDbPromise;
+}
+function rosterKey(username,classNumber){return String(username||"")+"::"+String(classNumber||"");}
+function compactStudentForRoster(student){
+    return {
+        id:student && student.id,
+        firstName:String(student && student.firstName || ""),
+        lastName:String(student && student.lastName || ""),
+        grade:String(student && student.grade || ""),
+        notes:String(student && student.notes || ""),
+        photo:(student && typeof student.photo==="string" && student.photo.indexOf("media://")===0)?student.photo:""
+    };
+}
+async function saveRosterClass(username,classNumber,students){
+    if(!username || !classNumber) return;
+    const db=await openRosterDB();
+    const payload={key:rosterKey(username,classNumber),username:String(username),classNumber:String(classNumber),students:(Array.isArray(students)?students:[]).map(compactStudentForRoster),updatedAt:Date.now()};
+    await new Promise(function(resolve,reject){
+        const tx=db.transaction(ROSTER_STORE_NAME,"readwrite");
+        tx.objectStore(ROSTER_STORE_NAME).put(payload);
+        tx.oncomplete=function(){resolve()};
+        tx.onerror=function(){reject(tx.error||new Error("ذخیره فهرست دانش‌آموزان ناموفق بود."))};
+        tx.onabort=function(){reject(tx.error||new Error("ذخیره فهرست دانش‌آموزان لغو شد."))};
+    });
+}
+async function readRosterClass(username,classNumber){
+    if(!username || !classNumber) return null;
+    const db=await openRosterDB();
+    return new Promise(function(resolve,reject){
+        const req=db.transaction(ROSTER_STORE_NAME,"readonly").objectStore(ROSTER_STORE_NAME).get(rosterKey(username,classNumber));
+        req.onsuccess=function(){resolve(req.result || null)};
+        req.onerror=function(){reject(req.error||new Error("خواندن فهرست دانش‌آموزان ناموفق بود."))};
+    });
+}
+async function restoreRosterFromIDB(username,data){
+    if(!username || !data) return data;
+    for(const k of ["1","2","3","4","5","6","multi"]){
+        try{
+            const row=await readRosterClass(username,k);
+            if(row && Array.isArray(row.students)){
+                if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
+                data[k].students=row.students;
+            }else if(data[k] && Array.isArray(data[k].students) && data[k].students.length){
+                // اولین اجرا/مهاجرت: داده موجود را به Store پایدار منتقل کن.
+                await saveRosterClass(username,k,data[k].students);
+            }
+        }catch(e){console.warn("Roster IDB restore/seed skipped",k,e)}
+    }
+    return data;
+}
+async function persistCurrentRoster(){
+    if(!activeAccountUsername || !currentClass || !database || !database[currentClass]) return;
+    await saveRosterClass(activeAccountUsername,currentClass,database[currentClass].students);
+}
+
 function setAuthMessage(id,text,type){const el=document.getElementById(id);if(!el)return;el.textContent=text||"";el.className="auth-message"+(type?" "+type:"");}
 function showAuthMode(mode){
     const login=mode==="login", lp=document.getElementById("authLoginPane"), rp=document.getElementById("authRegisterPane");
@@ -3776,7 +3785,8 @@ async function loadDatabaseForAccount(username){
     database=migrateDatabaseSafely(merged);
     // پشتیبان سبک فهرست دانش‌آموزان را هم وارد می‌کنیم تا وابستگی به Snapshot بزرگ کمتر شود.
     database=restoreStudentRosterBackups(username,database);
-    database=await restoreStudentRosterIndexedDB(username,database);
+    // فهرست مستقل IndexedDB منبع اصلی فهرست دانش‌آموزان است.
+    database=await restoreRosterFromIDB(username,database);
 
     // اگر داده‌ای از localStorage قدیمی یا حساب قدیمی پیدا شد، قبل از ذخیره نسخه جدید یک نسخه پشتیبان نگه می‌داریم.
     if(beforeMigration && (fromSchema < APP_DATA_SCHEMA_VERSION || !!accountLegacy || !!globalLegacy)){
@@ -3826,6 +3836,7 @@ async function cloudInitialSync(username){
 }
 
 async function registerOfflineAccount(){
+    try{
     const username=normalizeAccountUsername(document.getElementById("authRegisterUsername")?.value);
     const password=String(document.getElementById("authRegisterPassword")?.value||"");
     const password2=String(document.getElementById("authRegisterPassword2")?.value||"");
@@ -3833,23 +3844,7 @@ async function registerOfflineAccount(){
     if(!validAccountUsername(username)){setAuthMessage("authRegisterMessage","❌ نام کاربری باید ۳ تا ۳۲ کاراکتر و بدون فاصله باشد.","error");return;}
     if(!validAccountPassword(password)){setAuthMessage("authRegisterMessage","❌ رمز عبور باید حداقل ۶ کاراکتر باشد.","error");return;}
     if(password!==password2){setAuthMessage("authRegisterMessage","❌ تکرار رمز عبور با رمز اصلی یکسان نیست.","error");return;}
-    const existingIndex=accounts.findIndex(function(a){return accountUsernameEquals(a&&a.username,username);});
-    if(existingIndex>=0){
-        let orphan=false;
-        try{
-            const existing=accounts[existingIndex];
-            const existingData=await readAccountDatabase(existing.username);
-            const legacy=await readJsonStorage(accountDataKey(existing.username));
-            orphan=!existingData && !legacy;
-        }catch(e){ orphan=false; }
-        if(orphan){
-            accounts.splice(existingIndex,1);
-            try{ await saveAuthAccounts(accounts); }catch(e){}
-        }else{
-            setAuthMessage("authRegisterMessage","❌ این نام کاربری قبلاً استفاده شده است. یک نام کاربری دیگر انتخاب کنید.","error");
-            return;
-        }
-    }
+    if(accounts.some(function(a){return String(a.username).toLowerCase()===username.toLowerCase();})){setAuthMessage("authRegisterMessage","❌ این نام کاربری قبلاً استفاده شده است.","error");return;}
     let cloudAccount=null;
     if(CLOUD_ENDPOINT){
         try{ cloudAccount=await cloudRegister(username,password); }
@@ -3861,17 +3856,21 @@ async function registerOfflineAccount(){
     if(accounts.length===0 && localStorage.getItem(STORAGE_KEY)){try{accountDatabase=JSON.parse(localStorage.getItem(STORAGE_KEY))||database;}catch(e){}}
     localStorage.setItem(accountDataKey(username),JSON.stringify(accountDatabase));
     accounts.push({username:username,passwordHash:hash,createdAt:Date.now(),authMode:CLOUD_ENDPOINT?"cloud":"offline"});
-    await saveAuthAccounts(dedupeAuthAccounts(accounts));
+    await saveAuthAccounts(accounts);
     await loadDatabaseForAccount(username);
     if(CLOUD_ENDPOINT && cloudAccount) await cloudInitialSync(username);
     setAuthMessage("authRegisterMessage", CLOUD_ENDPOINT ? "✅ حساب آنلاین ساخته شد و همگام‌سازی آماده است." : "✅ حساب ساخته شد.","success");
     enterAuthenticatedApp();
+    }catch(error){
+        console.error("Account registration error",error);
+        setAuthMessage("authRegisterMessage","❌ ساخت حساب انجام نشد: "+String(error && error.message || error),"error");
+    }
 }
 async function loginOfflineAccount(){
     const username=normalizeAccountUsername(document.getElementById("authLoginUsername")?.value);
     const password=String(document.getElementById("authLoginPassword")?.value||"");
     const accounts=await getAuthAccounts();
-    let account=accounts.find(function(a){return accountUsernameEquals(a&&a.username,username);});
+    let account=accounts.find(function(a){return String(a.username).toLowerCase()===username.toLowerCase();});
     if(CLOUD_ENDPOINT){
         try{ await cloudLogin(username,password); }
         catch(e){ if(!account){setAuthMessage("authLoginMessage","❌ نام کاربری یا رمز عبور نادرست است.","error");return;} }
@@ -4383,6 +4382,10 @@ function saveDatabase(){
             return Promise.resolve();
         }
         const username=activeAccountUsername;
+        // Store مستقل فهرست دانش‌آموزان؛ شکست localStorage نباید فهرست را از بین ببرد.
+        if(currentClass && database[currentClass]){
+            saveRosterClass(username,currentClass,database[currentClass].students).catch(function(e){console.warn("Independent roster save skipped",e)});
+        }
         // ذخیره فوری و مستقل در localStorage: این نسخه به عنوان پشتیبان محلی
         // همیشه تازه نگه داشته می‌شود تا حتی در صورت تأخیر/مشکل IndexedDB،
         // اطلاعات دانش‌آموزان بعد از بستن WebView از بین نرود.
@@ -4395,11 +4398,9 @@ function saveDatabase(){
         // این بکاپ کوچک عمداً عکس‌های base64 را نگه نمی‌دارد؛ بنابراین حتی
         // در صورت محدودیت WebView Storage، فهرست دانش‌آموزان حفظ می‌شود.
         saveStudentRosterBackups(username,database);
-        const rosterSavePromise=saveStudentRosterIndexedDB(username,database);
         accountSaveQueue=accountSaveQueue
             .catch(function(){})
             .then(function(){ return Promise.all(jobs); })
-            .then(function(){ return rosterSavePromise; })
             .then(function(){ return writeAccountDatabase(username,snapshot); })
             .then(function(){ return queueSyncSnapshot(username,snapshot); })
             .then(function(){ scheduleSyncFlush(); })
@@ -5248,10 +5249,15 @@ async function addStudent(){
 
     });
 
-    await saveDatabase();
-    if(activeAccountUsername){
-        try{ await writeRosterIndexedDB(activeAccountUsername,String(currentClass),classData.students); }catch(e){ console.warn("Student roster direct save failed",e); }
+    // اول فهرست را در Store مستقل و پایدار ثبت کن؛ سپس Snapshot اصلی را ذخیره کن.
+    try{ await persistCurrentRoster(); }
+    catch(e){
+        console.error("Roster save failed",e);
+        alert("ذخیره فهرست دانش‌آموزان انجام نشد. لطفاً دوباره تلاش کنید.");
+        classData.students.pop();
+        return;
     }
+    await saveDatabase();
 
     // بلافاصله همه بخش‌های وابسته به فهرست دانش‌آموزان را تازه‌سازی می‌کنیم.
     renderStudents();
