@@ -3798,6 +3798,28 @@ async function initializeOfflineAuth(){
 ===================================================== */
 
 let currentClass = null;
+
+/* ذخیره آخرین کلاس انتخاب‌شده برای هر حساب — بدون وابستگی به IndexedDB */
+const LAST_CLASS_STORAGE_KEY = "دفتر_کلاسی_آخرین_کلاس";
+function getLastClassForAccount(username){
+    try{
+        if(!username) return "";
+        const all = JSON.parse(localStorage.getItem(LAST_CLASS_STORAGE_KEY) || "{}");
+        const value = all && all[username];
+        return ["1","2","3","4","5","6","multi"].includes(String(value)) ? String(value) : "";
+    }catch(e){ return ""; }
+}
+function setLastClassForAccount(username,classNumber){
+    try{
+        if(!username) return;
+        const key=String(classNumber);
+        if(!["1","2","3","4","5","6","multi"].includes(key)) return;
+        const all = JSON.parse(localStorage.getItem(LAST_CLASS_STORAGE_KEY) || "{}");
+        all[username]=key;
+        localStorage.setItem(LAST_CLASS_STORAGE_KEY,JSON.stringify(all));
+    }catch(e){ console.warn("Last class preference could not be saved",e); }
+}
+
 let dailyPendingImage = "";
 let goalPendingImage = "";
 
@@ -4389,9 +4411,21 @@ function updateStudentGradeField(){
 
 async function openClass(classNumber){
 
-    currentClass = String(classNumber);
+    const selectedClass = String(classNumber);
+    if(!["1","2","3","4","5","6","multi"].includes(selectedClass)){
+        console.warn("Invalid class selected:", classNumber);
+        return;
+    }
+
+    currentClass = selectedClass;
     if(activeAccountUsername) setLastClassForAccount(activeAccountUsername,currentClass);
-    await prepareClassMedia(currentClass);
+
+    // آماده‌سازی رسانه نباید مانع ورود به کلاس شود.
+    try{
+        await prepareClassMedia(currentClass);
+    }catch(error){
+        console.warn("Class media preparation skipped:",error);
+    }
 
 
     document
