@@ -3509,6 +3509,52 @@ async function hashAccountPassword(password){
     let h=2166136261; for(let i=0;i<String(password).length;i++){h^=String(password).charCodeAt(i);h=Math.imul(h,16777619);} return "fallback-"+(h>>>0).toString(16);
 }
 function accountDataKey(username){ return ACCOUNT_STORAGE_PREFIX+encodeURIComponent(username); }
+
+/* پشتیبان سبکِ فهرست دانش‌آموزان؛ مستقل از عکس‌ها و رسانه‌ها.
+   هدف: حتی اگر WebView نتواند Snapshot بزرگ را نگه دارد، فهرست دانش‌آموزان
+   پس از خروج و ورود دوباره از بین نرود. */
+const STUDENT_ROSTER_BACKUP_PREFIX = "دفتر_کلاسی_فهرست_دانش_آموزان_";
+function studentRosterBackupKey(username,classNumber){
+    return STUDENT_ROSTER_BACKUP_PREFIX + encodeURIComponent(String(username||"")) + "_" + encodeURIComponent(String(classNumber));
+}
+function makeStudentRosterBackup(students){
+    return (Array.isArray(students)?students:[]).map(function(student){
+        return {
+            id: student && student.id,
+            firstName: student && student.firstName || "",
+            lastName: student && student.lastName || "",
+            grade: student && student.grade || "",
+            notes: student && student.notes || "",
+            photo: (student && typeof student.photo === "string" && student.photo.indexOf("media://")===0) ? student.photo : ""
+        };
+    });
+}
+function saveStudentRosterBackups(username,data){
+    if(!username || !data) return;
+    try{
+        ["1","2","3","4","5","6","multi"].forEach(function(k){
+            const roster=makeStudentRosterBackup(data[k] && data[k].students);
+            localStorage.setItem(studentRosterBackupKey(username,k),JSON.stringify(roster));
+        });
+    }catch(e){
+        console.warn("Student roster backup skipped",e);
+    }
+}
+function restoreStudentRosterBackups(username,data){
+    if(!username || !data) return data;
+    try{
+        ["1","2","3","4","5","6","multi"].forEach(function(k){
+            let roster=null;
+            try{ roster=JSON.parse(localStorage.getItem(studentRosterBackupKey(username,k)) || "null"); }catch(e){}
+            if(!Array.isArray(roster) || !roster.length) return;
+            if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
+            data[k].students=mergeRecordArrays(data[k].students,roster,function(item){return recordKey(item,"students");});
+        });
+    }catch(e){
+        console.warn("Student roster restore skipped",e);
+    }
+    return data;
+}
 function setAuthMessage(id,text,type){const el=document.getElementById(id);if(!el)return;el.textContent=text||"";el.className="auth-message"+(type?" "+type:"");}
 function showAuthMode(mode){
     const login=mode==="login", lp=document.getElementById("authLoginPane"), rp=document.getElementById("authRegisterPane");
@@ -3643,6 +3689,8 @@ async function loadDatabaseForAccount(username){
     const versions=sources.filter(Boolean).map(databaseSchemaVersion);
     const fromSchema=versions.length ? Math.min.apply(Math,versions) : 1;
     database=migrateDatabaseSafely(merged);
+    // پشتیبان سبک فهرست دانش‌آموزان را هم وارد می‌کنیم تا وابستگی به Snapshot بزرگ کمتر شود.
+    database=restoreStudentRosterBackups(username,database);
 
     // اگر داده‌ای از localStorage قدیمی یا حساب قدیمی پیدا شد، قبل از ذخیره نسخه جدید یک نسخه پشتیبان نگه می‌داریم.
     if(beforeMigration && (fromSchema < APP_DATA_SCHEMA_VERSION || !!accountLegacy || !!globalLegacy)){
@@ -4242,6 +4290,9 @@ function saveDatabase(){
         }catch(e){
             console.warn("Immediate local storage save skipped",e);
         }
+        // این بکاپ کوچک عمداً عکس‌های base64 را نگه نمی‌دارد؛ بنابراین حتی
+        // در صورت محدودیت WebView Storage، فهرست دانش‌آموزان حفظ می‌شود.
+        saveStudentRosterBackups(username,database);
         accountSaveQueue=accountSaveQueue
             .catch(function(){})
             .then(function(){ return Promise.all(jobs); })
@@ -4417,7 +4468,13 @@ async function openClass(classNumber){
         return;
     }
 
+    if(currentClass && currentClass !== selectedClass){
+        try{ await saveDatabase(); }catch(e){ console.warn("Previous class save failed",e); }
+    }
     currentClass = selectedClass;
+    if(!database) database=createFreshDatabase();
+    if(!database[currentClass]) database[currentClass]=createClassData();
+    if(!Array.isArray(database[currentClass].students)) database[currentClass].students=[];
     if(activeAccountUsername) setLastClassForAccount(activeAccountUsername,currentClass);
 
     // آماده‌سازی رسانه نباید مانع ورود به کلاس شود.
@@ -4461,8 +4518,10 @@ async function openClass(classNumber){
    بازگشت
 ===================================================== */
 
-function goHome(){
+async function goHome(){
 
+    // قبل از خروج از کلاس، آخرین وضعیت را قطعی ذخیره می‌کنیم.
+    try{ await saveDatabase(); }catch(e){ console.warn("Class exit save failed",e); }
     currentClass = null;
 
 
