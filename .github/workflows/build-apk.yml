@@ -11,28 +11,54 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # --------------------------------------------------
+      # 1. دریافت پروژه
+      # --------------------------------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
+      # --------------------------------------------------
+      # 2. نصب Java 17
+      # --------------------------------------------------
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
+      # --------------------------------------------------
+      # 3. آماده‌سازی Gradle
+      # --------------------------------------------------
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
 
+      # --------------------------------------------------
+      # 4. بررسی فایل‌های ضروری پروژه
+      # --------------------------------------------------
       - name: Validate project
         shell: bash
         run: |
           set -e
+
+          echo "Checking project files..."
+
           test -f app/build.gradle
           test -f app/src/main/assets/index.html
-          test -f gradlew || true
 
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            echo "Gradle wrapper found."
+          else
+            echo "Gradle wrapper not found. System Gradle will be used."
+          fi
+
+          echo "Project validation successful."
+
+      # --------------------------------------------------
+      # 5. بررسی Secretهای امضا
+      # --------------------------------------------------
       - name: Validate signing secrets
         shell: bash
         env:
@@ -43,26 +69,33 @@ jobs:
         run: |
           set -e
 
+          echo "Checking signing secrets..."
+
           test -n "$KEYSTORE_BASE64" || {
-            echo "KEYSTORE_BASE64 secret is missing"
+            echo "ERROR: KEYSTORE_BASE64 secret is missing."
             exit 1
           }
 
           test -n "$KEYSTORE_PASSWORD" || {
-            echo "KEYSTORE_PASSWORD secret is missing"
+            echo "ERROR: KEYSTORE_PASSWORD secret is missing."
             exit 1
           }
 
           test -n "$KEY_ALIAS" || {
-            echo "KEY_ALIAS secret is missing"
+            echo "ERROR: KEY_ALIAS secret is missing."
             exit 1
           }
 
           test -n "$KEY_PASSWORD" || {
-            echo "KEY_PASSWORD secret is missing"
+            echo "ERROR: KEY_PASSWORD secret is missing."
             exit 1
           }
 
+          echo "All signing secrets are available."
+
+      # --------------------------------------------------
+      # 6. بازیابی Keystore دائمی
+      # --------------------------------------------------
       - name: Restore permanent signing keystore
         shell: bash
         env:
@@ -80,6 +113,11 @@ jobs:
 
           echo "KEYSTORE_FILE=$KEYSTORE_FILE" >> "$GITHUB_ENV"
 
+          echo "Keystore restored successfully."
+
+      # --------------------------------------------------
+      # 7. بررسی Keystore
+      # --------------------------------------------------
       - name: Validate keystore
         shell: bash
         env:
@@ -87,6 +125,8 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
           set -e
+
+          echo "Validating keystore..."
 
           keytool -list \
             -keystore "$KEYSTORE_FILE" \
@@ -96,17 +136,12 @@ jobs:
 
           echo "Keystore validation successful."
 
-      - name: Clean project
-        shell: bash
-        run: |
-          set -e
-
-          if [ -x "./gradlew" ]; then
-            ./gradlew --no-daemon clean
-          else
-            gradle --no-daemon clean
-          fi
-
+      # --------------------------------------------------
+      # 8. ساخت APK Release
+      #
+      # توجه:
+      # اینجا عمداً Clean حذف شده است.
+      # --------------------------------------------------
       - name: Build release APK
         shell: bash
         env:
@@ -117,18 +152,36 @@ jobs:
         run: |
           set -e
 
+          echo "Starting release APK build..."
+
           if [ -x "./gradlew" ]; then
-            ./gradlew --no-daemon --stacktrace --console=plain :app:assembleRelease
+            ./gradlew \
+              --no-daemon \
+              --stacktrace \
+              --console=plain \
+              :app:assembleRelease
           else
-            gradle --no-daemon --stacktrace --console=plain :app:assembleRelease
+            gradle \
+              --no-daemon \
+              --stacktrace \
+              --console=plain \
+              :app:assembleRelease
           fi
 
+          echo "Release APK build completed successfully."
+
+      # --------------------------------------------------
+      # 9. پیدا کردن APK
+      # --------------------------------------------------
       - name: Find APK
         shell: bash
         run: |
           set -e
 
-          APK_PATH="$(find app/build/outputs/apk/release -type f -name '*.apk' | head -n 1)"
+          APK_PATH="$(find app/build/outputs/apk/release \
+            -type f \
+            -name '*.apk' \
+            | head -n 1)"
 
           test -n "$APK_PATH"
           test -f "$APK_PATH"
@@ -138,6 +191,9 @@ jobs:
           echo "APK found:"
           ls -lh "$APK_PATH"
 
+      # --------------------------------------------------
+      # 10. بررسی امضای APK
+      # --------------------------------------------------
       - name: Verify APK signature
         shell: bash
         env:
@@ -146,13 +202,31 @@ jobs:
         run: |
           set -e
 
-          apksigner verify --verbose "$APK_PATH"
+          echo "Verifying APK signature..."
 
-          keytool -printcert -jarfile "$APK_PATH" > "$RUNNER_TEMP/apk-cert.txt"
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" \
+            -type f \
+            -name apksigner \
+            | sort -V \
+            | tail -n 1)"
+
+          test -x "$APKSIGNER"
+
+          "$APKSIGNER" verify --verbose "$APK_PATH"
+
+          keytool \
+            -printcert \
+            -jarfile "$APK_PATH" \
+            > "$RUNNER_TEMP/apk-cert.txt"
 
           echo "APK certificate:"
           cat "$RUNNER_TEMP/apk-cert.txt"
 
+          echo "APK signature verification successful."
+
+      # --------------------------------------------------
+      # 11. مقایسه گواهی APK با Keystore
+      # --------------------------------------------------
       - name: Compare APK certificate with release keystore
         shell: bash
         env:
@@ -161,19 +235,34 @@ jobs:
         run: |
           set -e
 
-          keytool -exportcert \
+          echo "Comparing APK certificate with release keystore..."
+
+          keytool \
+            -exportcert \
             -rfc \
             -keystore "$KEYSTORE_FILE" \
             -storepass "$KEYSTORE_PASSWORD" \
             -alias "$KEY_ALIAS" \
             > "$RUNNER_TEMP/keystore-cert.pem"
 
-          keytool -printcert \
+          keytool \
+            -printcert \
             -file "$RUNNER_TEMP/keystore-cert.pem" \
             > "$RUNNER_TEMP/keystore-cert.txt"
 
-          APK_SHA256="$(grep 'SHA256:' "$RUNNER_TEMP/apk-cert.txt" | head -n 1 | tr -d ' ' | cut -d: -f2-)"
-          KEYSTORE_SHA256="$(grep 'SHA256:' "$RUNNER_TEMP/keystore-cert.txt" | head -n 1 | tr -d ' ' | cut -d: -f2-)"
+          APK_SHA256="$(
+            grep 'SHA256:' "$RUNNER_TEMP/apk-cert.txt" \
+            | head -n 1 \
+            | tr -d ' ' \
+            | cut -d: -f2-
+          )"
+
+          KEYSTORE_SHA256="$(
+            grep 'SHA256:' "$RUNNER_TEMP/keystore-cert.txt" \
+            | head -n 1 \
+            | tr -d ' ' \
+            | cut -d: -f2-
+          )"
 
           echo "APK SHA-256:      $APK_SHA256"
           echo "Keystore SHA-256: $KEYSTORE_SHA256"
@@ -181,10 +270,16 @@ jobs:
           test -n "$APK_SHA256"
           test -n "$KEYSTORE_SHA256"
 
-          test "$APK_SHA256" = "$KEYSTORE_SHA256"
+          if [ "$APK_SHA256" != "$KEYSTORE_SHA256" ]; then
+            echo "ERROR: APK certificate does not match release keystore."
+            exit 1
+          fi
 
           echo "Certificate verification successful."
 
+      # --------------------------------------------------
+      # 12. آماده‌سازی APK نهایی
+      # --------------------------------------------------
       - name: Prepare final APK
         shell: bash
         run: |
@@ -194,8 +289,14 @@ jobs:
 
           cp "$APK_PATH" release/DaftarKelasi.apk
 
+          test -f release/DaftarKelasi.apk
+
+          echo "Final APK:"
           ls -lh release/DaftarKelasi.apk
 
+      # --------------------------------------------------
+      # 13. آپلود APK به عنوان Artifact
+      # --------------------------------------------------
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -204,8 +305,13 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      # --------------------------------------------------
+      # 14. پاک کردن Keystore از Runner
+      # --------------------------------------------------
       - name: Cleanup signing key
         if: always()
         shell: bash
         run: |
           rm -f "$RUNNER_TEMP/daftar-release-v2.keystore"
+
+          echo "Signing keystore cleanup completed."
