@@ -3627,9 +3627,14 @@ async function loadDatabaseForAccount(username){
     try{ accountLegacy=await readJsonStorage(accountDataKey(username)); }catch(e){}
     try{ globalLegacy=await readJsonStorage(STORAGE_KEY); }catch(e){}
 
-    const sources=[accountDb,accountLegacy];
+    // اولویت با نسخه پشتیبان محلیِ همان حساب است؛ اگر وجود نداشت، IndexedDB
+    // منبع اصلی خواهد بود. این ترتیب مانع برگشتن فهرست قدیمی دانش‌آموزان
+    // در زمان باز شدن دوباره برنامه می‌شود.
+    const sources=[];
+    if(accountLegacy) sources.push(accountLegacy);
+    if(accountDb) sources.push(accountDb);
     const accounts=await getAuthAccounts();
-    if(accounts.length===1 || !accountDb) sources.push(globalLegacy);
+    if(sources.length===0 && (accounts.length===1 || !accountDb) && globalLegacy) sources.push(globalLegacy);
 
     let merged=null;
     sources.filter(Boolean).forEach(function(source){ merged=mergeDatabasesSafely(merged,source); });
@@ -3735,36 +3740,12 @@ async function loginOfflineAccount(){
     if(CLOUD_ENDPOINT && cloudToken()) await cloudInitialSync(account.username);
     enterAuthenticatedApp();
 }
-function getLastClassKey(username){
-    return "دفتر_کلاسی_آخرین_کلاس_" + encodeURIComponent(String(username || ""));
-}
-function getLastClassForAccount(username){
-    try{
-        const value=localStorage.getItem(getLastClassKey(username));
-        return ["1","2","3","4","5","6","multi"].includes(String(value)) ? String(value) : "";
-    }catch(e){ return ""; }
-}
-function setLastClassForAccount(username,classNumber){
-    try{
-        if(username && ["1","2","3","4","5","6","multi"].includes(String(classNumber))){
-            localStorage.setItem(getLastClassKey(username),String(classNumber));
-        }
-    }catch(e){}
-}
 function enterAuthenticatedApp(){
     hideAuthOverlay();
     const home=document.getElementById("home"), app=document.getElementById("app");
     if(home)home.classList.remove("hidden"); if(app)app.classList.add("hidden");
     currentClass=null;
-    initializeScalableStorage().then(async function(){
-        const lastClass=getLastClassForAccount(activeAccountUsername);
-        if(lastClass && database && database[lastClass]){
-            await openClass(lastClass);
-        }else{
-            refreshAll();
-            renderHeaderImages();
-        }
-    }).catch(function(){refreshAll();renderHeaderImages();});
+    initializeScalableStorage().then(function(){refreshAll();renderHeaderImages();}).catch(function(){refreshAll();renderHeaderImages();});
     updateAccountSecurityFields();
 }
 function updateAccountSecurityFields(){
@@ -3929,7 +3910,8 @@ async function initializeScalableStorage(){
         await openMediaDB();
         if(database.teacher) database.teacher=await hydrateMedia(database.teacher);
         if(navigator.storage && navigator.storage.persist){ try{ await navigator.storage.persist(); }catch(e){} }
-        saveDatabase();
+        // ذخیره کامل و قابل انتظار؛ هنگام ورود، هیچ save معلقی باقی نماند.
+        await saveDatabase();
     }catch(e){ console.warn("Media storage unavailable",e); }
 }
 
@@ -4229,6 +4211,15 @@ function saveDatabase(){
             return Promise.resolve();
         }
         const username=activeAccountUsername;
+        // ذخیره فوری و مستقل در localStorage: این نسخه به عنوان پشتیبان محلی
+        // همیشه تازه نگه داشته می‌شود تا حتی در صورت تأخیر/مشکل IndexedDB،
+        // اطلاعات دانش‌آموزان بعد از بستن WebView از بین نرود.
+        try{
+            localStorage.setItem(accountDataKey(username),JSON.stringify(snapshot));
+            localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshot));
+        }catch(e){
+            console.warn("Immediate local storage save skipped",e);
+        }
         accountSaveQueue=accountSaveQueue
             .catch(function(){})
             .then(function(){ return Promise.all(jobs); })
@@ -4257,8 +4248,7 @@ function saveDatabase(){
 function getClassData(){
 
     if(!database) database = createFreshDatabase();
-    /* جلوگیری از ثبت ناخواسته اطلاعات در کلاس اول وقتی هیچ کلاسی انتخاب نشده است. */
-    if(!currentClass) return null;
+    if(!currentClass) currentClass = "1";
     if(!database[currentClass]) database[currentClass] = createClassData();
     if(!Array.isArray(database[currentClass].students)) database[currentClass].students = [];
     if(!Array.isArray(database[currentClass].attendance)) database[currentClass].attendance = [];
@@ -4399,13 +4389,8 @@ function updateStudentGradeField(){
 
 async function openClass(classNumber){
 
-    const normalizedClass=String(classNumber);
-    if(!["1","2","3","4","5","6","multi"].includes(normalizedClass)){
-        alert("کلاس انتخاب‌شده معتبر نیست.");
-        return;
-    }
-    currentClass = normalizedClass;
-    setLastClassForAccount(activeAccountUsername,currentClass);
+    currentClass = String(classNumber);
+    if(activeAccountUsername) setLastClassForAccount(activeAccountUsername,currentClass);
     await prepareClassMedia(currentClass);
 
 
@@ -4971,11 +4956,6 @@ function previewStudentPhoto(event){
 
 async function addStudent(){
 
-    if(!currentClass){
-        alert("ابتدا یک کلاس را انتخاب کنید.");
-        return;
-    }
-
     const firstName =
         document
         .getElementById("studentFirstName")
@@ -5319,11 +5299,6 @@ function renderStudents(){
         document.getElementById(
             "studentsTable"
         );
-    if(!box) return;
-    if(!currentClass){
-        box.innerHTML = '<div class="empty-box">ابتدا یک کلاس را انتخاب کنید.</div>';
-        return;
-    }
 
 
     const students =
