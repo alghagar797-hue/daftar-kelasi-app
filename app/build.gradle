@@ -11,8 +11,8 @@ android {
         applicationId 'com.classroom.daftar'
         minSdk 23
         targetSdk 36
-        versionCode 13
-        versionName '4.5.1'
+        versionCode 14
+        versionName '4.5.2'
     }
 
     compileOptions {
