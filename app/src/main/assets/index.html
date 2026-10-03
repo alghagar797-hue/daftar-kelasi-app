@@ -4382,9 +4382,16 @@ function saveDatabase(){
             return Promise.resolve();
         }
         const username=activeAccountUsername;
-        // Store مستقل فهرست دانش‌آموزان؛ شکست localStorage نباید فهرست را از بین ببرد.
+        // فهرست دانش‌آموزان باید بخشی از زنجیره ذخیره باشد؛
+        // هرگز آن را به صورت fire-and-forget ذخیره نمی‌کنیم.
         if(currentClass && database[currentClass]){
-            saveRosterClass(username,currentClass,database[currentClass].students).catch(function(e){console.warn("Independent roster save skipped",e)});
+            jobs.push(
+                saveRosterClass(username,currentClass,database[currentClass].students)
+                .catch(function(e){
+                    console.error("Independent roster save failed",e);
+                    throw e;
+                })
+            );
         }
         // ذخیره فوری و مستقل در localStorage: این نسخه به عنوان پشتیبان محلی
         // همیشه تازه نگه داشته می‌شود تا حتی در صورت تأخیر/مشکل IndexedDB،
@@ -5424,76 +5431,78 @@ function removeStudentPhoto(id){
    حذف دانش آموز
 ===================================================== */
 
-function deleteStudent(id){
+async function deleteStudent(id){
+    const data = getClassData();
+    const targetId = String(id);
 
-    if(
-        !confirm(
-            "آیا از حذف این دانش‌آموز مطمئن هستید؟"
-        )
-    ){
+    if(!data || !Array.isArray(data.students)) return;
 
-        return;
-
-    }
-
-
-    const data =
-        getClassData();
-
-
-    const relatedArrays = [
-
-        "attendance",
-
-        "homework",
-
-        "evaluations",
-
-        "grades",
-
-        "portfolio",
-
-        "parents",
-
-        "interests",
-
-        "attention"
-
-    ];
-
-
-    data.students =
-        data.students.filter(function(student){
-
-            return String(student.id) !== String(id);
-
-        });
-
-
-    relatedArrays.forEach(function(arrayName){
-
-        if(!data[arrayName]){
-            return;
-        }
-
-
-        data[arrayName] =
-            data[arrayName].filter(function(item){
-
-                return String(item.studentId) !== String(id);
-
-            });
-
+    const exists = data.students.some(function(student){
+        return String(student.id) === targetId;
     });
 
+    if(!exists){
+        alert("این دانش‌آموز دیگر در فهرست وجود ندارد.");
+        renderStudents();
+        return;
+    }
 
-    saveDatabase();
+    if(!window.confirm("آیا از حذف این دانش‌آموز مطمئن هستید؟")) return;
 
-    refreshAll();
-    renderTeacherCardSafe();
+    // ابتدا حافظه برنامه را تغییر می‌دهیم تا حذف فوراً در رابط کاربری دیده شود.
+    const oldStudents = data.students.slice();
+    const oldRelated = {};
+    const relatedArrays = [
+        "attendance","homework","evaluations","grades",
+        "portfolio","parents","interests","attention"
+    ];
 
+    data.students = data.students.filter(function(student){
+        return String(student.id) !== targetId;
+    });
+
+    relatedArrays.forEach(function(arrayName){
+        if(!Array.isArray(data[arrayName])) return;
+        oldRelated[arrayName] = data[arrayName];
+        data[arrayName] = data[arrayName].filter(function(item){
+            return String(item.studentId) !== targetId;
+        });
+    });
+
+    renderStudents();
+    renderAttendance();
+    renderHomework();
+    refreshStudentSelectorsSafely();
+    updateDashboard();
+
+    try{
+        // مهم: حتی فهرست خالی هم باید ذخیره شود؛ این رکورد وضعیت حذف را تثبیت می‌کند.
+        await persistCurrentRoster();
+        await saveDatabase();
+        refreshAll();
+        renderTeacherCardSafe();
+        alert("دانش‌آموز با موفقیت حذف شد و تغییرات ذخیره شد.");
+    }catch(error){
+        console.error("Student deletion persistence failed", error);
+
+        // اگر ذخیره واقعاً شکست خورد، اطلاعات قبلی را برمی‌گردانیم
+        // تا کاربر تصور نکند حذف شده ولی بعداً دوباره ظاهر شود.
+        data.students = oldStudents;
+        Object.keys(oldRelated).forEach(function(key){
+            data[key] = oldRelated[key];
+        });
+
+        renderStudents();
+        renderAttendance();
+        renderHomework();
+        refreshStudentSelectorsSafely();
+        updateDashboard();
+        alert("حذف ذخیره نشد. اطلاعات دانش‌آموز حفظ شد؛ لطفاً دوباره تلاش کنید.");
+    }
 }
 
+/* دسترسی مستقیم دکمه‌های داخل جدول در Android WebView */
+window.deleteStudent = deleteStudent;
 
 /* =====================================================
    نمایش دانش آموزان
@@ -9044,6 +9053,7 @@ function printTeacherCard(){
             ${card.outerHTML}
             <script>window.onload=function(){window.print();}<\/script>
         
+
 </body>
         </html>
     `);
@@ -9784,5 +9794,25 @@ document.addEventListener(
 <button type="button" data-q-menu="1" onclick="toggleSidebar();event.stopPropagation()"><span>☰</span>همه</button>
 </div>
 <script>window.addEventListener('load',function(){try{setupProfessionalNavigation();updateMobileQuickbar(document.querySelector('#app .section.active')?.id||'dashboard')}catch(e){console.warn('professional navigation:',e)}});</script>
+<script>
+(function(){
+  async function persistRosterOnLifecycle(){
+    try{
+      if(typeof persistCurrentRoster === "function"){
+        await persistCurrentRoster();
+      }
+      if(typeof saveStudentRosterBackups === "function" && activeAccountUsername && database){
+        saveStudentRosterBackups(activeAccountUsername,database);
+      }
+    }catch(e){
+      console.warn("Lifecycle roster save failed:",e);
+    }
+  }
+  document.addEventListener("visibilitychange",function(){
+    if(document.visibilityState==="hidden") persistRosterOnLifecycle();
+  });
+  window.addEventListener("pagehide",persistRosterOnLifecycle,{passive:true});
+})();
+</script>
 </body>
 </html>
