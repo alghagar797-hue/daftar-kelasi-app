@@ -3514,6 +3514,66 @@ function accountDataKey(username){ return ACCOUNT_STORAGE_PREFIX+encodeURICompon
    هدف: حتی اگر WebView نتواند Snapshot بزرگ را نگه دارد، فهرست دانش‌آموزان
    پس از خروج و ورود دوباره از بین نرود. */
 const STUDENT_ROSTER_BACKUP_PREFIX = "دفتر_کلاسی_فهرست_دانش_آموزان_";
+const ROSTER_DB_NAME = "DaftarKelasiRosterStore";
+const ROSTER_STORE = "rosters";
+let rosterDbPromise = null;
+function openRosterDB(){
+    if(rosterDbPromise) return rosterDbPromise;
+    rosterDbPromise=new Promise(function(resolve,reject){
+        if(!window.indexedDB){ reject(new Error("IndexedDB پشتیبانی نمی‌شود.")); return; }
+        const req=indexedDB.open(ROSTER_DB_NAME,1);
+        req.onupgradeneeded=function(){
+            const db=req.result;
+            if(!db.objectStoreNames.contains(ROSTER_STORE)) db.createObjectStore(ROSTER_STORE,{keyPath:"key"});
+        };
+        req.onsuccess=function(){resolve(req.result)};
+        req.onerror=function(){reject(req.error||new Error("Roster DB unavailable"))};
+    });
+    return rosterDbPromise;
+}
+function rosterKey(username,classNumber){ return String(username||"")+"::"+String(classNumber); }
+async function writeRosterIndexedDB(username,classNumber,students){
+    if(!username) return;
+    const db=await openRosterDB();
+    const data=makeStudentRosterBackup(students);
+    await new Promise(function(resolve,reject){
+        const tx=db.transaction(ROSTER_STORE,"readwrite");
+        tx.objectStore(ROSTER_STORE).put({key:rosterKey(username,classNumber),username:String(username),classNumber:String(classNumber),students:data,updatedAt:Date.now()});
+        tx.oncomplete=resolve; tx.onerror=function(){reject(tx.error||new Error("Roster write failed"))};
+    });
+}
+async function readRosterIndexedDB(username,classNumber){
+    if(!username) return null;
+    const db=await openRosterDB();
+    return new Promise(function(resolve,reject){
+        const tx=db.transaction(ROSTER_STORE,"readonly");
+        const req=tx.objectStore(ROSTER_STORE).get(rosterKey(username,classNumber));
+        req.onsuccess=function(){resolve(req.result && Array.isArray(req.result.students)?req.result.students:null)};
+        req.onerror=function(){reject(req.error||new Error("Roster read failed"))};
+    });
+}
+async function saveStudentRosterIndexedDB(username,data){
+    if(!username || !data) return;
+    try{
+        await Promise.all(["1","2","3","4","5","6","multi"].map(function(k){
+            return writeRosterIndexedDB(username,k,data[k] && data[k].students);
+        }));
+    }catch(e){ console.warn("Independent roster save skipped",e); }
+}
+async function restoreStudentRosterIndexedDB(username,data){
+    if(!username || !data) return data;
+    try{
+        for(const k of ["1","2","3","4","5","6","multi"]){
+            const roster=await readRosterIndexedDB(username,k);
+            if(!Array.isArray(roster) || !roster.length) continue;
+            if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
+            // Roster DB is authoritative for the student list because it is dedicated to this data.
+            data[k].students=mergeRecordArrays(data[k].students,roster,function(item){return recordKey(item,"students");});
+        }
+    }catch(e){ console.warn("Independent roster restore skipped",e); }
+    return data;
+}
+
 function studentRosterBackupKey(username,classNumber){
     return STUDENT_ROSTER_BACKUP_PREFIX + encodeURIComponent(String(username||"")) + "_" + encodeURIComponent(String(classNumber));
 }
@@ -3555,105 +3615,6 @@ function restoreStudentRosterBackups(username,data){
     }
     return data;
 }
-
-/* =====================================================
-   دفتر ثبت پایدار فهرست دانش‌آموزان
-   این Store عمداً از پایگاه اصلی جداست تا خرابی/حجم زیاد
-   اطلاعات عکس‌ها و پوشه‌کارها نتواند فهرست را از بین ببرد.
-===================================================== */
-const ROSTER_DB_NAME = "DaftarKelasiRosterStore";
-const ROSTER_STORE = "rosters";
-let rosterDbPromise = null;
-
-function openRosterDB(){
-    if(rosterDbPromise) return rosterDbPromise;
-    rosterDbPromise = new Promise(function(resolve,reject){
-        if(!window.indexedDB){ reject(new Error("IndexedDB پشتیبانی نمی‌شود.")); return; }
-        const req=indexedDB.open(ROSTER_DB_NAME,1);
-        req.onupgradeneeded=function(){
-            const db=req.result;
-            if(!db.objectStoreNames.contains(ROSTER_STORE)){
-                db.createObjectStore(ROSTER_STORE,{keyPath:"key"});
-            }
-        };
-        req.onsuccess=function(){ resolve(req.result); };
-        req.onerror=function(){ reject(req.error||new Error("خطا در پایگاه فهرست دانش‌آموزان")); };
-    });
-    return rosterDbPromise;
-}
-
-function rosterJournalKey(username,classNumber){
-    return String(username||"")+"::"+String(classNumber||"");
-}
-
-function rosterSafeStudent(student){
-    if(!student || typeof student!=="object") return null;
-    return {
-        id: student.id,
-        firstName: String(student.firstName||""),
-        lastName: String(student.lastName||""),
-        grade: String(student.grade||""),
-        notes: String(student.notes||""),
-        photo: (typeof student.photo==="string" && student.photo.indexOf("media://")===0) ? student.photo : ""
-    };
-}
-
-async function saveRosterJournal(username,classNumber,students){
-    if(!username || !classNumber) return;
-    const roster=(Array.isArray(students)?students:[]).map(rosterSafeStudent).filter(Boolean);
-    try{
-        const db=await openRosterDB();
-        await new Promise(function(resolve,reject){
-            const tx=db.transaction(ROSTER_STORE,"readwrite");
-            tx.objectStore(ROSTER_STORE).put({
-                key:rosterJournalKey(username,classNumber),
-                username:String(username),
-                classNumber:String(classNumber),
-                students:roster,
-                updatedAt:Date.now()
-            });
-            tx.oncomplete=function(){resolve();};
-            tx.onerror=function(){reject(tx.error||new Error("ذخیره فهرست دانش‌آموزان ناموفق بود."));};
-            tx.onabort=function(){reject(tx.error||new Error("ذخیره فهرست دانش‌آموزان لغو شد."));};
-        });
-    }catch(e){
-        console.warn("Roster journal save failed",e);
-    }
-}
-
-async function readRosterJournal(username,classNumber){
-    if(!username || !classNumber) return null;
-    try{
-        const db=await openRosterDB();
-        return await new Promise(function(resolve,reject){
-            const req=db.transaction(ROSTER_STORE,"readonly").objectStore(ROSTER_STORE).get(rosterJournalKey(username,classNumber));
-            req.onsuccess=function(){ resolve(req.result && Array.isArray(req.result.students) ? req.result.students : null); };
-            req.onerror=function(){ reject(req.error||new Error("خواندن فهرست دانش‌آموزان ناموفق بود.")); };
-        });
-    }catch(e){
-        console.warn("Roster journal read failed",e);
-        return null;
-    }
-}
-
-async function restoreRosterJournal(username,data){
-    if(!username || !data) return data;
-    for(const k of ["1","2","3","4","5","6","multi"]){
-        const roster=await readRosterJournal(username,k);
-        if(!Array.isArray(roster)) continue;
-        if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
-        /* اگر Journal وجود دارد، آن را مرجع فهرست می‌دانیم؛
-           این کار جلوی برگشت Snapshot قدیمی و خالی را می‌گیرد. */
-        data[k].students=roster.map(rosterSafeStudent).filter(Boolean);
-    }
-    return data;
-}
-
-async function persistCurrentClassRoster(){
-    if(!activeAccountUsername || !currentClass || !database || !database[currentClass]) return;
-    await saveRosterJournal(activeAccountUsername,currentClass,database[currentClass].students);
-}
-
 function setAuthMessage(id,text,type){const el=document.getElementById(id);if(!el)return;el.textContent=text||"";el.className="auth-message"+(type?" "+type:"");}
 function showAuthMode(mode){
     const login=mode==="login", lp=document.getElementById("authLoginPane"), rp=document.getElementById("authRegisterPane");
@@ -3790,7 +3751,7 @@ async function loadDatabaseForAccount(username){
     database=migrateDatabaseSafely(merged);
     // پشتیبان سبک فهرست دانش‌آموزان را هم وارد می‌کنیم تا وابستگی به Snapshot بزرگ کمتر شود.
     database=restoreStudentRosterBackups(username,database);
-    database=await restoreRosterJournal(username,database);
+    database=await restoreStudentRosterIndexedDB(username,database);
 
     // اگر داده‌ای از localStorage قدیمی یا حساب قدیمی پیدا شد، قبل از ذخیره نسخه جدید یک نسخه پشتیبان نگه می‌داریم.
     if(beforeMigration && (fromSchema < APP_DATA_SCHEMA_VERSION || !!accountLegacy || !!globalLegacy)){
@@ -4393,9 +4354,12 @@ function saveDatabase(){
         // این بکاپ کوچک عمداً عکس‌های base64 را نگه نمی‌دارد؛ بنابراین حتی
         // در صورت محدودیت WebView Storage، فهرست دانش‌آموزان حفظ می‌شود.
         saveStudentRosterBackups(username,database);
-        accountSaveQueue=accountSaveQueue
+        // فهرست دانش‌آموزان در IndexedDB مستقل هم ذخیره می‌شود؛ این ذخیره از Snapshot بزرگ برنامه مستقل است.
+        const rosterSavePromise = saveStudentRosterIndexedDB(username,database);
+        accountSaveQueue=accountSaveQueueaccountSaveQueue
             .catch(function(){})
             .then(function(){ return Promise.all(jobs); })
+            .then(function(){ return rosterSavePromise; })
             .then(function(){ return writeAccountDatabase(username,snapshot); })
             .then(function(){ return queueSyncSnapshot(username,snapshot); })
             .then(function(){ scheduleSyncFlush(); })
@@ -4583,12 +4547,6 @@ async function openClass(classNumber){
     }catch(error){
         console.warn("Class media preparation skipped:",error);
     }
-    if(activeAccountUsername){
-        try{
-            const roster=await readRosterJournal(activeAccountUsername,currentClass);
-            if(Array.isArray(roster)) database[currentClass].students=roster.map(rosterSafeStudent).filter(Boolean);
-        }catch(e){ console.warn("Class roster journal restore skipped:",e); }
-    }
 
 
     document
@@ -4628,7 +4586,9 @@ async function goHome(){
 
     // قبل از خروج از کلاس، آخرین وضعیت را قطعی ذخیره می‌کنیم.
     try{ await saveDatabase(); }catch(e){ console.warn("Class exit save failed",e); }
-    try{ await persistCurrentClassRoster(); }catch(e){ console.warn("Class roster journal save failed",e); }
+    if(activeAccountUsername && currentClass && database && database[currentClass]){
+        try{ await writeRosterIndexedDB(activeAccountUsername,currentClass,database[currentClass].students); }catch(e){ console.warn("Class roster commit skipped",e); }
+    }
     currentClass = null;
 
 
@@ -5252,7 +5212,9 @@ async function addStudent(){
     });
 
     await saveDatabase();
-    await saveRosterJournal(activeAccountUsername,currentClass,classData.students);
+    if(activeAccountUsername){
+        try{ await writeRosterIndexedDB(activeAccountUsername,currentClass,classData.students); }catch(e){ console.warn("Student roster commit skipped",e); }
+    }
 
     // بلافاصله همه بخش‌های وابسته به فهرست دانش‌آموزان را تازه‌سازی می‌کنیم.
     renderStudents();
@@ -5482,11 +5444,7 @@ function deleteStudent(id){
     });
 
 
-    saveDatabase().then(function(){
-        return persistCurrentClassRoster();
-    }).catch(function(e){
-        console.warn("Student delete persistence failed",e);
-    });
+    saveDatabase();
 
     refreshAll();
     renderTeacherCardSafe();
@@ -9769,15 +9727,6 @@ document.addEventListener(
   }
   window.addEventListener("online",updateConnection,{passive:true});
   window.addEventListener("offline",updateConnection,{passive:true});
-window.addEventListener("pagehide",function(){
-  try{ if(activeAccountUsername && currentClass && database && database[currentClass]) saveRosterJournal(activeAccountUsername,currentClass,database[currentClass].students); }catch(e){}
-},{passive:true});
-window.addEventListener("visibilitychange",function(){
-  if(document.visibilityState==="hidden"){
-    try{ if(activeAccountUsername && currentClass && database && database[currentClass]) saveRosterJournal(activeAccountUsername,currentClass,database[currentClass].students); }catch(e){}
-  }
-});
-
   window.addEventListener("error",function(e){ console.warn("UI error",e.error||e.message); });
   document.addEventListener("DOMContentLoaded",function(){ refreshIcons(); updateConnection(); });
   window.refreshProfessionalIcons=refreshIcons;
