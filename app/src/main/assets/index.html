@@ -4162,6 +4162,12 @@ function saveDatabase(){
 
 function getClassData(){
 
+    if(!database) database = createFreshDatabase();
+    if(!currentClass) currentClass = "1";
+    if(!database[currentClass]) database[currentClass] = createClassData();
+    if(!Array.isArray(database[currentClass].students)) database[currentClass].students = [];
+    if(!Array.isArray(database[currentClass].attendance)) database[currentClass].attendance = [];
+    if(!Array.isArray(database[currentClass].homework)) database[currentClass].homework = [];
     return database[currentClass];
 
 }
@@ -4590,7 +4596,7 @@ function fillStudentSelect(selectId){
 
 
     const students =
-        getClassData().students;
+        (getClassData().students || []);
 
 
     if(students.length === 0){
@@ -4934,26 +4940,33 @@ async function addStudent(){
     }
 
 
-    getClassData()
-        .students
-        .push({
+    const classData = getClassData();
+    if(!Array.isArray(classData.students)) classData.students = [];
 
-            id: Date.now(),
+    classData.students.push({
 
-            firstName:firstName,
+        id: Date.now(),
 
-            lastName:lastName,
+        firstName:firstName,
 
-            grade:grade,
+        lastName:lastName,
 
-            notes:notes,
+        grade:grade,
 
-            photo:photo
+        notes:notes,
 
-        });
+        photo:photo
 
+    });
 
-    saveDatabase();
+    await saveDatabase();
+
+    // بلافاصله همه بخش‌های وابسته به فهرست دانش‌آموزان را تازه‌سازی می‌کنیم.
+    renderStudents();
+    renderAttendance();
+    renderHomework();
+    refreshStudentSelectorsSafely();
+    updateDashboard();
 
 
     document
@@ -5197,7 +5210,7 @@ function renderStudents(){
 
 
     const students =
-        getClassData().students;
+        (getClassData().students || []);
 
 
     if(students.length === 0){
@@ -5473,7 +5486,7 @@ function renderAttendance(){
 
 
     const students =
-        getClassData().students;
+        (getClassData().students || []);
 
 
     const date =
@@ -5580,6 +5593,16 @@ function renderAttendance(){
 
                 </td>
 
+                <td>
+                    <textarea
+                        id="homeworkFeedback_${student.id}"
+                        rows="2"
+                        placeholder="توضیح یا بازخورد معلم..."
+                        onblur="saveHomeworkFeedback(${student.id})"
+                        style="width:100%;min-width:180px;box-sizing:border-box;"
+                    >${record ? escapeHTML(record.feedback || "") : ""}</textarea>
+                </td>
+
             </tr>
 
         `;
@@ -5656,6 +5679,27 @@ function setHomework(studentId,status){
 }
 
 
+function saveHomeworkFeedback(studentId){
+    const date = normalizePersianDate(document.getElementById("homeworkDate").value);
+    const input = document.getElementById("homeworkFeedback_" + studentId);
+    const feedback = input ? input.value.trim() : "";
+    const data = getClassData();
+    if(!Array.isArray(data.homework)) data.homework = [];
+
+    let record = data.homework.find(function(item){
+        return String(item.studentId) === String(studentId) &&
+               normalizePersianDate(item.date) === date;
+    });
+
+    if(!record){
+        record = {studentId:studentId,date:date,status:"ثبت نشده",feedback:""};
+        data.homework.push(record);
+    }
+
+    record.feedback = feedback;
+    saveDatabase();
+}
+
 function renderHomework(){
 
     const box =
@@ -5665,7 +5709,7 @@ function renderHomework(){
 
 
     const students =
-        getClassData().students;
+        (getClassData().students || []);
 
 
     const date =
@@ -5695,6 +5739,7 @@ function renderHomework(){
             <th>دانش‌آموز</th>
 
             <th>وضعیت تکلیف</th>
+            <th>توضیحات / بازخورد معلم</th>
 
         </tr>
 
@@ -9330,7 +9375,7 @@ function refreshAll(activeSectionId){
         [renderStudents,renderGroups,renderAttendance,renderHomework,renderEvaluations,renderGrades,renderFeedback,renderPortfolio,renderReport,renderGoals,renderParents,renderInterests,renderDaily,renderWeekly,renderBudget,renderExperiments,renderMonthlyPerformance,renderAttention,updateDashboard].forEach(function(fn){try{fn();}catch(e){}});
         return;
     }
-    const renderers={students:renderStudents,groups:renderGroups,attendance:renderAttendance,homework:renderHomework,evaluations:renderEvaluations,grades:renderGrades,feedback:renderFeedback,portfolio:renderPortfolio,report:renderReport,goals:renderGoals,parents:renderParents,interests:renderInterests,daily:renderDaily,weekly:renderWeekly,budget:renderBudget,experiments:renderExperiments,monthly:renderMonthlyPerformance,attention:renderAttention,dashboard:updateDashboard,bookBudget:renderBookBudget,teacherProfile:renderTeacherProfile};
+    const renderers={students:renderStudents,groups:renderGroups,attendance:renderAttendance,homework:renderHomework,evaluation:renderEvaluations,evaluations:renderEvaluations,grades:renderGrades,feedback:renderFeedback,portfolio:renderPortfolio,report:renderReport,goals:renderGoals,parents:renderParents,interests:renderInterests,daily:renderDaily,weekly:renderWeekly,budget:renderBudget,experiments:renderExperiments,monthly:renderMonthlyPerformance,attention:renderAttention,dashboard:updateDashboard,bookBudget:renderBookBudget,teacherProfile:renderTeacherProfile};
     const fn=renderers[activeSectionId];
     if(fn){try{fn();}catch(e){console.warn('section render:',activeSectionId,e);}}
 }

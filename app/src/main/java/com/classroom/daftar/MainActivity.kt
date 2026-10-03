@@ -290,12 +290,9 @@ class MainActivity : Activity() {
             sendStatus(textareaId, "❌ اجازه میکروفون داده نشده است.")
             return
         }
-        val recognizer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            android.speech.SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
-            android.speech.SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
-        } else {
-            android.speech.SpeechRecognizer.createSpeechRecognizer(this)
-        }
+        // از موتور استاندارد اندروید استفاده می‌کنیم تا اگر تشخیص آفلاین
+        // فارسی روی گوشی نصب نبود، موتور آنلاین سرویس گفتار بتواند کار کند.
+        val recognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(this)
         speechRecognizer = recognizer
         recognizer.setRecognitionListener(object : android.speech.RecognitionListener {
             override fun onReadyForSpeech(params: Bundle?) { sendStatus(textareaId, "🎙️ در حال شنیدن گفتار فارسی... صحبت کنید") }
@@ -332,7 +329,7 @@ class MainActivity : Activity() {
             putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "fa-IR")
             putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 3)
             putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            putExtra(android.speech.RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+            putExtra(android.speech.RecognizerIntent.EXTRA_PREFER_OFFLINE, false)
         }
         try { recognizer.startListening(intent) } catch (e: Exception) {
             sendStatus(textareaId, "❌ شروع تشخیص گفتار ممکن نشد.")
