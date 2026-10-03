@@ -1,5 +1,47 @@
-plugins { id 'com.android.application' }
+plugins { id 'com.android.application'; id 'org.jetbrains.kotlin.android' }
 
-android { namespace 'com.classnotebook.app'; compileSdk 35
-    defaultConfig { applicationId 'com.classnotebook.app'; minSdk 23; targetSdk 35; versionCode 1; versionName '1.0' }
+android {
+    namespace 'com.classroom.daftar'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.classroom.daftar'
+        minSdk 23
+        targetSdk 36
+        versionCode 12
+        versionName '4.5.0'
+    }
+
+    signingConfigs {
+        release {
+            def storeFileProp = project.findProperty('android.injected.signing.store.file')
+            def storePasswordProp = project.findProperty('android.injected.signing.store.password')
+            def keyAliasProp = project.findProperty('android.injected.signing.key.alias')
+            def keyPasswordProp = project.findProperty('android.injected.signing.key.password')
+
+            if (!storeFileProp || !storePasswordProp || !keyAliasProp || !keyPasswordProp) {
+                throw new GradleException('Release signing credentials are required. Configure the four Android signing properties before building release.')
+            }
+
+            storeFile file(storeFileProp)
+            storePassword storePasswordProp
+            keyAlias keyAliasProp
+            keyPassword keyPasswordProp
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+            debuggable false
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.webkit:webkit:1.12.1'
 }

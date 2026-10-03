@@ -3,9 +3,11 @@
 <head>
 
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https: http:; font-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>دفتر کلاسی من</title>
+<script>window.DAFTAR_CLOUD_ENDPOINT="";</script>
 
 <style>
 
@@ -216,6 +218,11 @@ label{
 
 .class-fourth{
     border-top:9px solid #3498db;
+}
+
+.class-multi{
+    border-top:9px solid #7c3aed;
+    background:linear-gradient(180deg,#ffffff,#faf7ff);
 }
 
 .class-card h2{
@@ -1235,7 +1242,10 @@ input:focus,select:focus,textarea:focus{
 .dashboard-mini span{font-size:27px;font-weight:900;color:var(--ui-ink);}
 
 /* جداول داده‌ها */
-.table-wrapper{border-radius:16px;overflow:auto;border:1px solid var(--ui-line);box-shadow:0 5px 16px rgba(15,23,42,.04);}
+.table-wrapper{border-radius:16px;overflow:auto;overflow-y:auto;max-height:min(62vh,680px);-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border:1px solid var(--ui-line);box-shadow:0 5px 16px rgba(15,23,42,.04);contain:layout paint;}
+.table-wrapper table{width:max-content;min-width:100%;}
+.table-wrapper thead th,.table-wrapper>table>tbody>tr:first-child th{position:sticky;top:0;z-index:4;}
+@media(max-width:700px){.table-wrapper{max-height:60vh}.table-wrapper td,.table-wrapper th{white-space:nowrap;}.table-wrapper table{font-size:11px;}}
 table{margin-top:0;border-collapse:separate;border-spacing:0;}
 th{background:linear-gradient(180deg,#eef9f8,#e7f4f4);border-color:#d7e5e7;padding:12px;}
 td{border-color:#e5ebef;padding:11px;}
@@ -1271,7 +1281,7 @@ tr:hover td{background:#f8fbfc!important;}
 /* بودجه‌بندی فقط تصویری است؛ جدول دستی در رابط کاربری نمایش داده نمی‌شود. */
 .budget-table,#budgetOldDataBox{display:none!important;}
 </style>
-<style id="commercial-pro-ui">:root{--pro-bg:#f4f7fb;--pro-surface:rgba(255,255,255,.9);--pro-ink:#172033;--pro-muted:#718096;--pro-line:#e6ebf2;--pro-accent:#0f766e;--pro-shadow:0 18px 50px rgba(24,39,75,.09)}body{background:radial-gradient(circle at 90% 0%,rgba(37,99,235,.08),transparent 30%),radial-gradient(circle at 10% 20%,rgba(15,118,110,.07),transparent 28%),var(--pro-bg);color:var(--pro-ink)}#app{max-width:1600px!important;margin:auto!important}.app-sidebar{position:fixed;inset:18px auto 18px 18px;width:272px;z-index:1000;background:rgba(18,28,45,.98);color:#fff;border-radius:24px;box-shadow:0 24px 70px rgba(15,23,42,.22);display:flex;flex-direction:column;overflow:hidden;transition:.28s ease}.sidebar-brand{display:flex;align-items:center;gap:12px;padding:24px 20px 18px;border-bottom:1px solid rgba(255,255,255,.08)}.brand-mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#14b8a6,#2563eb);font-size:24px}.sidebar-brand strong{display:block;font-size:15px}.sidebar-brand small{display:block;color:#9eabc0;font-size:10px;margin-top:3px}.sidebar-nav-scroll{overflow:auto;flex:1;padding:14px 10px}.sidebar-caption{font-size:10px;color:#718096;padding:8px 12px}.nav{display:flex!important;flex-direction:column!important;gap:5px!important;background:transparent!important;box-shadow:none!important;border:0!important;padding:0!important;position:static!important}.nav button{width:100%;display:flex!important;align-items:center;gap:12px!important;text-align:right!important;background:transparent!important;color:#b9c4d5!important;border:1px solid transparent!important;border-radius:13px!important;padding:11px 12px!important;font-size:13px!important;box-shadow:none!important}.nav button:hover{background:rgba(255,255,255,.07)!important;color:#fff!important}.nav button.active{background:linear-gradient(90deg,rgba(20,184,166,.18),rgba(37,99,235,.14))!important;color:#fff!important}.sb-icon{width:28px;height:28px;display:grid;place-items:center;flex:0 0 28px;border-radius:9px;background:rgba(255,255,255,.06);font-size:14px}.sidebar-footer{padding:12px;border-top:1px solid rgba(255,255,255,.08)}.sidebar-collapse{width:100%;border:0;background:rgba(255,255,255,.05);color:#aeb9ca;border-radius:12px;padding:10px;cursor:pointer}.page-workspace{margin-left:308px;min-height:calc(100vh - 36px);transition:.28s ease}.smart-header{position:sticky;top:14px;z-index:900;margin:14px 0 20px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:18px;background:rgba(255,255,255,.84);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.9);border-radius:20px;box-shadow:0 12px 40px rgba(24,39,75,.08)}.header-context{display:flex;align-items:center;gap:12px}.eyebrow{font-size:10px;color:var(--pro-accent);font-weight:800;margin-bottom:2px}.smart-header h1{font-size:20px;margin:0}.header-actions{display:flex;align-items:center;gap:9px}.global-search{position:relative;width:min(390px,36vw);display:flex;align-items:center;gap:7px;background:#f5f7fa;border:1px solid var(--pro-line);border-radius:13px;padding:0 11px;height:42px}.global-search span{font-size:21px;color:#8b98aa}.global-search input{border:0!important;background:transparent!important;outline:0!important;box-shadow:none!important;width:100%;padding:0!important;font-size:12px!important}.global-search kbd{font-size:9px;color:#8792a4;border:1px solid #dbe1e8;border-radius:6px;padding:3px 5px;background:#fff}.icon-action{position:relative;width:42px;height:42px;border:1px solid var(--pro-line);border-radius:13px;background:#fff;color:#536174;cursor:pointer}.notification-btn i{position:absolute;top:5px;right:5px;min-width:15px;height:15px;border-radius:9px;background:#ef4444;color:#fff;font-size:8px;font-style:normal;display:none;align-items:center;justify-content:center}.profile-chip{display:flex;align-items:center;gap:8px;border:1px solid var(--pro-line);background:#fff;border-radius:13px;padding:5px 9px 5px 6px;cursor:pointer;text-align:right}.profile-avatar{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:#e7f7f4;color:var(--pro-accent);font-weight:800}.profile-chip b,.profile-chip small{display:block}.profile-chip b{font-size:11px}.profile-chip small{font-size:8px;color:var(--pro-muted)}.search-results{position:absolute;top:48px;right:0;width:100%;min-width:280px;background:#fff;border:1px solid var(--pro-line);border-radius:15px;box-shadow:var(--pro-shadow);padding:6px;display:none}.search-results.show{display:block}.search-result{display:flex;align-items:center;gap:9px;padding:9px;border-radius:10px;cursor:pointer;font-size:11px}.search-result:hover{background:#f3f7f8}.notification-panel{position:absolute;top:67px;right:115px;width:310px;background:#fff;border:1px solid var(--pro-line);border-radius:17px;box-shadow:var(--pro-shadow);display:none;overflow:hidden}.notification-panel.show{display:block}.notification-head{display:flex;justify-content:space-between;padding:14px;border-bottom:1px solid var(--pro-line)}.notification-head button{border:0;background:none;font-size:18px;cursor:pointer}.notification-content{padding:12px;font-size:11px;color:var(--pro-muted)}.notice-item{padding:10px;border-radius:10px;background:#f7fafb;margin-bottom:7px}.mobile-menu-btn{display:none;border:0;background:#eef4f5;border-radius:10px;width:38px;height:38px}.card{border-color:rgba(226,232,240,.9)!important;box-shadow:var(--pro-shadow)!important;background:var(--pro-surface)!important;backdrop-filter:blur(10px)}body.sidebar-collapsed .app-sidebar{width:82px}body.sidebar-collapsed .sidebar-brand div:last-child,body.sidebar-collapsed .sb-label,body.sidebar-collapsed .sidebar-caption{display:none}body.sidebar-collapsed .sidebar-brand{justify-content:center;padding:20px 10px}body.sidebar-collapsed .nav button{justify-content:center;padding:10px!important}body.sidebar-collapsed .page-workspace{margin-left:118px}@media(max-width:1050px){.app-sidebar{width:235px}.page-workspace{margin-left:255px}.global-search{width:270px}}@media(max-width:820px){.app-sidebar{transform:translateX(110%);right:14px;left:auto;width:280px}.app-sidebar.mobile-open{transform:none}.page-workspace{margin-left:0}.mobile-menu-btn{display:block}.global-search{width:42px;padding:0 10px}.global-search input,.global-search kbd{display:none}.notification-panel{right:10px}.profile-chip span:last-child{display:none}}</style>
+<style id="commercial-pro-ui">:root{--pro-bg:#f4f7fb;--pro-surface:rgba(255,255,255,.9);--pro-ink:#172033;--pro-muted:#718096;--pro-line:#e6ebf2;--pro-accent:#0f766e;--pro-shadow:0 18px 50px rgba(24,39,75,.09)}body{background:radial-gradient(circle at 90% 0%,rgba(37,99,235,.08),transparent 30%),radial-gradient(circle at 10% 20%,rgba(15,118,110,.07),transparent 28%),var(--pro-bg);color:var(--pro-ink)}#app{max-width:1600px!important;margin:auto!important}.app-sidebar{position:fixed;inset:18px auto 18px 18px;width:272px;z-index:1000;background:rgba(18,28,45,.98);color:#fff;border-radius:24px;box-shadow:0 24px 70px rgba(15,23,42,.22);display:flex;flex-direction:column;overflow:hidden;transition:.28s ease}.sidebar-brand{display:flex;align-items:center;gap:12px;padding:24px 20px 18px;border-bottom:1px solid rgba(255,255,255,.08)}.brand-mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#14b8a6,#2563eb);font-size:24px}.sidebar-brand strong{display:block;font-size:15px}.sidebar-brand small{display:block;color:#9eabc0;font-size:10px;margin-top:3px}.sidebar-nav-scroll{overflow:auto;flex:1;padding:14px 10px}.sidebar-caption{font-size:10px;color:#718096;padding:8px 12px}.nav{display:flex!important;flex-direction:column!important;gap:5px!important;background:transparent!important;box-shadow:none!important;border:0!important;padding:0!important;position:static!important}.nav button{width:100%;display:flex!important;align-items:center;gap:12px!important;text-align:right!important;background:transparent!important;color:#b9c4d5!important;border:1px solid transparent!important;border-radius:13px!important;padding:11px 12px!important;font-size:13px!important;box-shadow:none!important}.nav button:hover{background:rgba(255,255,255,.07)!important;color:#fff!important}.nav button.active{background:linear-gradient(90deg,rgba(20,184,166,.18),rgba(37,99,235,.14))!important;color:#fff!important}.nav button.nav-logout-btn{margin-top:8px!important;border-color:rgba(239,68,68,.22)!important;color:#ffb4b4!important;background:rgba(239,68,68,.07)!important}.nav button.nav-logout-btn:hover{background:rgba(239,68,68,.16)!important;color:#fff!important}.sb-icon{width:28px;height:28px;display:grid;place-items:center;flex:0 0 28px;border-radius:9px;background:rgba(255,255,255,.06);font-size:14px}.sidebar-footer{padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:7px}.sidebar-collapse{width:100%;border:0;background:rgba(255,255,255,.05);color:#aeb9ca;border-radius:12px;padding:10px;cursor:pointer}.page-workspace{margin-left:308px;min-height:calc(100vh - 36px);transition:.28s ease}.smart-header{position:sticky;top:14px;z-index:900;margin:14px 0 20px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:18px;background:rgba(255,255,255,.84);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.9);border-radius:20px;box-shadow:0 12px 40px rgba(24,39,75,.08)}.header-context{display:flex;align-items:center;gap:12px}.eyebrow{font-size:10px;color:var(--pro-accent);font-weight:800;margin-bottom:2px}.smart-header h1{font-size:20px;margin:0}.header-actions{display:flex;align-items:center;gap:9px}.global-search{position:relative;width:min(390px,36vw);display:flex;align-items:center;gap:7px;background:#f5f7fa;border:1px solid var(--pro-line);border-radius:13px;padding:0 11px;height:42px}.global-search span{font-size:21px;color:#8b98aa}.global-search input{border:0!important;background:transparent!important;outline:0!important;box-shadow:none!important;width:100%;padding:0!important;font-size:12px!important}.global-search kbd{font-size:9px;color:#8792a4;border:1px solid #dbe1e8;border-radius:6px;padding:3px 5px;background:#fff}.icon-action{position:relative;width:42px;height:42px;border:1px solid var(--pro-line);border-radius:13px;background:#fff;color:#536174;cursor:pointer}.notification-btn i{position:absolute;top:5px;right:5px;min-width:15px;height:15px;border-radius:9px;background:#ef4444;color:#fff;font-size:8px;font-style:normal;display:none;align-items:center;justify-content:center}.profile-chip{display:flex;align-items:center;gap:8px;border:1px solid var(--pro-line);background:#fff;border-radius:13px;padding:5px 9px 5px 6px;cursor:pointer;text-align:right}.profile-avatar{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:#e7f7f4;color:var(--pro-accent);font-weight:800}.profile-chip b,.profile-chip small{display:block}.profile-chip b{font-size:11px}.profile-chip small{font-size:8px;color:var(--pro-muted)}.search-results{position:absolute;top:48px;right:0;width:100%;min-width:280px;background:#fff;border:1px solid var(--pro-line);border-radius:15px;box-shadow:var(--pro-shadow);padding:6px;display:none}.search-results.show{display:block}.search-result{display:flex;align-items:center;gap:9px;padding:9px;border-radius:10px;cursor:pointer;font-size:11px}.search-result:hover{background:#f3f7f8}.notification-panel{position:absolute;top:67px;right:115px;width:310px;background:#fff;border:1px solid var(--pro-line);border-radius:17px;box-shadow:var(--pro-shadow);display:none;overflow:hidden}.notification-panel.show{display:block}.notification-head{display:flex;justify-content:space-between;padding:14px;border-bottom:1px solid var(--pro-line)}.notification-head button{border:0;background:none;font-size:18px;cursor:pointer}.notification-content{padding:12px;font-size:11px;color:var(--pro-muted)}.notice-item{padding:10px;border-radius:10px;background:#f7fafb;margin-bottom:7px}.mobile-menu-btn{display:none;border:0;background:#eef4f5;border-radius:10px;width:38px;height:38px}.card{border-color:rgba(226,232,240,.9)!important;box-shadow:var(--pro-shadow)!important;background:var(--pro-surface)!important;backdrop-filter:blur(10px)}body.sidebar-collapsed .app-sidebar{width:82px}body.sidebar-collapsed .sidebar-brand div:last-child,body.sidebar-collapsed .sb-label,body.sidebar-collapsed .sidebar-caption{display:none}body.sidebar-collapsed .sidebar-brand{justify-content:center;padding:20px 10px}body.sidebar-collapsed .nav button{justify-content:center;padding:10px!important}body.sidebar-collapsed .page-workspace{margin-left:118px}@media(max-width:1050px){.app-sidebar{width:235px}.page-workspace{margin-left:255px}.global-search{width:270px}}@media(max-width:820px){.app-sidebar{transform:translateX(110%);right:14px;left:auto;width:280px}.app-sidebar.mobile-open{transform:none}.page-workspace{margin-left:0}.mobile-menu-btn{display:block}.global-search{width:42px;padding:0 10px}.global-search input,.global-search kbd{display:none}.notification-panel{right:10px}.profile-chip span:last-child{display:none}}</style>
 <style id="commercial-layout-fix">
 /* اصلاح چیدمان نسخه تجاری */
 #app > .smart-header, #app > .section, #app > .card:not(.teacher-home-card) { margin-left:308px; }
@@ -1299,6 +1309,9 @@ tr:hover td{background:#f8fbfc!important;}
 .teacher-field:has(#teacherServicePlace){grid-column:span 1;}
 #teacherServicePlace{direction:rtl;}
 </style>
+<style id="mobile-search-fix">
+@media(max-width:820px){.global-search.open{position:absolute;top:8px;left:8px;right:8px;width:auto;height:42px;z-index:1500;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.18)}.global-search.open input{display:block!important}}
+</style>
 <style id="mobile-sidebar-fix">
 @media(max-width:820px){
   .app-sidebar{transform:translateX(110%) !important;visibility:hidden !important;opacity:0 !important;pointer-events:none !important;}
@@ -1306,10 +1319,262 @@ tr:hover td{background:#f8fbfc!important;}
   .mobile-menu-btn{display:grid !important;place-items:center !important;cursor:pointer !important;position:relative !important;z-index:2000 !important;}
 }
 </style>
+<style id="persian-speech-field-ui">
+.speech-field-wrap{display:grid;grid-template-columns:minmax(0,1fr) 82px;grid-template-rows:auto auto;gap:7px;align-items:stretch;width:100%;margin:0 0 10px;position:relative}
+.speech-field-wrap>input,.speech-field-wrap>textarea{grid-column:1;grid-row:1;margin:0!important;width:100%!important;box-sizing:border-box}
+.speech-field-wrap>.field-mic-btn{grid-column:2;grid-row:1;min-height:44px;border:1px solid #b9e3df;border-radius:12px;background:linear-gradient(135deg,#ecfffc,#f5fbff);color:#087f8c;display:flex;align-items:center;justify-content:center;gap:4px;flex-direction:column;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgba(8,127,140,.08);transition:.18s ease}
+.speech-field-wrap>.field-mic-btn span{font-size:20px;line-height:1}
+.speech-field-wrap>.field-mic-btn b{font-size:9px}
+.speech-field-wrap>.field-mic-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(8,127,140,.14)}
+.speech-field-wrap>.field-mic-btn:active{transform:scale(.97)}
+.speech-field-wrap>.field-mic-btn.listening{background:#fff4f4;border-color:#f59e9e;color:#c62828;animation:speechPulse 1s infinite}
+.speech-field-wrap>.field-voice-status{grid-column:1 / -1;grid-row:2;min-height:16px;font-size:10px;color:#718096;text-align:right;padding:0 3px}
+.speech-field-wrap>.field-voice-status.success{color:#16845b;font-weight:700}
+@keyframes speechPulse{50%{box-shadow:0 0 0 5px rgba(220,38,38,.10)}}
+@media(max-width:520px){.speech-field-wrap{grid-template-columns:minmax(0,1fr) 68px}.speech-field-wrap>.field-mic-btn{min-height:42px}.speech-field-wrap>.field-mic-btn b{font-size:8px}}
+</style>
+<style id="class-page-flow-fix-v5">
+/* نسخه ۵: حذف فضای خالی ناشی از wrapper سایدبار و فشرده‌سازی هدر موبایل */
+.page-workspace{
+    min-height:0 !important;
+    height:0 !important;
+    margin-top:0 !important;
+    margin-bottom:0 !important;
+    overflow:visible !important;
+}
+@media(max-width:820px){
+    .smart-header{
+        margin:8px 0 10px !important;
+        padding:9px 10px !important;
+        min-height:58px !important;
+        gap:6px !important;
+        align-items:center !important;
+    }
+    .header-context{min-width:0;flex:1;gap:7px;}
+    .header-context > div{min-width:0;}
+    .smart-header h1{
+        font-size:16px !important;
+        line-height:1.45 !important;
+        white-space:normal !important;
+        overflow-wrap:anywhere;
+        margin:0 !important;
+    }
+    .eyebrow{font-size:8px !important;line-height:1.3 !important;}
+    .mobile-menu-btn{width:34px !important;height:34px !important;flex:0 0 34px !important;}
+    .header-actions{gap:4px !important;flex:0 0 auto;}
+    .global-search,.icon-action,.profile-chip{width:34px !important;height:34px !important;min-width:34px !important;}
+    .global-search{padding:0 7px !important;}
+    .profile-chip{padding:2px !important;justify-content:center;}
+    .profile-avatar{width:28px;height:28px;border-radius:9px;}
+    #app > .section{margin-top:0 !important;}
+    #app > .section.active{scroll-margin-top:8px;}
+}
+</style>
+
+<style id="budget-hours-beautify-v6">
+/* بودجه‌بندی ساعات تدریس - نسخه ۶ */
+#budget .budget-main-card{
+  overflow:hidden; border:1px solid #dcecf2!important;
+  background:linear-gradient(180deg,#ffffff 0%,#f8fcff 100%)!important;
+}
+#budget .budget-hero{
+  position:relative; padding:20px 22px; margin:-2px -2px 16px;
+  border-radius:20px; color:#fff;
+  background:linear-gradient(135deg,#087f8c,#1596a8 55%,#3aa6d8);
+  box-shadow:0 12px 30px rgba(8,127,140,.16);
+}
+#budget .budget-hero h2{margin:0 0 6px;font-size:22px;color:#fff}
+#budget .budget-hero p{margin:0;line-height:1.9;font-size:12px;opacity:.96}
+#budget .budget-hero .budget-hero-icon{position:absolute;left:18px;top:14px;font-size:42px;opacity:.22}
+#budget .budget-section-badge{display:inline-block;margin:0 0 12px;padding:7px 12px;border-radius:999px;background:#edf8f8;color:#087f8c;border:1px solid #cce9e7;font-size:11px;font-weight:800}
+#budget .budget-hours-toolbar{background:linear-gradient(135deg,#f0fbfa,#f5f9ff);border:1px solid #d4e9ee;border-radius:16px}
+#budget .budget-hours-current{background:#fff;border:1px solid #dce9ee;border-radius:12px;padding:9px 13px}
+#budget .budget-hours-current strong{color:#087f8c}
+#budget .budget-hours-table-wrap{border:1px solid #cfe1e8;border-radius:16px;box-shadow:0 8px 24px rgba(32,74,90,.07);background:#fff}
+#budget .budget-hours-table{min-width:860px}
+#budget .budget-hours-table th{background:linear-gradient(180deg,#eaf8f7,#f1f8fc);color:#17576a;padding:12px 9px}
+#budget .budget-hours-table th:first-child{background:#dff4f1;position:sticky;right:0;z-index:3}
+#budget .budget-hours-table td{padding:8px 7px;background:#fff}
+#budget .budget-hours-table tbody tr:nth-child(even) td{background:#fbfdff}
+#budget .budget-hours-table tbody td:first-child{position:sticky;right:0;z-index:2;background:#f7fbfd;font-weight:800;color:#244b5b}
+#budget .budget-hours-table input{font-weight:800;color:#16576a;background:#fff;border-color:#c9dce4;border-radius:10px}
+#budget .budget-hours-table input:focus{border-color:#1596a8}
+#budget .budget-hours-table tfoot td{background:linear-gradient(90deg,#eaf8f5,#f4f9ff);color:#0b6573;padding:11px 8px}
+#budget .budget-hours-note{border-right:5px solid #1596a8;background:#eef9fb;box-shadow:none}
+#budget .capability-budget-card .capability-icon{background:#e5f7f5}
+@media(max-width:820px){
+  #budget .budget-hero{padding:16px 17px}
+  #budget .budget-hero h2{font-size:18px}
+  #budget .budget-hours-table{min-width:820px}
+}
+</style>
+
+<style id="dashboard-v7-ui">
+.dashboard-showcase{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,.9fr);gap:16px;margin-top:18px}
+.dashboard-showcase-main{padding:18px;background:linear-gradient(145deg,#ffffff,#f4fbfb)!important}
+.showcase-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.showcase-heading span{display:block;font-size:19px;font-weight:900;color:#15576a}.showcase-heading small{display:block;color:#718096;font-size:10px;margin-top:4px}.showcase-heading b{background:#e6f7f4;color:#087f8c;padding:8px 12px;border-radius:999px;font-size:10px}
+.showcase-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.showcase-actions button{position:relative;border:1px solid #dce9ef;border-radius:18px;padding:15px 10px;background:#fff;cursor:pointer;text-align:center;box-shadow:0 8px 20px rgba(30,70,90,.06);transition:.18s}.showcase-actions button:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(30,70,90,.1)}.showcase-actions button span{display:grid;place-items:center;width:48px;height:48px;margin:0 auto 8px;border-radius:15px;background:#e8f7f5;font-size:25px}.showcase-actions button b{display:block;color:#174f63;font-size:12px}.showcase-actions button small{display:block;color:#8493a2;font-size:9px;margin-top:4px}.showcase-actions button.featured{background:linear-gradient(145deg,#fff8fb,#fff)}.showcase-actions button.featured span{background:#ffe9f0}.showcase-actions button.featured em{position:absolute;top:7px;left:7px;background:#e91e63;color:#fff;border-radius:9px;padding:3px 6px;font-style:normal;font-size:8px}
+.dashboard-showcase-side{display:grid;gap:16px}.showcase-side-card{padding:16px}.side-title{font-size:15px;font-weight:900;color:#0b6573}.side-subtitle{font-size:9px;color:#7b8b98;margin:4px 0 10px}.mini-budget-grid{display:grid;grid-template-columns:1.5fr repeat(6,1fr);border:1px solid #d8e7eb;border-radius:12px;overflow:hidden;font-size:8px}.mini-budget-grid>*{padding:6px 3px;text-align:center;border-left:1px solid #e3edf0;border-bottom:1px solid #e3edf0}.mini-budget-grid span{background:#edf8f7;font-weight:800;color:#166174}.mini-budget-grid b{font-weight:800;color:#355b67;background:#f9fcfd}.mini-budget-grid i{font-style:normal;color:#145d6d}.showcase-link{width:100%;border:0;background:#edf9f7;color:#087f8c;border-radius:11px;padding:9px;margin-top:10px;font-weight:800;cursor:pointer}.book-budget-preview{display:grid;grid-template-columns:65px 1fr;gap:6px;background:#f7fbfc;border-radius:12px;padding:9px;font-size:9px}.book-budget-preview b{grid-column:1/-1;color:#087f8c;font-size:10px}.book-budget-preview span{color:#738391}.book-budget-preview strong{color:#284e5b}
+#bookBudget .book-budget-main-card{overflow:hidden;background:linear-gradient(180deg,#fff,#f8fcff)!important}.book-budget-hero{position:relative;padding:20px 22px;margin:-2px -2px 16px;border-radius:20px;color:#fff;background:linear-gradient(135deg,#0f766e,#1596a8 55%,#2563eb);box-shadow:0 12px 30px rgba(8,127,140,.16)}.book-budget-hero h2{margin:0 0 6px;color:#fff;font-size:22px}.book-budget-hero p{margin:0;font-size:12px;line-height:1.9}.book-budget-icon{position:absolute;left:18px;top:12px;font-size:45px;opacity:.25}.book-budget-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid #d7e8ed;background:#f3fafb;border-radius:16px;margin-bottom:12px}.book-budget-toolbar select{border:1px solid #cbdde4;border-radius:10px;padding:9px 12px;background:#fff;font:inherit}.book-budget-table-wrap{overflow:auto;border:1px solid #cfe1e8;border-radius:16px;background:#fff;box-shadow:0 8px 24px rgba(32,74,90,.07)}.book-budget-table{width:100%;min-width:1050px;border-collapse:collapse}.book-budget-table th,.book-budget-table td{border:1px solid #dce8ed;padding:8px;text-align:center}.book-budget-table thead th{background:linear-gradient(180deg,#e8f8f5,#eef6ff);color:#17576a;white-space:nowrap}.book-budget-table tbody th{background:#f4fafb;color:#087f8c;position:sticky;right:0;z-index:2}.book-budget-table tbody tr:nth-child(even) td{background:#fbfdff}.book-budget-table input{width:100%;min-width:105px;box-sizing:border-box;border:1px solid #d4e2e8;border-radius:8px;padding:8px;text-align:center;background:#fff;font:inherit;font-size:11px}.book-budget-table input:focus{outline:none;border-color:#1596a8;box-shadow:0 0 0 3px rgba(21,150,168,.1)}.book-budget-note{margin-top:12px;padding:11px 13px;border-right:5px solid #1596a8;background:#eef9fb;border-radius:12px;color:#48616b;font-size:10px;line-height:1.9}
+.capability-book-budget-card .capability-icon{background:#ffeaf2!important}
+@media(max-width:900px){.dashboard-showcase{grid-template-columns:1fr}.showcase-actions{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.showcase-actions{grid-template-columns:repeat(2,1fr);gap:8px}.showcase-actions button{padding:11px 7px}.showcase-actions button span{width:40px;height:40px;font-size:21px}.showcase-heading span{font-size:16px}.book-budget-hero h2{font-size:18px}}
+</style>
+
+<style id="book-budget-v8-fix">
+#bookBudget .book-budget-table{min-width:980px;direction:rtl;}
+#bookBudget .book-budget-table th:first-child{position:sticky;right:0;z-index:3;min-width:190px;background:#dff4f1;color:#17576a;}
+#bookBudget .book-budget-table td{min-width:105px;height:58px;background:#fff;}
+#bookBudget .book-budget-table tbody tr:nth-child(even) td{background:#fbfdff;}
+#bookBudget .book-budget-table input{min-width:90px;height:42px;font-size:13px;}
+.book-budget-image-card{margin-top:16px;padding:15px;border:1px solid #d5e7ec;border-radius:16px;background:linear-gradient(180deg,#f9fdff,#eef9fb);}
+.book-budget-image-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.book-budget-image-head b{display:block;color:#0f6673;font-size:15px}.book-budget-image-head small{display:block;color:#6b7d86;margin-top:5px;line-height:1.8}.book-budget-upload-label{display:inline-flex!important;align-items:center;justify-content:center;cursor:pointer;}
+.book-budget-image-empty{margin-top:12px;padding:22px;text-align:center;border:2px dashed #b9d8df;border-radius:14px;color:#71838b;background:#fff;}
+.book-budget-image-preview{margin-top:12px;padding:10px;background:#fff;border-radius:14px;border:1px solid #d8e6eb;text-align:center;}
+.book-budget-image-preview img{display:block;width:100%;max-height:520px;object-fit:contain;border-radius:10px;cursor:zoom-in;margin-bottom:10px;}
+@media(max-width:700px){#bookBudget .book-budget-table{min-width:900px}.book-budget-image-head{align-items:stretch}.book-budget-upload-label{width:100%;box-sizing:border-box;}}
+/* اطمینان از رندر شدن جدول بودجه ساعات */
+#budget .budget-hours-table-wrap{display:block!important;visibility:visible!important;opacity:1!important;min-height:180px;}
+#budget .budget-hours-table{display:table!important;visibility:visible!important;}
+</style>
+<style id="horizontal-table-scroll-fix">
+/* اصلاح نمایش جدول‌ها در موبایل و Android WebView: اسکرول افقی با لمس چپ و راست */
+.table-wrapper,
+.budget-hours-table-wrap,
+.book-budget-table-wrap,
+.simple-hours-table {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto !important;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.table-wrapper > table,
+.budget-hours-table-wrap > table,
+.book-budget-table-wrap > table,
+.simple-hours-table > table {
+  min-width: max-content;
+}
+</style>
+
+<style id="global-scroll-stability-v1">
+/* اسکرول سراسری و سازگار با لمس — هیچ صفحه‌ای نباید به‌خاطر لیست یا نام دانش‌آموز قفل شود. */
+html{width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+body{width:100%;min-height:100vh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
+#app,#home,.page-workspace{width:100%;min-height:100vh;overflow:visible;}
+.section{width:100%;min-height:0;overflow:visible;}
+.table-wrapper{max-width:100%;overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:auto;overscroll-behavior:contain;}
+.table-wrapper table{min-width:100%;}
+/* جلوگیری از قفل‌شدن حرکت عمودی در جدول‌ها/لیست‌ها */
+.table-wrapper *{touch-action:auto;}
+.sidebar-nav-scroll{touch-action:auto;-webkit-overflow-scrolling:touch;}
+@media(max-width:820px){
+  html,body{overscroll-behavior-y:auto;}
+  .page-workspace{min-height:100vh;}
+  .section.active{display:block;overflow:visible;}
+  .table-wrapper{max-height:none;}
+}
+</style>
+<style id="world-class-ui-v4">
+:root{--wc-accent:#0f766e;--wc-blue:#2563eb;--wc-ink:#172033;--wc-muted:#64748b;--wc-line:#e2e8f0;--wc-radius:18px}
+*{box-sizing:border-box}
+html{scroll-behavior:auto;-webkit-text-size-adjust:100%}
+body{font-family:Tahoma,Arial,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,input,select,textarea{font-family:inherit}
+button{touch-action:manipulation}
+.section,.card{contain:layout style}
+.table-wrapper,.book-budget-table-wrap{contain:layout paint;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.table-wrapper table tbody tr{content-visibility:auto;contain-intrinsic-size:56px}
+.student-photo{object-fit:cover;image-rendering:auto}
+.app-sidebar,.smart-header{backdrop-filter:none;-webkit-backdrop-filter:none}
+.nav button,.capability-card,.btn,.icon-action,.profile-chip{min-height:44px}
+.nav button{transition:background-color .14s ease,color .14s ease,transform .14s ease}
+.nav button:active,.btn:active,.icon-action:active,.capability-card:active{transform:scale(.985)}
+.capability-card{min-height:138px;display:flex;flex-direction:column;justify-content:flex-start}
+.capability-icon,.sb-icon{font-family:Arial,sans-serif;line-height:1}
+.design-credit{margin-top:10px;font-size:10px;color:#8a98aa;text-align:center}
+.sync-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:#eef8f6;color:#0f766e;font-size:9px;font-weight:800;border:1px solid #d6eee9}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.12)}
+.sync-pill.offline{background:#fff7ed;color:#9a3412;border-color:#fed7aa}.sync-pill.offline .sync-dot{background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.12)}
+.global-search input::placeholder{color:#94a3b8}
+@media(max-width:820px){
+  .smart-header{position:sticky;top:8px;margin:8px 8px 14px!important;width:calc(100% - 16px)!important;border-radius:16px;padding:9px 10px;gap:8px}
+  .smart-header h1{font-size:16px}.header-actions{gap:5px}.profile-chip{min-width:42px;padding:5px}.profile-avatar{width:31px;height:31px}
+  .card{backdrop-filter:none!important}.capability-card{min-height:122px;padding:14px}
+  .table-wrapper{max-height:none;overflow:auto}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+<style id="performance-stability-v411">
+/* فقط بهینه‌سازی؛ هیچ قابلیت یا ساختار داده‌ای حذف نشده است. */
+img{content-visibility:auto;}
+.section:not(.active){content-visibility:hidden;contain:layout style paint;}
+.table-wrapper,.book-budget-table-wrap,.simple-hours-table{contain:layout paint;}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}}
+@media (max-width:820px){.smart-header{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 6px 20px rgba(24,39,75,.07)!important}.app-sidebar{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 14px 35px rgba(15,23,42,.18)!important}}
+</style>
+
+<style id="professional-ux-4-5">
+html{scroll-behavior:smooth;overscroll-behavior-y:auto}
+body{min-height:100dvh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+#app{min-height:100dvh;overflow:visible}.page-workspace{overflow:visible!important}.section{overflow:visible!important;max-width:100%}
+.sidebar-nav-scroll{-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin}.sidebar-nav-scroll .nav button{touch-action:manipulation}
+.dashboard-quick{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px!important;margin-bottom:18px}
+.dashboard-mini{min-width:0!important;padding:15px 12px!important;border:1px solid #e5ebf0!important;border-radius:17px!important;background:linear-gradient(180deg,#fff,#f8fbfc)!important;box-shadow:0 7px 20px rgba(24,39,75,.06)!important}
+.dashboard-mini strong{display:block;font-size:11px;color:#526173;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dashboard-mini span{display:block;font-size:22px;font-weight:900;color:#0f766e;line-height:1.35}
+.dashboard-showcase{display:grid!important;grid-template-columns:minmax(0,1.55fr) minmax(280px,.85fr)!important;gap:16px!important;align-items:start}.dashboard-showcase-main,.dashboard-showcase-side .card{margin-bottom:0!important}
+.showcase-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px!important}.showcase-actions button{min-width:0!important;margin:0!important;padding:13px!important}
+.sidebar-group-label{font-size:9px;color:#6f7f95;padding:12px 12px 5px;font-weight:800}.mobile-quickbar{display:none}
+.table-wrapper{touch-action:pan-x pan-y!important;overflow-x:auto!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+@media(max-width:1100px){.dashboard-quick{grid-template-columns:repeat(3,minmax(0,1fr))!important}.dashboard-showcase{grid-template-columns:1fr!important}}
+@media(max-width:820px){body{padding-bottom:74px}.dashboard-quick{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important}.dashboard-mini{padding:11px 8px!important;border-radius:14px!important}.dashboard-mini span{font-size:18px}.dashboard-mini strong{font-size:9px}.showcase-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}.dashboard-capabilities{grid-template-columns:repeat(2,minmax(0,1fr))!important}.mobile-quickbar{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));z-index:1200;padding:6px;background:rgba(18,28,45,.96);border-radius:17px;box-shadow:0 15px 40px rgba(15,23,42,.28);backdrop-filter:blur(14px)}.mobile-quickbar button{border:0;background:transparent;color:#aeb9ca;border-radius:12px;padding:7px 3px;font-family:inherit;font-size:8px;line-height:1.4;min-width:0}.mobile-quickbar button span{display:block;font-size:17px;line-height:1.2}.mobile-quickbar button.active{background:rgba(20,184,166,.18);color:#fff}body.sidebar-collapsed .sidebar-group-label{display:none}}
+@media(max-width:520px){.dashboard-quick{grid-template-columns:repeat(2,minmax(0,1fr))!important}.showcase-actions,.dashboard-capabilities{grid-template-columns:1fr!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
 </head>
 
 
+<style id="offline-auth-ui">
+#offlineAuthOverlay{position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#f5fbff,#eefcf8);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;font-family:Tahoma,Arial,sans-serif;direction:rtl}
+#offlineAuthOverlay.auth-hidden{display:none}
+.auth-card{width:min(470px,100%);background:#fff;border:1px solid #dfe8ef;border-radius:24px;box-shadow:0 18px 60px rgba(15,71,82,.14);padding:28px;box-sizing:border-box}
+.auth-brand{text-align:center;margin-bottom:20px}.auth-brand .logo{font-size:42px}.auth-brand h2{margin:6px 0;color:#087f8c;font-size:24px}.auth-brand p{margin:0;color:#718096;font-size:13px}
+.auth-tabs{display:flex;gap:8px;margin-bottom:18px}.auth-tab{flex:1;border:1px solid #d8e5e8;background:#f7fbfc;color:#48616b;border-radius:12px;padding:11px;cursor:pointer;font-weight:700}.auth-tab.active{background:#e9fbf8;border-color:#8ed7cf;color:#087f8c}
+.auth-field{margin:12px 0}.auth-field label{display:block;margin-bottom:6px;font-size:12px;font-weight:800;color:#425466}.auth-field input{width:100%;box-sizing:border-box;padding:13px 14px;border:1px solid #cbd8df;border-radius:12px;font-size:14px;outline:none;background:#fff}.auth-field input:focus{border-color:#2aa69b;box-shadow:0 0 0 3px rgba(42,166,155,.10)}
+.auth-main-btn{width:100%;border:0;border-radius:13px;padding:13px;background:#087f8c;color:#fff;font-size:14px;font-weight:800;cursor:pointer;margin-top:8px}.auth-main-btn:disabled{opacity:.6;cursor:wait}.auth-secondary{width:100%;border:1px solid #cbd8df;border-radius:13px;padding:11px;background:#fff;color:#425466;font-size:13px;font-weight:700;cursor:pointer;margin-top:9px}.auth-message{min-height:20px;margin:10px 0;text-align:center;font-size:12px;font-weight:700}.auth-message.error{color:#c62828}.auth-message.success{color:#16845b}.auth-hint{font-size:11px;color:#718096;line-height:1.8;margin-top:12px;text-align:center}
+#accountSecurityCard{margin-top:18px}.account-security-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.account-security-grid .auth-field{margin:0}.account-security-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.account-security-actions button{flex:1;min-width:150px}.logout-account-btn{background:#fff!important;color:#c62828!important;border:1px solid #efb4b4!important}
+@media(max-width:520px){.auth-card{padding:20px;border-radius:18px}.account-security-grid{grid-template-columns:1fr}}
+</style>
 <body>
+
+<div id="offlineAuthOverlay">
+  <div class="auth-card">
+    <div class="auth-brand"><div class="logo">📚</div><h2>دفتر کلاسی من</h2><p>ورود امن و آماده کار آنلاین و آفلاین</p><div class="design-credit">طراح برنامه: <strong>محمد حسین ممشلی</strong></div></div>
+    <div class="auth-tabs">
+      <button id="authLoginTab" class="auth-tab active" type="button" onclick="showAuthMode('login')">ورود</button>
+      <button id="authRegisterTab" class="auth-tab" type="button" onclick="showAuthMode('register')">ساخت حساب</button>
+    </div>
+    <div id="authLoginPane">
+      <div class="auth-field"><label>نام کاربری</label><input id="authLoginUsername" autocomplete="username" placeholder="نام کاربری خود را وارد کنید"></div>
+      <div class="auth-field"><label>رمز عبور</label><input id="authLoginPassword" type="password" autocomplete="current-password" placeholder="رمز عبور"></div>
+      <div id="authLoginMessage" class="auth-message"></div>
+      <button id="authLoginButton" class="auth-main-btn" type="button" onclick="loginOfflineAccount()">🔐 ورود به برنامه</button>
+      <button class="auth-secondary" type="button" onclick="showAuthMode('register')">➕ ساخت حساب جدید برای یک معلم</button>
+    </div>
+    <div id="authRegisterPane" style="display:none">
+      <div class="auth-field"><label>نام کاربری دلخواه</label><input id="authRegisterUsername" autocomplete="username" placeholder="مثلاً teacher_mohammad"></div>
+      <div class="auth-field"><label>رمز عبور دلخواه</label><input id="authRegisterPassword" type="password" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر"></div>
+      <div class="auth-field"><label>تکرار رمز عبور</label><input id="authRegisterPassword2" type="password" autocomplete="new-password" placeholder="رمز را دوباره وارد کنید"></div>
+      <div id="authRegisterMessage" class="auth-message"></div>
+      <button id="authRegisterButton" class="auth-main-btn" type="button" onclick="registerOfflineAccount()">✅ ساخت حساب و ورود</button>
+      <div class="auth-hint">هر معلم نام کاربری و رمز خودش را انتخاب می‌کند. اطلاعات هر حساب روی همان دستگاه جداگانه ذخیره می‌شود و برای کارکرد اصلی برنامه اینترنت لازم نیست.</div>
+    </div>
+  </div>
+</div>
 
 
 <header class="header">
@@ -1353,6 +1618,7 @@ tr:hover td{background:#f8fbfc!important;}
   <div class="class-card class-fourth" onclick="openClass('4')"><h2>🔵 کلاس چهارم</h2><p>ورود به دفتر کلاس چهارم</p></div>
   <div class="class-card class-fourth" onclick="openClass('5')"><h2>🔵 کلاس پنجم</h2><p>ورود به دفتر کلاس پنجم</p></div>
   <div class="class-card class-fourth" onclick="openClass('6')"><h2>🔵 کلاس ششم</h2><p>ورود به دفتر کلاس ششم</p></div>
+  <div class="class-card class-multi" onclick="openClass('multi')"><h2>🟣 کلاس چندپایه</h2><p>مدیریت هم‌زمان دانش‌آموزان پایه‌های مختلف</p></div>
 </div>
 </div>
 
@@ -1390,7 +1656,7 @@ onclick="goHome()"
      منوی برنامه
 ===================================================== -->
 
-<header class="smart-header" id="smartHeader"><div class="header-context"><button class="mobile-menu-btn" type="button" onclick="toggleSidebar()">☰</button><div><div class="eyebrow">پنل مدیریت کلاس</div><h1 id="smartPageTitle">داشبورد</h1></div></div><div class="header-actions"><div class="global-search"><span>⌕</span><input id="globalSearch" type="search" placeholder="جست‌وجو در بخش‌ها و ابزارها..." autocomplete="off" oninput="handleGlobalSearch(this.value)"><kbd>Ctrl K</kbd><div id="searchResults" class="search-results"></div></div><button class="icon-action notification-btn" type="button" onclick="toggleNotifications()">♢<i id="notificationBadge">0</i></button><button class="profile-chip" type="button" onclick="document.querySelector('[data-nav-label*=\"کارتابل\"]')?.click()"><span class="profile-avatar">م</span><span><b id="headerTeacherName">معلم</b><small>پروفایل</small></span></button></div><div id="notificationPanel" class="notification-panel"><div class="notification-head"><strong>اعلان‌ها</strong><button onclick="toggleNotifications()">×</button></div><div id="notificationContent" class="notification-content"></div></div></header><div class="page-workspace"><aside class="app-sidebar" id="appSidebar"><div class="sidebar-brand"><div class="brand-mark">▦</div><div><strong>دفتر کلاسی من</strong><small>Classroom Pro</small></div></div><div class="sidebar-nav-scroll"><div class="sidebar-caption">مدیریت کلاس</div><nav class="nav" id="mainNav"><button onclick="showSection('teacherProfile',this)" data-nav-label="👨‍🏫 کارتابل معلم"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🏫 کارتابل معلم</span></button><button class="active" onclick="showSection('dashboard',this)" data-nav-label="🏠 داشبورد"><span class="sb-icon">🏠 </span><span class="sb-label">🏠 داشبورد</span></button><button onclick="showSection('students',this)" data-nav-label="👨‍🎓 دانش‌آموزان"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🎓 دانش‌آموزان</span></button><button onclick="showSection('groups',this)" data-nav-label="👥 گروه‌بندی کلاس"><span class="sb-icon">👥</span><span class="sb-label">👥 گروه‌بندی کلاس</span></button><button onclick="showSection('attendance',this)" data-nav-label="📋 حضور و غیاب"><span class="sb-icon">📋 </span><span class="sb-label">📋 حضور و غیاب</span></button><button onclick="showSection('homework',this)" data-nav-label="📚 تکالیف"><span class="sb-icon">📚 </span><span class="sb-label">📚 تکالیف</span></button><button onclick="showSection('evaluation',this)" data-nav-label="⭐ ارزشیابی"><span class="sb-icon">⭐ </span><span class="sb-label">⭐ ارزشیابی</span></button><button onclick="showSection('feedback',this)" data-nav-label="💬 بازخورد آموزشی"><span class="sb-icon">💬</span><span class="sb-label">💬 بازخورد آموزشی</span></button><button onclick="showSection('grades',this)" data-nav-label="📝 ارزشیابی کیفی"><span class="sb-icon">📝 </span><span class="sb-label">📝 ارزشیابی کیفی</span></button><button onclick="showSection('portfolio',this)" data-nav-label="📁 پوشه‌کار"><span class="sb-icon">📁 </span><span class="sb-label">📁 پوشه‌کار</span></button><button onclick="showSection('experiments',this)" data-nav-label="🔬 آزمایش‌های علوم"><span class="sb-icon">🔬 </span><span class="sb-label">🔬 آزمایش‌های علوم</span></button><button onclick="showSection('monthly',this)" data-nav-label="📅 عملکرد ماهانه"><span class="sb-icon">📅 </span><span class="sb-label">📅 عملکرد ماهانه</span></button><button onclick="showSection('report',this)" data-nav-label="📊 وضعیت تحصیلی"><span class="sb-icon">📊 </span><span class="sb-label">📊 وضعیت تحصیلی</span></button><button onclick="showSection('goals',this)" data-nav-label="🎯 اهداف آموزشی"><span class="sb-icon">🎯 </span><span class="sb-label">🎯 اهداف آموزشی</span></button><button onclick="showSection('parents',this)" data-nav-label="👨‍👩‍👧 اطلاعات والدین"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍👩‍👧 اطلاعات والدین</span></button><button onclick="showSection('interests',this)" data-nav-label="❤️ علاقه‌مندی دانش‌آموز"><span class="sb-icon">❤️</span><span class="sb-label">❤️ علاقه‌مندی دانش‌آموز</span></button><button onclick="showSection('daily',this)" data-nav-label="📖 دفتر روزانه"><span class="sb-icon">📖 </span><span class="sb-label">📖 دفتر روزانه</span></button><button onclick="showSection('weekly',this)" data-nav-label="🗓️ برنامه هفتگی"><span class="sb-icon">🗓️</span><span class="sb-label">🗓️ برنامه هفتگی</span></button><button onclick="showSection('budget',this)" data-nav-label="⏱️ بودجه ساعات تدریس"><span class="sb-icon">📊 </span><span class="sb-label">⏱️ بودجه ساعات تدریس</span></button><button onclick="showSection('attention',this)" data-nav-label="⚠️ نیازمند توجه"><span class="sb-icon">⚠️</span><span class="sb-label">⚠️ نیازمند توجه</span></button><button onclick="showSection('backup',this)" data-nav-label="💾 پشتیبان"><span class="sb-icon">💾 </span><span class="sb-label">💾 پشتیبان</span></button></nav></div><div class="sidebar-footer"><button class="sidebar-collapse" type="button" onclick="toggleSidebar()"><span class="sb-icon">‹</span><span class="sb-label">جمع‌کردن منو</span></button></div></aside></div>
+<header class="smart-header" id="smartHeader"><div class="header-context"><button class="mobile-menu-btn" type="button" onclick="toggleSidebar()" aria-label="باز کردن منو">☰</button><div><div class="eyebrow">پنل مدیریت کلاس</div><h1 id="smartPageTitle">داشبورد</h1></div><span id="syncStatusPill" class="sync-pill offline"><i class="sync-dot"></i><span>آفلاین آماده</span></span></div><div class="header-actions"><div class="global-search"><button type="button" aria-label="جست‌وجو" onclick="focusGlobalSearch()" style="border:0;background:transparent;font-size:21px;cursor:pointer;color:#8b98aa;padding:0">⌕</button><input id="globalSearch" type="search" placeholder="جست‌وجو در بخش‌ها و ابزارها..." autocomplete="off" oninput="handleGlobalSearch(this.value)"><kbd>Ctrl K</kbd><div id="searchResults" class="search-results"></div></div><button class="icon-action notification-btn" type="button" onclick="toggleNotifications()">♢<i id="notificationBadge">0</i></button><button class="profile-chip" type="button" onclick="openHeaderProfile()"><span class="profile-avatar">م</span><span><b id="headerTeacherName">معلم</b><small>پروفایل</small></span></button></div><div id="notificationPanel" class="notification-panel"><div class="notification-head"><strong>اعلان‌ها</strong><button onclick="toggleNotifications()">×</button></div><div id="notificationContent" class="notification-content"></div></div></header><div class="page-workspace"><aside class="app-sidebar" id="appSidebar"><div class="sidebar-brand"><div class="brand-mark" aria-hidden="true">⌘</div><div><strong>دفتر کلاسی من</strong><small>Classroom Pro · Pro Edition</small><small style="margin-top:5px;color:#8ee7dc">طراح: محمد حسین ممشلی</small></div></div><div class="sidebar-nav-scroll"><div class="sidebar-caption">مدیریت کلاس</div><nav class="nav" id="mainNav"><button onclick="showSection('teacherProfile',this)" data-nav-label="👨‍🏫 کارتابل معلم"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🏫 کارتابل معلم</span></button><button class="active" onclick="showSection('dashboard',this)" data-nav-label="🏠 داشبورد"><span class="sb-icon">🏠 </span><span class="sb-label">🏠 داشبورد</span></button><button onclick="showSection('students',this)" data-nav-label="👨‍🎓 دانش‌آموزان"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🎓 دانش‌آموزان</span></button><button onclick="showSection('groups',this)" data-nav-label="👥 گروه‌بندی کلاس"><span class="sb-icon">👥</span><span class="sb-label">👥 گروه‌بندی کلاس</span></button><button onclick="showSection('attendance',this)" data-nav-label="📋 حضور و غیاب"><span class="sb-icon">📋 </span><span class="sb-label">📋 حضور و غیاب</span></button><button onclick="showSection('homework',this)" data-nav-label="📚 تکالیف"><span class="sb-icon">📚 </span><span class="sb-label">📚 تکالیف</span></button><button onclick="showSection('evaluation',this)" data-nav-label="⭐ ارزشیابی"><span class="sb-icon">⭐ </span><span class="sb-label">⭐ ارزشیابی</span></button><button onclick="showSection('feedback',this)" data-nav-label="💬 بازخورد آموزشی"><span class="sb-icon">💬</span><span class="sb-label">💬 بازخورد آموزشی</span></button><button onclick="showSection('grades',this)" data-nav-label="📝 ارزشیابی کیفی"><span class="sb-icon">📝 </span><span class="sb-label">📝 ارزشیابی کیفی</span></button><button onclick="showSection('portfolio',this)" data-nav-label="📁 پوشه‌کار"><span class="sb-icon">📁 </span><span class="sb-label">📁 پوشه‌کار</span></button><button onclick="showSection('experiments',this)" data-nav-label="🔬 آزمایش‌های علوم"><span class="sb-icon">🔬 </span><span class="sb-label">🔬 آزمایش‌های علوم</span></button><button onclick="showSection('monthly',this)" data-nav-label="📅 عملکرد ماهانه"><span class="sb-icon">📅 </span><span class="sb-label">📅 عملکرد ماهانه</span></button><button onclick="showSection('report',this)" data-nav-label="📊 وضعیت تحصیلی"><span class="sb-icon">📊 </span><span class="sb-label">📊 وضعیت تحصیلی</span></button><button onclick="showSection('goals',this)" data-nav-label="🎯 اهداف آموزشی"><span class="sb-icon">🎯 </span><span class="sb-label">🎯 اهداف آموزشی</span></button><button onclick="showSection('parents',this)" data-nav-label="👨‍👩‍👧 اطلاعات والدین"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍👩‍👧 اطلاعات والدین</span></button><button onclick="showSection('interests',this)" data-nav-label="❤️ علاقه‌مندی دانش‌آموز"><span class="sb-icon">❤️</span><span class="sb-label">❤️ علاقه‌مندی دانش‌آموز</span></button><button onclick="showSection('daily',this)" data-nav-label="📖 دفتر روزانه"><span class="sb-icon">📖 </span><span class="sb-label">📖 دفتر روزانه</span></button><button onclick="showSection('weekly',this)" data-nav-label="🗓️ برنامه هفتگی"><span class="sb-icon">🗓️</span><span class="sb-label">🗓️ برنامه هفتگی</span></button><button onclick="showSection('budget',this)" data-nav-label="⏱️ بودجه ساعات تدریس"><span class="sb-icon">📊 </span><span class="sb-label">⏱️ بودجه ساعات تدریس</span></button><button onclick="showSection('bookBudget',this)" data-nav-label="📘 بودجه‌بندی تدریس کتاب"><span class="sb-icon">📘</span><span class="sb-label">📘 بودجه‌بندی تدریس کتاب</span></button><button onclick="showSection('attention',this)" data-nav-label="⚠️ نیازمند توجه"><span class="sb-icon">⚠️</span><span class="sb-label">⚠️ نیازمند توجه</span></button><button onclick="showSection('backup',this)" data-nav-label="💾 پشتیبان"><span class="sb-icon">💾 </span><span class="sb-label">💾 پشتیبان</span></button></nav></div><div class="sidebar-footer"><button class="nav-logout-btn" type="button" onclick="logoutOfflineAccount()"><span class="sb-icon">🚪</span><span class="sb-label">🚪 خروج از حساب</span></button><button class="sidebar-collapse" type="button" onclick="toggleSidebar()"><span class="sb-icon">‹</span><span class="sb-label">جمع‌کردن منو</span></button></div></aside></div>
 
 <!-- =====================================================
      کارتابل معلم
@@ -1483,6 +1749,21 @@ onclick="goHome()"
 
         <button class="btn btn-primary" onclick="saveTeacherProfile()">💾 ذخیره اطلاعات معلم</button>
         <button class="btn btn-gray" onclick="clearTeacherForm()">↺ پاک کردن فرم</button>
+
+
+        <div class="card" id="accountSecurityCard">
+            <h2>🔐 حساب کاربری</h2>
+            <p style="color:#607d8b;font-size:12px;line-height:1.8;">نام کاربری و رمز این معلم فقط روی همین دستگاه نگهداری می‌شود. برای تغییر هر دو، اطلاعات جدید را وارد و ذخیره کنید.</p>
+            <div class="account-security-grid">
+                <div class="auth-field"><label>نام کاربری جدید</label><input id="accountNewUsername" autocomplete="username"></div>
+                <div class="auth-field"><label>رمز عبور جدید</label><input id="accountNewPassword" type="password" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر"></div>
+            </div>
+            <div class="account-security-actions">
+                <button class="btn btn-primary" type="button" onclick="changeCurrentAccountCredentials()">💾 تغییر مشخصات ورود</button>
+                <button class="btn btn-gray logout-account-btn" type="button" onclick="logoutOfflineAccount()">🚪 خروج از حساب</button>
+            </div>
+            <div id="accountSecurityMessage" class="auth-message"></div>
+        </div>
     </div>
 
     <div class="card">
@@ -1553,6 +1834,24 @@ onclick="goHome()"
 
     </div>
 
+    <div class="dashboard-showcase">
+        <div class="dashboard-showcase-main card">
+            <div class="showcase-heading"><div><span>✨ امکانات اصلی کلاس</span><small>دسترسی سریع به ابزارهای پرکاربرد</small></div><b>کلاس فعال</b></div>
+            <div class="showcase-actions">
+                <button onclick="showSection('students')"><span>👨‍🎓</span><b>دانش‌آموزان</b><small>فهرست و مشخصات</small></button>
+                <button onclick="showSection('weekly')"><span>🗓️</span><b>برنامه هفتگی</b><small>برنامه کلاس</small></button>
+                <button onclick="showSection('budget')"><span>⏱️</span><b>بودجه ساعات</b><small>ساعات تدریس</small></button>
+                <button onclick="showSection('bookBudget')" class="featured"><span>📘</span><b>بودجه‌بندی کتاب</b><small>صفحات و مباحث</small><em>جدید</em></button>
+                <button onclick="showSection('portfolio')"><span>📁</span><b>پوشه‌کار</b><small>فعالیت‌ها و فایل‌ها</small></button>
+                <button onclick="showSection('attendance')"><span>📋</span><b>حضور و غیاب</b><small>ثبت روزانه</small></button>
+            </div>
+        </div>
+        <div class="dashboard-showcase-side">
+            <div class="card showcase-side-card"><div class="side-title">⏱️ جدول ساعات تدریس</div><div class="side-subtitle">پایه‌های اول تا ششم</div><div class="mini-budget-grid"><span>درس</span><span>اول</span><span>دوم</span><span>سوم</span><span>چهارم</span><span>پنجم</span><span>ششم</span><b>ریاضی</b><i>۵</i><i>۵</i><i>۴</i><i>۴</i><i>۴</i><i>۴</i><b>فارسی</b><i>۱۱</i><i>۳</i><i>۴</i><i>۳</i><i>۳</i><i>۲</i></div><button class="showcase-link" onclick="showSection('budget')">مشاهده جدول کامل ←</button></div>
+            <div class="card showcase-side-card"><div class="side-title">📘 بودجه‌بندی تدریس کتاب</div><div class="side-subtitle">تقسیم صفحات در طول سال</div><div class="book-budget-preview"><b>پایه سوم</b><span>مهر</span><strong>قرآن ۱–۱۷</strong><span>آبان</span><strong>قرآن ۱۸–۳۳</strong><span>آذر</span><strong>قرآن ۳۴–۴۶</strong></div><button class="showcase-link" onclick="showSection('bookBudget')">ورود به بودجه‌بندی ←</button></div>
+        </div>
+    </div>
+
     <div class="card" style="margin-top:18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
             <div><h3 style="margin:0;">✨ قابلیت‌های دفتر کلاس</h3><p style="margin:3px 0 0;color:#718096;font-size:10px;">برای ورود مستقیم، روی هر قابلیت کلیک کنید.</p></div>
@@ -1566,13 +1865,14 @@ onclick="goHome()"
             <div class="capability-card" onclick="showSection('portfolio')"><div class="capability-icon">📁</div><strong>پوشه‌کار</strong><span>ثبت و نگهداری فعالیت‌ها</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('experiments')"><div class="capability-icon">🔬</div><strong>آزمایش‌های علوم</strong><span>ثبت فعالیت‌ها و آزمایش‌های علوم</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('monthly')"><div class="capability-icon">📅</div><strong>عملکرد ماهانه</strong><span>ثبت و بررسی عملکرد ماهانه</span><b class="capability-arrow">←</b></div>
+            <div class="capability-card capability-budget-card" onclick="showSection('budget')"><div class="capability-icon">📊</div><strong>بودجه‌بندی ساعات تدریس</strong><span>جدول ساعات هفتگی پایه‌های اول تا ششم</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('report')"><div class="capability-icon">📊</div><strong>وضعیت تحصیلی</strong><span>نمایش وضعیت و گزارش تحصیلی</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('goals')"><div class="capability-icon">🎯</div><strong>اهداف آموزشی</strong><span>ثبت و پیگیری اهداف آموزشی</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('parents')"><div class="capability-icon">👨‍👩‍👧</div><strong>اطلاعات والدین</strong><span>مدیریت اطلاعات ارتباطی والدین</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('interests')"><div class="capability-icon">❤️</div><strong>علاقه‌مندی دانش‌آموز</strong><span>ثبت علایق و زمینه‌های مورد علاقه</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('daily')"><div class="capability-icon">📖</div><strong>دفتر روزانه</strong><span>ثبت رویدادها و یادداشت‌های روزانه</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('weekly')"><div class="capability-icon">🗓️</div><strong>برنامه هفتگی</strong><span>مشاهده و مدیریت برنامه تصویری</span><b class="capability-arrow">←</b></div>
-            <div class="capability-card" onclick="showSection('budget')"><div class="capability-icon">⏱️</div><strong>بودجه ساعات تدریس</strong><span>مدیریت ساعات هفتگی دروس پایه‌های اول تا ششم</span><b class="capability-arrow">←</b></div>
+            <div class="capability-card" onclick="showSection('budget')"><div class="capability-icon">⏱️</div><strong>بودجه ساعات تدریس</strong><span>مدیریت ساعات هفتگی دروس پایه‌های اول تا ششم</span><b class="capability-arrow">←</b></div><div class="capability-card capability-book-budget-card" onclick="showSection('bookBudget')"><div class="capability-icon">📘</div><strong>بودجه‌بندی تدریس کتاب</strong><span>تقسیم صفحات و مباحث کتاب در طول سال تحصیلی</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('attention')"><div class="capability-icon">⚠️</div><strong>نیازمند توجه</strong><span>پیگیری دانش‌آموزان نیازمند توجه</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('backup')"><div class="capability-icon">💾</div><strong>پشتیبان</strong><span>پشتیبان‌گیری و بازیابی اطلاعات</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('teacherProfile')"><div class="capability-icon">👨‍🏫</div><strong>کارتابل معلم</strong><span>مدیریت مشخصات و اطلاعات معلم</span><b class="capability-arrow">←</b></div>
@@ -1585,7 +1885,7 @@ onclick="goHome()"
             <h3>📌 وضعیت برنامه‌های تصویری</h3>
             <ul class="dashboard-list">
                 <li id="weeklyStatus">🗓️ برنامه هفتگی: بررسی می‌شود...</li>
-                <li id="budgetStatus">⏱️ بودجه ساعات تدریس: بررسی می‌شود...</li>
+                <li id="budgetStatus">⏱️ بودجه ساعات تدریس: بررسی می‌شود...</li><li id="bookBudgetStatus">📘 بودجه‌بندی تدریس کتاب: بررسی می‌شود...</li>
             </ul>
         </div>
 
@@ -1653,6 +1953,23 @@ placeholder="مثلاً رضایی"
 
 </div>
 
+
+<div>
+
+<label>
+پایه دانش‌آموز
+</label>
+
+<select id="studentGrade" aria-label="پایه دانش‌آموز">
+    <option value="1">پایه اول</option>
+    <option value="2">پایه دوم</option>
+    <option value="3">پایه سوم</option>
+    <option value="4">پایه چهارم</option>
+    <option value="5">پایه پنجم</option>
+    <option value="6">پایه ششم</option>
+</select>
+
+</div>
 
 <div>
 
@@ -2503,6 +2820,18 @@ id="dailyActivity"
 id="dailyNotes"
 ></textarea>
 
+<div class="voice-tools" style="margin:14px 0;padding:14px;border:1px solid #e6ebf2;border-radius:14px;background:#fafcfd">
+    <strong>🎙️ ابزار صوتی فارسی دفتر روزانه</strong>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+        <button class="btn btn-purple" type="button" onclick="startSpeechToText('dailyNotes','dailyVoiceStatus')">🎙️ گفتار فارسی به متن</button>
+        <button class="btn btn-blue" type="button" onclick="toggleVoiceRecording('daily')">⏺️ ضبط صوت</button>
+        <label class="btn btn-gray" style="cursor:pointer">📁 انتخاب فایل صوتی<input type="file" accept="audio/*" hidden onchange="importVoiceFile('daily',this)"></label>
+        <button class="btn btn-danger btn-small" type="button" onclick="clearVoiceDraft('daily')">پاک کردن صوت</button>
+    </div>
+    <div id="dailyVoiceStatus" style="margin-top:8px;color:#718096">آماده دریافت گفتار فارسی</div>
+    <div id="dailyVoicePreview" style="margin-top:8px"></div>
+</div>
+
 <div class="image-upload-box">
     <div style="font-size:34px;">🖼️</div>
     <h3>افزودن عکس به دفتر روزانه</h3>
@@ -2586,15 +2915,17 @@ class="table-wrapper"
 
 <section id="budget" class="section">
 
-    <div class="card">
-        <div class="image-section-title">
-            <h2>⏱️ جدول ساده ساعات تدریس دروس</h2>
-            <span class="level-badge level-good">پایه‌های اول تا ششم</span>
+    <div class="card budget-main-card">
+        <div class="budget-hero">
+            <div class="budget-hero-icon">📊</div>
+            <h2>بودجه‌بندی ساعات تدریس</h2>
+            <p>جدول مرجع ساعات هفتگی دروس دوره ابتدایی؛ قابل مشاهده، ویرایش و ذخیره برای هر کلاس.</p>
         </div>
+        <div class="budget-section-badge">📚 جدول مرجع دوره ابتدایی · پایه‌های اول تا ششم</div>
 
         <div class="info-box">
-            ساعات هفتگی هر درس در پایه‌های اول تا ششم در جدول زیر قرار داده شده است.
-            جدول ساده، خوانا و قابل ویرایش است و برای هر کلاس جداگانه ذخیره می‌شود.
+            جدول زیر بر اساس جدول «مواد درسی و ساعات کار هفتگی دوره ابتدایی» تنظیم شده است.
+            مقادیر برای پایه‌های اول تا ششم نمایش داده می‌شوند و در صورت نیاز قابل ویرایش و ذخیره هستند.
         </div>
 
         <div class="budget-hours-toolbar">
@@ -2627,12 +2958,48 @@ class="table-wrapper"
         </div>
 
         <div class="budget-hours-note">
-            <strong>داده‌های اولیه جدول:</strong> همان مقادیر مرجع بارگذاری‌شده در نسخه قبلی برنامه حفظ شده‌اند.
+            <strong>راهنمای بودجه‌بندی:</strong> اعداد جدول، ساعات هفتگی هر درس هستند. در صورت تغییر بخشنامه یا برنامه مدرسه، می‌توانی اعداد را ویرایش و ذخیره کنی.
         </div>
     </div>
 
 </section>
 
+<!-- =====================================================
+     بودجه‌بندی تدریس کتاب
+===================================================== -->
+<section id="bookBudget" class="section">
+  <div class="card book-budget-main-card">
+    <div class="book-budget-hero">
+      <div class="book-budget-icon">📘</div>
+      <h2>بودجه‌بندی تدریس کتاب</h2>
+      <p>تقسیم‌بندی صفحات و مباحث کتاب‌ها در طول ماه‌های سال تحصیلی؛ برای هر کلاس جداگانه ذخیره می‌شود.</p>
+    </div>
+    <div class="book-budget-toolbar">
+      <div class="budget-hours-current"><span>کلاس فعال:</span> <strong id="bookBudgetCurrentClass">—</strong></div>
+      <div class="budget-hours-actions">
+        <select id="bookBudgetGrade" onchange="renderBookBudget()" aria-label="پایه بودجه‌بندی کتاب">
+          <option value="1">پایه اول</option><option value="2">پایه دوم</option><option value="3" selected>پایه سوم</option><option value="4">پایه چهارم</option><option value="5">پایه پنجم</option><option value="6">پایه ششم</option>
+        </select>
+        <button class="btn btn-primary" type="button" onclick="saveBookBudget()">💾 ذخیره بودجه‌بندی</button>
+        <button class="btn btn-secondary" type="button" onclick="resetBookBudget()">↺ بازگردانی</button>
+      </div>
+    </div>
+    <div class="info-box">ردیف سمت راست نام کتاب‌ها و ردیف بالای جدول ماه‌های سال تحصیلی است. هر خانه را می‌توان ویرایش کرد؛ برای نمونه «۱–۱۷» یا نام مبحث را وارد کن.</div>
+    <div class="book-budget-table-wrap">
+      <table class="book-budget-table">
+        <thead><tr><th class="book-name-head">📚 کتاب / ماه</th><th>مهر</th><th>آبان</th><th>آذر</th><th>دی</th><th>بهمن</th><th>اسفند</th><th>فروردین</th><th>اردیبهشت</th></tr></thead>
+        <tbody id="bookBudgetBody"></tbody>
+      </table>
+    </div>
+    <div class="book-budget-image-card">
+      <div class="book-budget-image-head"><div><b>🖼️ تصویر بودجه‌بندی</b><small>در صورت داشتن جدول یا بخشنامه بودجه‌بندی، می‌توانی عکس آن را هم کنار جدول ذخیره کنی.</small></div>
+      <label class="btn btn-primary book-budget-upload-label" for="bookBudgetImageInput">📤 آپلود عکس بودجه‌بندی</label>
+      <input id="bookBudgetImageInput" type="file" accept="image/*" onchange="saveBookBudgetImage(event)" hidden></div>
+      <div id="bookBudgetImageBox"></div>
+    </div>
+    <div class="book-budget-note">💡 اطلاعات جدول و تصویر برای پایه انتخاب‌شده و کلاس فعال، به‌صورت آفلاین روی همین دستگاه ذخیره می‌شود.</div>
+  </div>
+</section>
 
 
 <!-- =====================================================
@@ -2980,7 +3347,7 @@ onchange="importData(event)"
 
 <div class="footer">
 
-📚 دفتر کلاسی من | نسخه شخصی معلم
+📚 دفتر کلاسی من | نسخه 4.1 حرفه‌ای معلم<br><span style="font-size:11px;opacity:.82">طراح برنامه: <strong>محمد حسین ممشلی</strong></span>
 
 </div>
 
@@ -3021,6 +3388,335 @@ function renderTeacherCardSafe(){
 }
 
 
+
+/* =====================================================
+   حساب‌های کاربری کاملاً آفلاین
+===================================================== */
+const AUTH_STORAGE_KEY = "دفتر_کلاسی_حساب‌ها_v1";
+const SESSION_STORAGE_KEY = "دفتر_کلاسی_نشست_v1";
+const ACCOUNT_STORAGE_PREFIX = "دفتر_کلاسی_حساب_";
+const ACCOUNT_DB_NAME = "DaftarKelasiAccountsStore";
+const ACCOUNT_STORE = "accounts";
+let accountDbPromise = null;
+let activeAccountUsername = "";
+let accountSaveQueue = Promise.resolve();
+
+const ACCOUNT_META_STORE = "accountMeta";
+
+async function getAuthAccounts(){
+    try{
+        const db=await openAccountDB();
+        const rows=await new Promise(function(resolve,reject){
+            const req=db.transaction(ACCOUNT_META_STORE,"readonly").objectStore(ACCOUNT_META_STORE).getAll();
+            req.onsuccess=function(){resolve(req.result||[])};
+            req.onerror=function(){reject(req.error)};
+        });
+        if(rows.length) return rows.sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0)});
+        // مهاجرت یک‌باره فهرست حساب‌های نسخه‌های قدیمی
+        let legacy=[];
+        try{ legacy=JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY)||"[]")||[]; }catch(e){}
+        if(legacy.length){ await saveAuthAccounts(legacy); return legacy; }
+        return [];
+    }catch(e){
+        try{return JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY)||"[]")||[]}catch(_){return []}
+    }
+}
+async function saveAuthAccounts(accounts){
+    const db=await openAccountDB();
+    return new Promise(function(resolve,reject){
+        const tx=db.transaction(ACCOUNT_META_STORE,"readwrite");
+        const store=tx.objectStore(ACCOUNT_META_STORE);
+        store.clear();
+        (accounts||[]).forEach(function(account){store.put(account)});
+        tx.oncomplete=function(){
+            try{localStorage.removeItem(AUTH_STORAGE_KEY)}catch(e){}
+            resolve();
+        };
+        tx.onerror=function(){reject(tx.error||new Error("ذخیره فهرست حساب‌ها ناموفق بود."))};
+    });
+}
+
+function openAccountDB(){
+    if(accountDbPromise) return accountDbPromise;
+    accountDbPromise = new Promise(function(resolve,reject){
+        if(!window.indexedDB){ reject(new Error("IndexedDB پشتیبانی نمی‌شود.")); return; }
+        const req=indexedDB.open(ACCOUNT_DB_NAME,4);
+        req.onupgradeneeded=function(){
+            const db=req.result;
+            if(!db.objectStoreNames.contains(ACCOUNT_STORE)){
+                db.createObjectStore(ACCOUNT_STORE,{keyPath:"username"});
+            }
+            if(!db.objectStoreNames.contains(ACCOUNT_META_STORE)){
+                db.createObjectStore(ACCOUNT_META_STORE,{keyPath:"username"});
+            }
+            if(!db.objectStoreNames.contains("syncQueue")){
+                const q=db.createObjectStore("syncQueue",{keyPath:"id",autoIncrement:true});
+                q.createIndex("username","username",{unique:false});
+                q.createIndex("status","status",{unique:false});
+            }
+            if(!db.objectStoreNames.contains("migrationBackups")){
+                const b=db.createObjectStore("migrationBackups",{keyPath:"id"});
+                b.createIndex("username","username",{unique:false});
+                b.createIndex("createdAt","createdAt",{unique:false});
+            }
+        };
+        req.onsuccess=function(){resolve(req.result)};
+        req.onerror=function(){reject(req.error||new Error("پایگاه حساب‌ها در دسترس نیست."))};
+    });
+    return accountDbPromise;
+}
+
+function readAccountDatabase(username){
+    return openAccountDB().then(function(db){
+        return new Promise(function(resolve,reject){
+            const req=db.transaction(ACCOUNT_STORE,"readonly").objectStore(ACCOUNT_STORE).get(username);
+            req.onsuccess=function(){resolve(req.result ? req.result.data : null)};
+            req.onerror=function(){reject(req.error||new Error("خواندن اطلاعات حساب ناموفق بود."))};
+        });
+    });
+}
+
+function writeAccountDatabase(username,data){
+    return openAccountDB().then(function(db){
+        return new Promise(function(resolve,reject){
+            const tx=db.transaction(ACCOUNT_STORE,"readwrite");
+            tx.objectStore(ACCOUNT_STORE).put({username:username,data:data,updatedAt:Date.now()});
+            tx.oncomplete=function(){resolve()};
+            tx.onerror=function(){reject(tx.error||new Error("ذخیره اطلاعات حساب ناموفق بود."))};
+        });
+    });
+}
+
+function deleteAccountDatabase(username){
+    return openAccountDB().then(function(db){
+        return new Promise(function(resolve,reject){
+            const tx=db.transaction(ACCOUNT_STORE,"readwrite");
+            tx.objectStore(ACCOUNT_STORE).delete(username);
+            tx.oncomplete=function(){resolve()};
+            tx.onerror=function(){reject(tx.error)};
+        });
+    });
+}
+function normalizeAccountUsername(value){ return String(value||"").trim(); }
+function validAccountUsername(value){ return /^[^\s]{3,32}$/.test(value); }
+function validAccountPassword(value){ return String(value||"").length >= 6; }
+async function hashAccountPassword(password){
+    const data=new TextEncoder().encode(String(password));
+    if(window.crypto && window.crypto.subtle){
+        const digest=await window.crypto.subtle.digest("SHA-256",data);
+        return Array.from(new Uint8Array(digest)).map(function(b){return b.toString(16).padStart(2,"0")}).join("");
+    }
+    let h=2166136261; for(let i=0;i<String(password).length;i++){h^=String(password).charCodeAt(i);h=Math.imul(h,16777619);} return "fallback-"+(h>>>0).toString(16);
+}
+function accountDataKey(username){ return ACCOUNT_STORAGE_PREFIX+encodeURIComponent(username); }
+function setAuthMessage(id,text,type){const el=document.getElementById(id);if(!el)return;el.textContent=text||"";el.className="auth-message"+(type?" "+type:"");}
+function showAuthMode(mode){
+    const login=mode==="login", lp=document.getElementById("authLoginPane"), rp=document.getElementById("authRegisterPane");
+    if(lp)lp.style.display=login?"block":"none"; if(rp)rp.style.display=login?"none":"block";
+    document.getElementById("authLoginTab")?.classList.toggle("active",login); document.getElementById("authRegisterTab")?.classList.toggle("active",!login);
+    setAuthMessage("authLoginMessage",""); setAuthMessage("authRegisterMessage","");
+}
+function showAuthOverlay(){ document.getElementById("offlineAuthOverlay")?.classList.remove("auth-hidden"); }
+function hideAuthOverlay(){ document.getElementById("offlineAuthOverlay")?.classList.add("auth-hidden"); }
+function createFreshDatabase(){
+    return {teacher:createTeacherData(),"1":createClassData(),"2":createClassData(),"3":createClassData(),"4":createClassData(),"5":createClassData(),"6":createClassData(),"multi":createClassData(),classNames:{"1":"کلاس اول","2":"کلاس دوم","3":"کلاس سوم","4":"کلاس چهارم","5":"کلاس پنجم","6":"کلاس ششم","multi":"کلاس چندپایه"},dataSchemaVersion:APP_DATA_SCHEMA_VERSION};
+}
+function migrateDatabaseSafely(source){
+    let data = source && typeof source === "object" ? source : null;
+    if(!data || !data.teacher) data = data || createFreshDatabase();
+    /* مهاجرت فقط افزایشی است؛ هیچ Store یا رکورد قدیمی حذف نمی‌شود. */
+    if(!data.classNames) data.classNames={"1":"کلاس اول","2":"کلاس دوم","3":"کلاس سوم","4":"کلاس چهارم","5":"کلاس پنجم","6":"کلاس ششم","multi":"کلاس چندپایه"};
+    ["1","2","3","4","5","6","multi"].forEach(function(k){
+        if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
+        if(!Array.isArray(data[k].students)) data[k].students=[];
+        if(!Array.isArray(data[k].groups)) data[k].groups=[];
+    });
+    if(!data.teacher || typeof data.teacher!=="object") data.teacher=createTeacherData();
+    data.dataSchemaVersion=APP_DATA_SCHEMA_VERSION;
+    return data;
+}
+function databaseSchemaVersion(data){
+    const n=Number(data && data.dataSchemaVersion);
+    return Number.isFinite(n) && n>0 ? n : 1;
+}
+function writeMigrationBackup(username,data,fromVersion){
+    if(!username || !data) return Promise.resolve();
+    return openAccountDB().then(function(db){
+        return new Promise(function(resolve,reject){
+            if(!db.objectStoreNames.contains("migrationBackups")){ resolve(); return; }
+            const tx=db.transaction("migrationBackups","readwrite");
+            tx.objectStore("migrationBackups").put({
+                id:username+":"+Date.now(),username:username,fromVersion:fromVersion,toVersion:APP_DATA_SCHEMA_VERSION,
+                createdAt:Date.now(),data:cloneForSync(data)
+            });
+            tx.oncomplete=function(){resolve()};
+            tx.onerror=function(){reject(tx.error||new Error("تهیه نسخه پشتیبان مهاجرت ناموفق بود."))};
+        });
+    });
+}
+
+async function loadDatabaseForAccount(username){
+    let loaded=null;
+    try{ loaded=await readAccountDatabase(username); }catch(e){ console.warn("Account DB read failed",e); }
+
+    // مهاجرت خودکار از نسخه‌های قدیمی که داده حساب را در localStorage نگه می‌داشتند.
+    if(!loaded){
+        const raw=localStorage.getItem(accountDataKey(username));
+        if(raw){ try{ loaded=JSON.parse(raw); }catch(e){ loaded=null; } }
+    }
+    if(!loaded && (await getAuthAccounts()).length===1){
+        const legacy=localStorage.getItem(STORAGE_KEY);
+        if(legacy){ try{ loaded=JSON.parse(legacy); }catch(e){ loaded=null; } }
+    }
+
+    const beforeMigration = loaded ? cloneForSync(loaded) : null;
+    const fromSchema = databaseSchemaVersion(loaded);
+    database=migrateDatabaseSafely(loaded);
+    if(beforeMigration && fromSchema < APP_DATA_SCHEMA_VERSION){
+        try{ await writeMigrationBackup(username,beforeMigration,fromSchema); }catch(e){ console.warn("Migration backup skipped",e); }
+    }
+    activeAccountUsername=username;
+    localStorage.setItem(SESSION_STORAGE_KEY,username);
+    await saveDatabase();
+}
+async function cloudRequest(path,options){
+    if(!CLOUD_ENDPOINT) throw new Error("CLOUD_NOT_CONFIGURED");
+    const opts=Object.assign({headers:{}},options||{});
+    opts.headers=Object.assign({"Content-Type":"application/json"},opts.headers||{});
+    const token=cloudToken(); if(token) opts.headers.Authorization="Bearer "+token;
+    const response=await fetch(CLOUD_ENDPOINT+path,opts);
+    let body={}; try{body=await response.json();}catch(e){}
+    if(!response.ok) throw new Error(body.error||("HTTP "+response.status));
+    return body;
+}
+async function cloudRegister(username,password){
+    const data=await cloudRequest("/api/auth/register",{method:"POST",body:JSON.stringify({username,password})});
+    setCloudToken(data.token); return data;
+}
+async function cloudLogin(username,password){
+    const data=await cloudRequest("/api/auth/login",{method:"POST",body:JSON.stringify({username,password})});
+    setCloudToken(data.token); return data;
+}
+async function cloudPullSnapshot(){
+    if(!CLOUD_ENDPOINT||!cloudToken()) return null;
+    return cloudRequest("/api/sync/pull",{method:"GET"});
+}
+async function cloudInitialSync(username){
+    if(!CLOUD_ENDPOINT||!cloudToken()||!database) return;
+    try{
+        const remote=await cloudPullSnapshot();
+        const hasRemote=remote && remote.payload && Object.keys(remote.payload).length>0;
+        const hasLocal=database && database.teacher;
+        const pending=await getPendingSyncItems(username);
+        if(hasRemote && pending.length===0){
+            database=migrateDatabaseSafely(remote.payload); await writeAccountDatabase(username,database); setCloudRevision(username,remote.revision||"initial"); refreshAll(); renderHeaderImages();
+        } else if(hasLocal){
+            await queueSyncSnapshot(username,database); scheduleSyncFlush();
+        }
+    }catch(e){ console.warn("Cloud initial sync skipped",e); }
+}
+
+async function registerOfflineAccount(){
+    const username=normalizeAccountUsername(document.getElementById("authRegisterUsername")?.value);
+    const password=String(document.getElementById("authRegisterPassword")?.value||"");
+    const password2=String(document.getElementById("authRegisterPassword2")?.value||"");
+    const accounts=await getAuthAccounts();
+    if(!validAccountUsername(username)){setAuthMessage("authRegisterMessage","❌ نام کاربری باید ۳ تا ۳۲ کاراکتر و بدون فاصله باشد.","error");return;}
+    if(!validAccountPassword(password)){setAuthMessage("authRegisterMessage","❌ رمز عبور باید حداقل ۶ کاراکتر باشد.","error");return;}
+    if(password!==password2){setAuthMessage("authRegisterMessage","❌ تکرار رمز عبور با رمز اصلی یکسان نیست.","error");return;}
+    if(accounts.some(function(a){return String(a.username).toLowerCase()===username.toLowerCase();})){setAuthMessage("authRegisterMessage","❌ این نام کاربری قبلاً استفاده شده است.","error");return;}
+    let cloudAccount=null;
+    if(CLOUD_ENDPOINT){
+        try{ cloudAccount=await cloudRegister(username,password); }
+        catch(e){ setAuthMessage("authRegisterMessage", "❌ ساخت حساب آنلاین ناموفق بود: "+String(e.message||e), "error"); return; }
+    }
+    const hash=await hashAccountPassword(password);
+    // اگر نسخه قدیمی برنامه روی گوشی داده داشته باشد، آن داده‌ها به اولین حساب منتقل می‌شوند.
+    let accountDatabase=database;
+    if(accounts.length===0 && localStorage.getItem(STORAGE_KEY)){try{accountDatabase=JSON.parse(localStorage.getItem(STORAGE_KEY))||database;}catch(e){}}
+    localStorage.setItem(accountDataKey(username),JSON.stringify(accountDatabase));
+    accounts.push({username:username,passwordHash:hash,createdAt:Date.now(),authMode:CLOUD_ENDPOINT?"cloud":"offline"});
+    await saveAuthAccounts(accounts);
+    await loadDatabaseForAccount(username);
+    if(CLOUD_ENDPOINT && cloudAccount) await cloudInitialSync(username);
+    setAuthMessage("authRegisterMessage", CLOUD_ENDPOINT ? "✅ حساب آنلاین ساخته شد و همگام‌سازی آماده است." : "✅ حساب ساخته شد.","success");
+    enterAuthenticatedApp();
+}
+async function loginOfflineAccount(){
+    const username=normalizeAccountUsername(document.getElementById("authLoginUsername")?.value);
+    const password=String(document.getElementById("authLoginPassword")?.value||"");
+    const accounts=await getAuthAccounts();
+    let account=accounts.find(function(a){return String(a.username).toLowerCase()===username.toLowerCase();});
+    if(CLOUD_ENDPOINT){
+        try{ await cloudLogin(username,password); }
+        catch(e){ if(!account){setAuthMessage("authLoginMessage","❌ نام کاربری یا رمز عبور نادرست است.","error");return;} }
+    }
+    if(!account){
+        if(CLOUD_ENDPOINT && cloudToken()){
+            account={username:username,passwordHash:await hashAccountPassword(password),createdAt:Date.now(),authMode:"cloud"};
+            accounts.push(account); await saveAuthAccounts(accounts);
+        } else { setAuthMessage("authLoginMessage","❌ نام کاربری یا رمز عبور نادرست است.","error");return; }
+    }
+    if(!CLOUD_ENDPOINT){
+        const hash=await hashAccountPassword(password);
+        if(hash!==account.passwordHash){setAuthMessage("authLoginMessage","❌ نام کاربری یا رمز عبور نادرست است.","error");return;}
+    }
+    await loadDatabaseForAccount(account.username);
+    if(CLOUD_ENDPOINT && cloudToken()) await cloudInitialSync(account.username);
+    enterAuthenticatedApp();
+}
+function enterAuthenticatedApp(){
+    hideAuthOverlay();
+    const home=document.getElementById("home"), app=document.getElementById("app");
+    if(home)home.classList.remove("hidden"); if(app)app.classList.add("hidden");
+    currentClass=null;
+    initializeScalableStorage().then(function(){refreshAll();renderHeaderImages();}).catch(function(){refreshAll();renderHeaderImages();});
+    updateAccountSecurityFields();
+}
+function updateAccountSecurityFields(){
+    const el=document.getElementById("accountNewUsername"); if(el)el.value=activeAccountUsername||"";
+}
+async function changeCurrentAccountCredentials(){
+    if(!activeAccountUsername)return;
+    const newUsername=normalizeAccountUsername(document.getElementById("accountNewUsername")?.value);
+    const newPassword=String(document.getElementById("accountNewPassword")?.value||"");
+    const accounts=await getAuthAccounts();
+    const current=accounts.find(function(a){return a.username===activeAccountUsername;});
+    if(!current){setAuthMessage("accountSecurityMessage","❌ حساب فعال پیدا نشد.","error");return;}
+    if(!validAccountUsername(newUsername)){setAuthMessage("accountSecurityMessage","❌ نام کاربری باید ۳ تا ۳۲ کاراکتر و بدون فاصله باشد.","error");return;}
+    if(newUsername!==activeAccountUsername && accounts.some(function(a){return a.username.toLowerCase()===newUsername.toLowerCase() && a.username!==activeAccountUsername;})){setAuthMessage("accountSecurityMessage","❌ این نام کاربری قبلاً استفاده شده است.","error");return;}
+    if(newPassword && !validAccountPassword(newPassword)){setAuthMessage("accountSecurityMessage","❌ رمز جدید باید حداقل ۶ کاراکتر باشد.","error");return;}
+    const hash=newPassword ? await hashAccountPassword(newPassword) : current.passwordHash;
+    await saveDatabase();
+    try{ await writeAccountDatabase(newUsername,database); if(newUsername!==activeAccountUsername) await deleteAccountDatabase(activeAccountUsername); }catch(e){
+        setAuthMessage("accountSecurityMessage","❌ تغییر حساب ذخیره نشد؛ فضای ذخیره‌سازی دستگاه را بررسی کنید.","error");
+        return;
+    }
+    const oldKey=accountDataKey(activeAccountUsername), newKey=accountDataKey(newUsername);
+    localStorage.removeItem(oldKey); localStorage.removeItem(newKey);
+    current.username=newUsername; current.passwordHash=hash; current.updatedAt=Date.now();
+    await saveAuthAccounts(accounts);
+    activeAccountUsername=newUsername; localStorage.setItem(SESSION_STORAGE_KEY,newUsername);
+    document.getElementById("accountNewPassword").value="";
+    updateAccountSecurityFields();
+    const name=teacherFullName(); if(document.getElementById("headerTeacherName"))document.getElementById("headerTeacherName").textContent=name;
+    setAuthMessage("accountSecurityMessage","✅ نام کاربری/رمز با موفقیت تغییر کرد.","success");
+}
+function logoutOfflineAccount(){
+    if(!activeAccountUsername)return;
+    activeAccountUsername=""; currentClass=null; localStorage.removeItem(SESSION_STORAGE_KEY); setCloudToken(""); showAuthOverlay(); showAuthMode("login");
+    const u=document.getElementById("authLoginUsername"); const pw=document.getElementById("authLoginPassword"); if(u)u.value="";if(pw)pw.value="";
+    setAuthMessage("authLoginMessage","از حساب خارج شدید.","success");
+}
+async function initializeOfflineAuth(){
+    const accounts=await getAuthAccounts();
+    const session=localStorage.getItem(SESSION_STORAGE_KEY);
+    if(session && accounts.some(function(a){return a.username===session;})){
+        try{ await loadDatabaseForAccount(session); enterAuthenticatedApp(); return; }
+        catch(e){ console.error(e); }
+    }
+    showAuthOverlay(); showAuthMode(accounts.length?"login":"register");
+}
 
 /* =====================================================
    متغیرهای اصلی
@@ -3243,7 +3939,8 @@ if(!database){
         "4": createClassData(),
         "5": createClassData(),
         "6": createClassData(),
-        classNames: {"1":"کلاس اول","2":"کلاس دوم","3":"کلاس سوم","4":"کلاس چهارم","5":"کلاس پنجم","6":"کلاس ششم"}
+        "multi": createClassData(),
+        classNames: {"1":"کلاس اول","2":"کلاس دوم","3":"کلاس سوم","4":"کلاس چهارم","5":"کلاس پنجم","6":"کلاس ششم","multi":"کلاس چندپایه"}
 
     };
 
@@ -3258,9 +3955,11 @@ else{
     }
 
     if(!database.classNames){
-        database.classNames = {"1":"کلاس اول","2":"کلاس دوم","3":"کلاس سوم","4":"کلاس چهارم","5":"کلاس پنجم","6":"کلاس ششم"};
+        database.classNames = {"1":"کلاس اول","2":"کلاس دوم","3":"کلاس سوم","4":"کلاس چهارم","5":"کلاس پنجم","6":"کلاس ششم","multi":"کلاس چندپایه"};
+    } else if(!database.classNames.multi){
+        database.classNames.multi = "کلاس چندپایه";
     }
-    const classNumbers = ["1","2","3","4","5","6"];
+    const classNumbers = ["1","2","3","4","5","6","multi"];
     classNumbers.forEach(function(classNumber){
         if(!database[classNumber]) database[classNumber] = createClassData();
         const data = database[classNumber];
@@ -3285,6 +3984,9 @@ else{
         if(!data.students) data.students = [];
         data.students.forEach(function(student){
             if(typeof student.photo === "undefined") student.photo = "";
+            if(typeof student.grade === "undefined" || student.grade === ""){
+                student.grade = classNumber === "multi" ? "1" : classNumber;
+            }
         });
     });
     saveDatabase();
@@ -3296,15 +3998,160 @@ else{
    ذخیره
 ===================================================== */
 
-function saveDatabase(){
+/* =====================================================
+   هسته همگام‌سازی امن و آفلاین‌محور
+   - هر تغییر ابتدا روی دستگاه ذخیره می‌شود.
+   - تغییرات در صف محلی ثبت می‌شوند.
+   - وقتی Backend رسمی برنامه تنظیم شود، صف بدون از دست رفتن داده ارسال می‌شود.
+   - تا زمانی که endpoint رسمی تنظیم نشده، هیچ داده‌ای به سرویس شخص ثالث ارسال نمی‌شود.
+===================================================== */
+const SYNC_PROTOCOL_VERSION = 1;
+const APP_DATA_SCHEMA_VERSION = 4;
+const SYNC_RETRY_BASE_MS = 2500;
+const SYNC_MAX_RETRIES = 8;
+const CLOUD_ENDPOINT = (window.DAFTAR_CLOUD_ENDPOINT || window.DAFTAR_SYNC_ENDPOINT || "").trim().replace(/\/$/,"");
+const SYNC_ENDPOINT = CLOUD_ENDPOINT ? CLOUD_ENDPOINT + "/api/sync/push" : "";
+const CLOUD_TOKEN_KEY = "دفتر_کلاسی_cloud_token_v2";
+const CLOUD_REVISION_PREFIX = "دفتر_کلاسی_cloud_revision_v1:";
+function cloudToken(){ try{return localStorage.getItem(CLOUD_TOKEN_KEY)||"";}catch(e){return ""} }
+function setCloudToken(token){ try{ if(token)localStorage.setItem(CLOUD_TOKEN_KEY,token); else localStorage.removeItem(CLOUD_TOKEN_KEY); }catch(e){} }
+function cloudRevisionKey(username){ return CLOUD_REVISION_PREFIX + String(username||""); }
+function cloudRevision(username){ try{return localStorage.getItem(cloudRevisionKey(username))||"initial";}catch(e){return "initial";} }
+function setCloudRevision(username,revision){ try{localStorage.setItem(cloudRevisionKey(username),String(revision||"initial"));}catch(e){} }
+let syncFlushTimer = null;
+let syncRunning = false;
+
+function makeSyncRevision(){
+    return String(Date.now()) + "-" + Math.random().toString(36).slice(2,10);
+}
+function cloneForSync(value){
+    try{return JSON.parse(JSON.stringify(value));}catch(e){return null;}
+}
+function queueSyncSnapshot(username,snapshot){
+    if(!username || !snapshot) return Promise.resolve();
+    return openAccountDB().then(function(db){
+        return new Promise(function(resolve,reject){
+            const tx=db.transaction("syncQueue","readwrite");
+            const store=tx.objectStore("syncQueue");
+            const idx=store.index("username");
+            const req=idx.getAll(username);
+            req.onsuccess=function(){
+                (req.result||[]).filter(function(x){return x.status!=="done"}).forEach(function(x){store.delete(x.id);});
+                store.add({
+                username:username,
+                revision:makeSyncRevision(),
+                baseRevision:cloudRevision(username),
+                protocol:SYNC_PROTOCOL_VERSION,
+                payload:cloneForSync(snapshot),
+                createdAt:Date.now(),
+                attempts:0,
+                status:"pending",
+                nextAttemptAt:Date.now()
+                });
+            };
+            req.onerror=function(){reject(req.error||new Error("خواندن صف همگام‌سازی ناموفق بود."))};
+            tx.oncomplete=function(){resolve()};
+            tx.onerror=function(){reject(tx.error||new Error("ثبت صف همگام‌سازی ناموفق بود."))};
+        });
+    });
+}
+function getPendingSyncItems(username){
+    return openAccountDB().then(function(db){
+        return new Promise(function(resolve,reject){
+            const tx=db.transaction("syncQueue","readonly");
+            const req=tx.objectStore("syncQueue").index("username").getAll(username);
+            req.onsuccess=function(){resolve((req.result||[]).filter(function(x){return x.status!=="done"}))};
+            req.onerror=function(){reject(req.error)};
+        });
+    });
+}
+function updateSyncItem(item,patch){
+    return openAccountDB().then(function(db){
+        return new Promise(function(resolve,reject){
+            const tx=db.transaction("syncQueue","readwrite");
+            const store=tx.objectStore("syncQueue");
+            store.put(Object.assign({},item,patch));
+            tx.oncomplete=function(){resolve()};
+            tx.onerror=function(){reject(tx.error)};
+        });
+    });
+}
+function setSyncStatus(label,kind){
+    const pill=document.getElementById("syncStatusPill");
+    if(!pill)return;
+    const text=pill.querySelector("span:last-child");
+    if(text)text.textContent=label;
+    pill.classList.toggle("offline",kind==="offline");
+    pill.classList.toggle("syncing",kind==="syncing");
+}
+async function flushSyncQueue(){
+    if(syncRunning || !activeAccountUsername || !navigator.onLine || !SYNC_ENDPOINT)return;
+    syncRunning=true; setSyncStatus("در حال همگام‌سازی…","syncing");
     try{
+        const items=await getPendingSyncItems(activeAccountUsername);
+        for(const item of items.slice().sort((a,b)=>a.createdAt-b.createdAt)){
+            if(item.nextAttemptAt>Date.now()) continue;
+            if(item.attempts>=SYNC_MAX_RETRIES) continue;
+            try{
+                const response=await fetch(SYNC_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","X-Daftar-Protocol":String(SYNC_PROTOCOL_VERSION),"Authorization":"Bearer "+cloudToken()},body:JSON.stringify({revision:item.revision,baseRevision:item.baseRevision||cloudRevision(activeAccountUsername),payload:item.payload})});
+                if(response.status===409){
+                    let conflict={}; try{conflict=await response.json();}catch(e){}
+                    try{localStorage.setItem("دفتر_کلاسی_sync_conflict:"+activeAccountUsername,JSON.stringify({local:cloneForSync(item.payload),remote:conflict.payload||null,revision:conflict.revision||"",at:Date.now()}));}catch(e){}
+                    await updateSyncItem(item,{status:"conflict",lastError:"SYNC_CONFLICT",conflictRevision:conflict.revision||""});
+                    setSyncStatus("تعارض همگام‌سازی · اطلاعات محفوظ است","offline");
+                    continue;
+                }
+                if(!response.ok)throw new Error("HTTP "+response.status);
+                await updateSyncItem(item,{status:"done",syncedAt:Date.now()});
+                setCloudRevision(activeAccountUsername,item.revision);
+            }catch(err){
+                const attempts=(item.attempts||0)+1;
+                await updateSyncItem(item,{attempts:attempts,nextAttemptAt:Date.now()+SYNC_RETRY_BASE_MS*Math.pow(2,Math.min(attempts-1,6)),lastError:String(err&&err.message||err)});
+            }
+        }
+        setSyncStatus("آنلاین · همگام‌سازی آماده","online");
+    }catch(err){
+        console.warn("Sync queue error",err);
+        setSyncStatus("آنلاین · صف همگام‌سازی","online");
+    }finally{syncRunning=false;}
+}
+function scheduleSyncFlush(){
+    clearTimeout(syncFlushTimer);
+    syncFlushTimer=setTimeout(flushSyncQueue,600);
+}
+window.DaftarSync={flush:flushSyncQueue,queue:queueSyncSnapshot,getPending:function(){return getPendingSyncItems(activeAccountUsername)}};
+
+function saveDatabase(){
+    if(!database) return Promise.resolve();
+    try{
+        database=migrateDatabaseSafely(database);
         const jobs=[];
         const snapshot=prepareMediaSnapshot(database,jobs,new Set());
-        localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshot));
-        if(jobs.length){ Promise.all(jobs).catch(function(e){console.warn("Media save error",e)}); }
+        // داده اصلی هر معلم در IndexedDB نگهداری می‌شود؛ localStorage فقط برای سازگاری
+        // با نسخه‌های قدیمی و نشست کاربر باقی می‌ماند. این کار از پرشدن Web Storage
+        // با عکس‌ها، پوشه‌کارها و اطلاعات طولانی جلوگیری می‌کند.
+        if(!activeAccountUsername){
+            try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshot)); }catch(e){ console.warn("Legacy localStorage save skipped",e); }
+            return Promise.resolve();
+        }
+        const username=activeAccountUsername;
+        accountSaveQueue=accountSaveQueue
+            .catch(function(){})
+            .then(function(){ return Promise.all(jobs); })
+            .then(function(){ return writeAccountDatabase(username,snapshot); })
+            .then(function(){ return queueSyncSnapshot(username,snapshot); })
+            .then(function(){ scheduleSyncFlush(); })
+            .catch(function(error){
+                console.error("Account save error",error);
+                try{ localStorage.setItem(accountDataKey(username),JSON.stringify(snapshot)); }catch(e){
+                    console.error("Fallback storage failed",e);
+                    alert("فضای ذخیره‌سازی دستگاه کافی نیست. لطفاً از بخش پشتیبان‌گیری نسخه تهیه کنید.");
+                }
+            });
+        return accountSaveQueue;
     }catch(error){
-        alert("فضای ذخیره اطلاعات متنی پر شده است. لطفاً از بخش پشتیبان‌گیری یک نسخه تهیه کنید و داده‌های غیرضروری را کاهش دهید.");
         console.error(error);
+        return Promise.reject(error);
     }
 }
 
@@ -3425,8 +4272,22 @@ function normalizePersianDate(value){
 ===================================================== */
 
 function getClassTitleForKey(classNumber){
-    const names={"1":"کلاس اول","2":"کلاس دوم","3":"کلاس سوم","4":"کلاس چهارم","5":"کلاس پنجم","6":"کلاس ششم"};
+    const names={"1":"کلاس اول","2":"کلاس دوم","3":"کلاس سوم","4":"کلاس چهارم","5":"کلاس پنجم","6":"کلاس ششم","multi":"کلاس چندپایه"};
     return (database && database.classNames && database.classNames[String(classNumber)]) || names[String(classNumber)] || ("کلاس "+String(classNumber));
+}
+
+function getStudentGradeLabel(grade){
+    const names={"1":"اول","2":"دوم","3":"سوم","4":"چهارم","5":"پنجم","6":"ششم"};
+    return names[String(grade)] ? "پایه "+names[String(grade)] : "-";
+}
+
+function updateStudentGradeField(){
+    const select=document.getElementById("studentGrade");
+    if(!select || !currentClass)return;
+    const isMulti=String(currentClass)==="multi";
+    select.disabled=!isMulti;
+    if(!isMulti) select.value=String(currentClass);
+    select.title=isMulti ? "پایه واقعی دانش‌آموز را انتخاب کنید" : "پایه این کلاس";
 }
 
 async function openClass(classNumber){
@@ -3448,16 +4309,18 @@ async function openClass(classNumber){
 
 
     const gradeNames = {
-        "1":"اول","2":"دوم","3":"سوم","4":"چهارم","5":"پنجم","6":"ششم"
+        "1":"اول","2":"دوم","3":"سوم","4":"چهارم","5":"پنجم","6":"ششم","multi":"چندپایه"
     };
     const gradeName = gradeNames[String(classNumber)] || String(classNumber);
     document.getElementById("classTitle").innerHTML = "📚 دفتر کلاس " + gradeName;
 
-
+    updateStudentGradeField();
     setDefaultDates();
 
     refreshAll();
     renderTeacherCardSafe();
+    // هنگام ورود به کلاس همیشه از ابتدای صفحه شروع کن تا فضای خالیِ باقی‌مانده از صفحه انتخاب کلاس دیده نشود.
+    requestAnimationFrame(function(){ window.scrollTo(0,0); });
 
 }
 
@@ -3482,8 +4345,66 @@ function goHome(){
         .classList
         .remove("hidden");
 
+    requestAnimationFrame(function(){ window.scrollTo(0,0); });
+
 }
 
+
+/* =====================================================
+   ابزارهای سربرگ: جست‌وجو، اعلان و پروفایل
+===================================================== */
+function handleGlobalSearch(query){
+    const box=document.getElementById("searchResults");
+    const q=String(query||"").trim().toLowerCase();
+    if(!box)return;
+    if(!q){box.innerHTML="";box.classList.remove("show");return;}
+    const buttons=Array.from(document.querySelectorAll("#mainNav button[data-nav-label]"));
+    const matches=buttons.filter(function(btn){
+        return String(btn.getAttribute("data-nav-label")||"").toLowerCase().includes(q);
+    }).slice(0,8);
+    box.innerHTML=matches.length ? matches.map(function(btn){
+        const label=btn.getAttribute("data-nav-label")||"";
+        const target=btn.getAttribute("onclick")||"";
+        return '<button type="button" class="search-result" style="width:100%;border:0;background:transparent;text-align:right" onclick="document.getElementById(\'searchResults\').classList.remove(\'show\');document.getElementById(\'globalSearch\').value=\'\';'+target+'">'+escapeHTML(label)+'</button>';
+    }).join("") : '<div class="search-result">نتیجه‌ای پیدا نشد.</div>';
+    box.classList.add("show");
+}
+function toggleNotifications(){
+    const panel=document.getElementById("notificationPanel");
+    if(!panel)return;
+    panel.classList.toggle("show");
+    if(panel.classList.contains("show")){
+        const content=document.getElementById("notificationContent");
+        if(content)content.innerHTML='<div class="notice-item">🔔 اعلان جدیدی ثبت نشده است.</div>';
+    }
+}
+function openHeaderProfile(){
+    const btn=document.querySelector('#mainNav button[data-nav-label*="کارتابل"]');
+    if(btn){showSection("teacherProfile",btn);return;}
+    const target=document.getElementById("teacherProfile");
+    if(target){
+        document.querySelectorAll('#app .section').forEach(function(s){s.classList.remove('active')});
+        target.classList.add('active');
+        target.scrollIntoView({behavior:"smooth",block:"start"});
+    }
+}
+function focusGlobalSearch(){
+    const input=document.getElementById("globalSearch");
+    const wrap=document.querySelector(".global-search");
+    if(wrap)wrap.classList.add("open");
+    if(input){input.focus();input.select();}
+}
+document.addEventListener("click",function(e){
+    const search=document.getElementById("searchResults");
+    const wrap=document.querySelector(".global-search");
+    if(search && wrap && !wrap.contains(e.target)){ search.classList.remove("show"); wrap.classList.remove("open"); }
+    const panel=document.getElementById("notificationPanel");
+    const nbtn=document.querySelector(".notification-btn");
+    if(panel && nbtn && !panel.contains(e.target) && !nbtn.contains(e.target)) panel.classList.remove("show");
+});
+document.addEventListener("keydown",function(e){
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); focusGlobalSearch(); }
+});
 
 /* =====================================================
    نمایش بخش
@@ -3499,7 +4420,14 @@ function toggleSidebar(){
     }
 }
 
+function setupProfessionalNavigation(){
+ const nav=document.getElementById('mainNav'); if(!nav||nav.dataset.grouped==='1') return;
+ const groups={teacherProfile:'معلم و کلاس',dashboard:'معلم و کلاس',students:'معلم و کلاس',groups:'معلم و کلاس',attendance:'مدیریت روزانه',homework:'مدیریت روزانه',evaluation:'ارزشیابی و پرونده',feedback:'ارزشیابی و پرونده',grades:'ارزشیابی و پرونده',portfolio:'ارزشیابی و پرونده',experiments:'ارزشیابی و پرونده',monthly:'ارزشیابی و پرونده',report:'ارزشیابی و پرونده',goals:'ارزشیابی و پرونده',parents:'ارزشیابی و پرونده',interests:'ارزشیابی و پرونده',daily:'برنامه‌ریزی آموزشی',weekly:'برنامه‌ریزی آموزشی',budget:'برنامه‌ریزی آموزشی',bookBudget:'برنامه‌ریزی آموزشی',attention:'ابزارها و پشتیبان',backup:'ابزارها و پشتیبان'};
+ let last=''; Array.from(nav.querySelectorAll('button')).forEach(btn=>{const m=(btn.getAttribute('onclick')||'').match(/showSection\('([^']+)'/);const g=m&&groups[m[1]];if(g&&g!==last){const d=document.createElement('div');d.className='sidebar-group-label';d.textContent=g;nav.insertBefore(d,btn);last=g;}}); nav.dataset.grouped='1';
+}
+function updateMobileQuickbar(sectionId){document.querySelectorAll('#mobileQuickbar button[data-q-section]').forEach(b=>b.classList.toggle('active',b.dataset.qSection===sectionId));}
 function showSection(sectionId,button){
+    setupProfessionalNavigation(); updateMobileQuickbar(sectionId);
     const target = document.getElementById(sectionId);
     if(!target) return;
 
@@ -3520,9 +4448,12 @@ function showSection(sectionId,button){
 
     if(window.innerWidth <= 820) document.getElementById('appSidebar')?.classList.remove('mobile-open');
 
-    try { refreshAll();
+    try { refreshAll(sectionId);
     renderTeacherCardSafe(); } catch(err) { console.warn('refreshAll:', err); }
-    target.scrollIntoView({behavior:'smooth',block:'start'});
+    /* رندر مستقیم بخش‌های بودجه برای جلوگیری از خالی ماندن جدول هنگام ورود */
+    try { if(sectionId === 'budget') renderBudgetHours(); } catch(err) { console.warn('budget render:', err); }
+    try { if(sectionId === 'bookBudget') renderBookBudget(); } catch(err) { console.warn('book budget render:', err); }
+    requestAnimationFrame(function(){ window.scrollTo({top:Math.max(0,target.getBoundingClientRect().top + window.scrollY - 92),behavior:'auto'}); });
 }
 
 
@@ -3947,6 +4878,8 @@ async function addStudent(){
         .value
         .trim();
 
+    const gradeSelect=document.getElementById("studentGrade");
+    const grade = String(gradeSelect && gradeSelect.value ? gradeSelect.value : (currentClass === "multi" ? "1" : currentClass || "1"));
 
     const photoInput =
         document.getElementById(
@@ -4011,6 +4944,8 @@ async function addStudent(){
 
             lastName:lastName,
 
+            grade:grade,
+
             notes:notes,
 
             photo:photo
@@ -4035,6 +4970,7 @@ async function addStudent(){
         .getElementById("studentNotes")
         .value = "";
 
+    updateStudentGradeField();
 
     if(photoInput){
 
@@ -4288,6 +5224,8 @@ function renderStudents(){
 
             <th>نام خانوادگی</th>
 
+            <th>پایه</th>
+
             <th>توضیحات</th>
 
             <th>عملیات</th>
@@ -4355,6 +5293,8 @@ function renderStudents(){
                 <td>${escapeHTML(student.firstName)}</td>
 
                 <td>${escapeHTML(student.lastName)}</td>
+
+                <td>${escapeHTML(getStudentGradeLabel(student.grade))}</td>
 
                 <td>${escapeHTML(student.notes || "-")}</td>
 
@@ -6266,6 +7206,8 @@ function addDaily(){
 
             notes:notes,
 
+            voiceId:voiceDrafts.daily || "",
+
             image:dailyPendingImage || ""
 
         });
@@ -6293,6 +7235,7 @@ function addDaily(){
         .getElementById("dailyNotes")
         .value = "";
 
+    clearVoiceDraft("daily");
     clearDailyPendingImage();
 
     renderDaily();
@@ -6338,6 +7281,8 @@ function renderDaily(){
 
             <th>یادداشت</th>
 
+            <th>صوت</th>
+
             <th>تصویر</th>
 
         </tr>
@@ -6374,6 +7319,10 @@ function renderDaily(){
 
                 <td>
                     ${escapeHTML(item.notes || "-")}
+                </td>
+
+                <td>
+                    ${item.voiceId ? voiceButton(item.voiceId) : "—"}
                 </td>
 
                 <td>
@@ -6513,13 +7462,14 @@ function cloneBudgetReference(){
 
 function ensureBudgetHours(){
     const data=getClassData();
-    if(!data) return null;
-    if(!data.budgetHours || typeof data.budgetHours !== "object") data.budgetHours=cloneBudgetReference();
+    // اگر هنوز کلاسی انتخاب نشده باشد، جدول مرجع همچنان باید قابل مشاهده باشد.
+    const target = data || (window.__budgetPreviewHours || (window.__budgetPreviewHours = cloneBudgetReference()));
+    if(!target.budgetHours || typeof target.budgetHours !== "object") target.budgetHours=cloneBudgetReference();
     Object.keys(BUDGET_HOURS_REFERENCE).forEach(function(subject){
-        if(!Array.isArray(data.budgetHours[subject])) data.budgetHours[subject]=BUDGET_HOURS_REFERENCE[subject].slice();
-        while(data.budgetHours[subject].length<6) data.budgetHours[subject].push(0);
+        if(!Array.isArray(target.budgetHours[subject])) target.budgetHours[subject]=BUDGET_HOURS_REFERENCE[subject].slice();
+        while(target.budgetHours[subject].length<6) target.budgetHours[subject].push(0);
     });
-    return data.budgetHours;
+    return target.budgetHours;
 }
 
 function toFaDigits(value){
@@ -6531,12 +7481,12 @@ function renderBudgetHours(){
     const foot=document.getElementById("budgetHoursFoot");
     if(!body || !foot) return;
     const data=getClassData();
-    if(!data) return;
     const hours=ensureBudgetHours();
+    if(!hours) return;
     const current=document.getElementById("budgetCurrentClass");
     if(current){
-        const names={"1":"کلاس اول","2":"کلاس دوم","3":"کلاس سوم","4":"کلاس چهارم","5":"کلاس پنجم","6":"کلاس ششم"};
-        current.textContent=names[String(classNumber)] || "—";
+        const names={"1":"کلاس اول","2":"کلاس دوم","3":"کلاس سوم","4":"کلاس چهارم","5":"کلاس پنجم","6":"کلاس ششم","multi":"کلاس چندپایه"};
+        current.textContent=names[String(currentClass)] || "—";
     }
     let html="";
     Object.keys(BUDGET_HOURS_REFERENCE).forEach(function(subject){
@@ -6565,7 +7515,7 @@ function markBudgetHoursChanged(){
 
 function saveBudgetHours(){
     const data=getClassData();
-    if(!data) return;
+    if(!data){ alert('ابتدا یک کلاس را انتخاب کنید تا جدول برای همان کلاس ذخیره شود.'); return; }
     const hours=ensureBudgetHours();
     document.querySelectorAll('#budgetHoursBody input[data-budget-subject]').forEach(function(input){
         const subject=input.getAttribute('data-budget-subject');
@@ -6583,7 +7533,7 @@ function saveBudgetHours(){
 function resetBudgetHours(){
     if(!confirm('جدول ساعات این کلاس به مقادیر مرجع بازگردانده شود؟')) return;
     const data=getClassData();
-    if(!data) return;
+    if(!data){ window.__budgetPreviewHours=cloneBudgetReference(); renderBudgetHours(); return; }
     data.budgetHours=cloneBudgetReference();
     saveDatabase();
     renderBudgetHours();
@@ -6650,7 +7600,7 @@ function renderBudget(){
     }
 
     const budgetData = getClassData();
-    const image = Object.prototype.hasOwnProperty.call(budgetData, "budgetImage") ? (budgetData.budgetImage || "") : BUDGET_DEFAULT_IMAGE;
+    const image = budgetData ? (Object.prototype.hasOwnProperty.call(budgetData, "budgetImage") ? (budgetData.budgetImage || "") : BUDGET_DEFAULT_IMAGE) : BUDGET_DEFAULT_IMAGE;
 
     if(!image){
         box.innerHTML = `
@@ -6680,6 +7630,69 @@ function renderBudget(){
     `;
 }
 
+
+/* =====================================================
+   بودجه‌بندی تدریس کتاب
+===================================================== */
+const BOOK_BUDGET_MONTHS = ['مهر','آبان','آذر','دی','بهمن','اسفند','فروردین','اردیبهشت'];
+const BOOK_BUDGET_SUBJECTS = ['قرآن','هدیه‌های آسمان','فارسی','علوم تجربی','ریاضی','مطالعات اجتماعی'];
+function blankBookBudget(){
+  const out={}; BOOK_BUDGET_MONTHS.forEach(m=>{out[m]={}; BOOK_BUDGET_SUBJECTS.forEach(s=>out[m][s]=''); out[m].notes='';}); return out;
+}
+function ensureBookBudget(grade){
+  const data=getClassData();
+  const target = data || (window.__bookBudgetPreviewData || (window.__bookBudgetPreviewData = {bookBudgets:{}}));
+  if(!target.bookBudgets || typeof target.bookBudgets!=='object') target.bookBudgets={};
+  const key=String(grade||3);
+  if(!target.bookBudgets[key]) target.bookBudgets[key]=blankBookBudget();
+  return target.bookBudgets[key];
+}
+function renderBookBudget(){
+  const body=document.getElementById('bookBudgetBody'); if(!body) return;
+  const grade=document.getElementById('bookBudgetGrade')?.value || '3';
+  const book=ensureBookBudget(grade);
+  const names={'1':'کلاس اول','2':'کلاس دوم','3':'کلاس سوم','4':'کلاس چهارم','5':'کلاس پنجم','6':'کلاس ششم','multi':'کلاس چندپایه'};
+  const title=document.getElementById('bookBudgetCurrentClass'); if(title) title.textContent=(currentClass && names[String(currentClass)]) ? names[String(currentClass)] : 'بدون انتخاب کلاس (پیش‌نمایش)';
+  body.innerHTML=BOOK_BUDGET_SUBJECTS.map(function(subject){
+    return '<tr><th>'+subject+'</th>'+BOOK_BUDGET_MONTHS.map(function(month){
+      const val=String((book[month]&&book[month][subject])||'').replace(/"/g,'&quot;');
+      return '<td><input type="text" value="'+val+'" data-book-month="'+month+'" data-book-subject="'+subject+'" placeholder="مثلاً ۱–۱۷"></td>';
+    }).join('')+'</tr>';
+  }).join('');
+  renderBookBudgetImage(grade);
+}
+function saveBookBudget(){
+  const grade=document.getElementById('bookBudgetGrade')?.value||'3'; const data=getClassData(); if(!data){ alert('ابتدا یک کلاس را انتخاب کنید تا بودجه‌بندی برای همان کلاس ذخیره شود.'); return; } const book=ensureBookBudget(grade);
+  document.querySelectorAll('#bookBudgetBody input[data-book-month]').forEach(function(input){ const month=input.getAttribute('data-book-month'); const subject=input.getAttribute('data-book-subject'); if(!book[month]) book[month]={}; book[month][subject]=input.value.trim(); });
+  saveDatabase(); updateDashboard(); alert('بودجه‌بندی تدریس کتاب ذخیره شد.');
+}
+function resetBookBudget(){ if(!confirm('بودجه‌بندی تدریس کتاب این پایه پاک و خالی شود؟')) return; const grade=document.getElementById('bookBudgetGrade')?.value||'3'; const data=getClassData(); if(!data){ if(window.__bookBudgetPreviewData) window.__bookBudgetPreviewData.bookBudgets[String(grade)]=blankBookBudget(); renderBookBudget(); return; } data.bookBudgets=data.bookBudgets||{}; data.bookBudgets[String(grade)]=blankBookBudget(); saveDatabase(); renderBookBudget(); }
+
+async function saveBookBudgetImage(event){
+  const file=event.target.files && event.target.files[0]; if(!file) return;
+  try{
+    const grade=document.getElementById('bookBudgetGrade')?.value||'3';
+    const data=getClassData(); if(!data) return;
+    if(!data.bookBudgetImages || typeof data.bookBudgetImages!=='object') data.bookBudgetImages={};
+    data.bookBudgetImages[String(grade)]=await resizeImage(file,1400,0.85);
+    saveDatabase(); renderBookBudgetImage(grade); updateDashboard(); alert('تصویر بودجه‌بندی با موفقیت ذخیره شد.');
+  }catch(e){ alert('در ذخیره تصویر بودجه‌بندی مشکلی پیش آمد.'); }
+  event.target.value='';
+}
+function renderBookBudgetImage(grade){
+  const box=document.getElementById('bookBudgetImageBox'); if(!box) return;
+  const data=getClassData(); if(!data){ box.innerHTML='<div class="book-budget-image-empty">🖼️ برای ذخیره و نمایش تصویر، ابتدا یک کلاس را انتخاب کنید.</div>'; return; }
+  const image=data.bookBudgetImages && data.bookBudgetImages[String(grade)] ? data.bookBudgetImages[String(grade)] : '';
+  if(!image){ box.innerHTML='<div class="book-budget-image-empty">🖼️ هنوز تصویری برای این پایه ثبت نشده است.</div>'; return; }
+  box.innerHTML='<div class="book-budget-image-preview"><img src="'+image+'" alt="تصویر بودجه‌بندی تدریس کتاب" onclick="showImageLarge(this.src)"><button class="btn btn-danger" type="button" onclick="deleteBookBudgetImage()">🗑️ حذف تصویر</button></div>';
+}
+function deleteBookBudgetImage(){
+  const grade=document.getElementById('bookBudgetGrade')?.value||'3';
+  const data=getClassData(); if(!data) return;
+  if(!confirm('تصویر بودجه‌بندی این پایه حذف شود؟')) return;
+  if(data.bookBudgetImages) data.bookBudgetImages[String(grade)]='';
+  saveDatabase(); renderBookBudgetImage(grade);
+}
 
 /* =====================================================
    نیازمند توجه
@@ -6982,6 +7995,7 @@ function updateDashboard(){
 
     const budgetStatus =
         document.getElementById("budgetStatus");
+    const bookBudgetStatus = document.getElementById('bookBudgetStatus');
 
     if(budgetStatus){
 
@@ -6992,6 +8006,11 @@ function updateDashboard(){
             :
             '🟢 بودجه ساعات تدریس: جدول ساعات آماده است.';
 
+    }
+
+    if(bookBudgetStatus){
+        const hasBook = data.bookBudgets && Object.values(data.bookBudgets).some(function(book){ return Object.values(book||{}).some(function(row){ return Object.values(row||{}).some(function(v){ return String(v||'').trim(); }); }); });
+        bookBudgetStatus.innerHTML = hasBook ? '🟢 بودجه‌بندی تدریس کتاب: اطلاعات ثبت شده است.' : '🟠 بودجه‌بندی تدریس کتاب: هنوز اطلاعاتی ثبت نشده است.';
     }
 
     const evalBox =
@@ -7681,7 +8700,8 @@ function printTeacherCard(){
         <body>
             ${card.outerHTML}
             <script>window.onload=function(){window.print();}<\/script>
-        </body>
+        
+</body>
         </html>
     `);
 
@@ -7693,7 +8713,7 @@ function printTeacherCard(){
    بازخورد، عملکرد ماهانه و ابزار صوتی فارسی
 ===================================================== */
 
-const voiceDrafts = {evaluation:"", grade:"", monthly:"", feedback:""};
+const voiceDrafts = {evaluation:"", grade:"", monthly:"", feedback:"", daily:""};
 let activeVoiceRecorder = null;
 let activeVoiceChunks = [];
 let activeVoiceType = "";
@@ -7787,43 +8807,81 @@ function renderVoiceDraft(type){
 }
 
 function toggleVoiceRecording(type){
+    // در APK از ضبط‌کننده بومی اندروید استفاده می‌کنیم؛ در نسخه وب fallback حفظ شده است.
+    if(window.AndroidAudio && typeof window.AndroidAudio.startRecording === "function"){
+        if(window.__nativeRecordingType===type){
+            try{ window.AndroidAudio.stopRecording(); }catch(e){}
+            return;
+        }
+        if(window.__nativeRecordingType){
+            try{ window.AndroidAudio.stopRecording(); }catch(e){}
+        }
+        const status=document.getElementById(type+"VoiceStatus");
+        window.__nativeRecordingType=type;
+        if(status){status.textContent="🔴 در حال ضبط... دوباره دکمه ضبط را بزنید تا ذخیره شود.";status.classList.add("listening");}
+        try{
+            window.AndroidAudio.startRecording(type);
+        }catch(e){
+            window.__nativeRecordingType="";
+            if(status){status.textContent="❌ شروع ضبط صوت ممکن نشد.";status.classList.remove("listening");}
+        }
+        return;
+    }
+
     if(activeVoiceRecorder && activeVoiceType===type){
         activeVoiceRecorder.stop();
         return;
     }
-    if(activeVoiceRecorder){
-        try{activeVoiceRecorder.stop()}catch(e){}
-    }
+    if(activeVoiceRecorder){try{activeVoiceRecorder.stop()}catch(e){}}
     if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
-        alert("ضبط صوت در این محیط پشتیبانی نمی‌شود. از «تبدیل گفتار فارسی به متن» استفاده کنید.");
+        alert("ضبط صوت در این محیط پشتیبانی نمی‌شود.");
         return;
     }
     const status=document.getElementById(type+"VoiceStatus");
     navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
         let options={};
-        if(MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) options.mimeType="audio/webm;codecs=opus";
+        try{
+            if(MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported("audio/webm;codecs=opus"))
+                options.mimeType="audio/webm;codecs=opus";
+        }catch(e){}
         activeVoiceRecorder=new MediaRecorder(stream,options);
-        activeVoiceChunks=[];
-        activeVoiceType=type;
-        if(status){status.textContent="🔴 در حال ضبط... دوباره دکمه ضبط را بزن تا ذخیره شود.";status.classList.add("listening")}
+        activeVoiceChunks=[]; activeVoiceType=type;
+        if(status){status.textContent="🔴 در حال ضبط... دوباره دکمه ضبط را بزنید.";status.classList.add("listening")}
         activeVoiceRecorder.ondataavailable=function(e){if(e.data && e.data.size) activeVoiceChunks.push(e.data)};
         activeVoiceRecorder.onstop=function(){
             stream.getTracks().forEach(function(t){t.stop()});
-            const blob=new Blob(activeVoiceChunks,{type:activeVoiceRecorder.mimeType||"audio/webm"});
+            const recorderType=activeVoiceRecorder && activeVoiceRecorder.mimeType;
+            const blob=new Blob(activeVoiceChunks,{type:recorderType||"audio/webm"});
             putVoiceBlob(blob).then(function(id){
-                voiceDrafts[type]=id;
-                renderVoiceDraft(type);
+                voiceDrafts[type]=id; renderVoiceDraft(type);
                 if(status){status.textContent="✅ صوت با موفقیت آماده ذخیره شد.";status.classList.remove("listening");status.classList.add("success")}
-            }).catch(function(){
-                if(status) status.textContent="ذخیره صوت انجام نشد.";
-            }).finally(function(){
-                activeVoiceRecorder=null; activeVoiceChunks=[]; activeVoiceType="";
-            });
+            }).catch(function(){if(status) status.textContent="❌ ذخیره صوت انجام نشد."})
+            .finally(function(){activeVoiceRecorder=null;activeVoiceChunks=[];activeVoiceType=""});
         };
-        activeVoiceRecorder.start();
+        activeVoiceRecorder.onerror=function(){try{stream.getTracks().forEach(function(t){t.stop()})}catch(e){}};
+        activeVoiceRecorder.start(250);
     }).catch(function(){
-        alert("دسترسی میکروفون داده نشد. از تنظیمات مرورگر/برنامه، اجازه میکروفون را فعال کنید.");
+        alert("دسترسی میکروفون داده نشد. مجوز میکروفون برنامه را فعال کنید.");
     });
+}
+
+// نتیجه ضبط بومی اندروید: فایل محلی خوانده و در IndexedDB برنامه ذخیره می‌شود.
+window.setNativeVoiceResult=function(fileUrl,type){
+    const status=document.getElementById(type+"VoiceStatus");
+    const done=function(id){
+        voiceDrafts[type]=id; renderVoiceDraft(type);
+        if(status){status.textContent="✅ صوت با موفقیت آماده ذخیره شد.";status.classList.remove("listening");status.classList.add("success");}
+        window.__nativeRecordingType="";
+    };
+    const fail=function(){
+        if(status){status.textContent="❌ ذخیره فایل صوتی انجام نشد.";status.classList.remove("listening");}
+        window.__nativeRecordingType="";
+    };
+    if(!fileUrl){fail();return;}
+    fetch(fileUrl).then(function(r){
+        if(!r.ok) throw new Error("file read");
+        return r.blob();
+    }).then(function(blob){return putVoiceBlob(blob)}).then(done).catch(fail);
 }
 
 function importVoiceFile(type,input){
@@ -7856,10 +8914,26 @@ function cleanPersianText(value){
 }
 
 let activeSpeechRecognition=null;
+function ensureSpeechStatus(textareaId,statusId){
+    let statusIdFinal=statusId||textareaId+"VoiceStatus";
+    let status=document.getElementById(statusIdFinal);
+    if(!status){
+        status=document.createElement("div");
+        status.id=statusIdFinal;
+        status.style.cssText="margin:6px 0 8px;color:#718096;font-size:12px";
+        const area=document.getElementById(textareaId);
+        if(area && area.parentNode) area.parentNode.insertBefore(status,area.nextSibling);
+    }
+    if(!status.textContent) status.textContent="آماده دریافت گفتار فارسی";
+    return status;
+}
 async function startSpeechToText(textareaId,statusId){
     const area=document.getElementById(textareaId);
-    const status=document.getElementById(statusId);
     if(!area) return;
+    const status=ensureSpeechStatus(textareaId,statusId);
+    const fieldWrap=area.parentElement;
+    const micButton=fieldWrap && fieldWrap.querySelector('.field-mic-btn');
+    if(micButton) micButton.classList.add('listening');
 
     // اگر نسخه APK دارای پل native باشد، اول از تشخیص گفتار بومی اندروید استفاده می‌کنیم.
     // این مسیر برای APKهای WebView بسیار پایدارتر از SpeechRecognition مرورگر است.
@@ -7887,6 +8961,7 @@ async function startSpeechToText(textareaId,statusId){
         }
     }catch(err){
         if(status){status.textContent="❌ اجازه میکروفون داده نشد.";status.classList.remove("listening");}
+        if(micButton) micButton.classList.remove('listening');
         alert("دسترسی میکروفون برای برنامه فعال نیست. از تنظیمات گوشی > برنامه > دفتر کلاسی > مجوزها، میکروفون را فعال کنید و دوباره امتحان کنید.");
         return;
     }
@@ -7920,6 +8995,7 @@ async function startSpeechToText(textareaId,statusId){
           "language-not-supported":"❌ زبان فارسی توسط این محیط پشتیبانی نمی‌شود."
         }[code]||("❌ خطای تشخیص گفتار: "+code);
         if(status){status.textContent=msg;status.classList.remove("listening");}
+        if(micButton) micButton.classList.remove('listening');
         // ضبط صوت همچنان در دسترس است و می‌تواند فایل واقعی صدا را ذخیره کند.
         if(code==="not-allowed" || code==="service-not-allowed")
           alert("این نسخه از WebView اجازه SpeechRecognition را نمی‌دهد. برای APK واقعی باید پل بومی اندروید فعال باشد؛ دکمه «ضبط صوت» برای ذخیره صدای واقعی همچنان کار می‌کند.");
@@ -7927,22 +9003,25 @@ async function startSpeechToText(textareaId,statusId){
     recognition.onend=function(){
         activeSpeechRecognition=null;
         area.value=cleanPersianText(area.value);
+        if(micButton) micButton.classList.remove('listening');
         if(finalText.trim() && status){status.textContent="✅ متن فارسی آماده و قابل ویرایش است.";status.classList.remove("listening");status.classList.add("success");}
     };
-    try{recognition.start()}catch(e){if(status)status.textContent="❌ شروع تشخیص گفتار ممکن نشد.";}
+    try{recognition.start()}catch(e){if(status)status.textContent="❌ شروع تشخیص گفتار ممکن نشد.";if(micButton)micButton.classList.remove('listening');}
 }
 
 // نتیجه تشخیص گفتار بومی اندروید را به متن فرم برمی‌گرداند.
-window.nativeSpeechStatus=function(msg){
-    const el=document.getElementById("speechStatus") || document.getElementById("speechStatusFeedback") || document.getElementById("speechStatusMonthly");
-    if(el) el.textContent=msg||"";
-};
 window.setNativePersianSpeechResult=function(text,textareaId){
     const area=document.getElementById(textareaId);
     if(!area)return;
-    area.value=cleanPersianText(text||"");
-    const status=document.getElementById(textareaId.replace(/Notes|Text$/,"VoiceStatus"));
-    if(status){status.textContent="✅ متن فارسی آماده و قابل ویرایش است.";status.classList.remove("listening");status.classList.add("success");}
+    const spoken=cleanPersianText(text||"");
+    const existing=String(area.value||"").trim();
+    area.value=cleanPersianText(existing ? existing+" "+spoken : spoken);
+    area.dispatchEvent(new Event("input",{bubbles:true}));
+    area.dispatchEvent(new Event("change",{bubbles:true}));
+    const status=ensureSpeechStatus(textareaId,textareaId+"VoiceStatus");
+    if(status){status.textContent="✅ متن فارسی در همین فیلد قرار گرفت و قابل ویرایش است.";status.classList.remove("listening");status.classList.add("success");}
+    const btn=area.parentElement && area.parentElement.querySelector('.field-mic-btn');
+    if(btn) btn.classList.remove('listening');
 };
 
 function saveFeedback(){
@@ -8233,101 +9312,76 @@ function importData(event){
    به‌روزرسانی همه بخش‌ها
 ===================================================== */
 
-function refreshAll(){
-    loadTeacherProfile();
-
-
-    if(!currentClass){
-
-        return;
-
-    }
-
-
-    setDefaultDates();
-
-
-    fillStudentSelect(
-        "evaluationStudent"
-    );
-    fillStudentSelect(
-        "feedbackStudent"
-    );
-
-
-    fillStudentSelect(
-        "gradeStudent"
-    );
-
-
-    fillStudentSelect(
-        "reportStudent"
-    );
-
-
-    fillStudentSelect(
-        "portfolioStudent"
-    );
-
-
-    fillStudentSelect(
-        "parentStudent"
-    );
-
-
-    fillStudentSelect(
-        "interestStudent"
-    );
-
-
-    fillStudentSelect(
-        "attentionStudent"
-    );
-
-    fillStudentSelect(
-        "monthlyStudent"
-    );
-
-
-    renderStudents();
-    renderGroups();
-
-    renderAttendance();
-
-    renderHomework();
-
-    renderEvaluations();
-
-    renderGrades();
-
-    renderFeedback();
-
-    renderPortfolio();
-
-    renderReport();
-
-    renderGoals();
-
-    renderParents();
-
-    renderInterests();
-
-    renderDaily();
-
-    renderWeekly();
-
-    renderBudget();
-
-    renderExperiments();
-
-    renderMonthlyPerformance();
-
-    renderAttention();
-
-    updateDashboard();
-
+function refreshStudentSelectorsSafely(){
+    if(!currentClass || !database || !database[currentClass]) return;
+    const ids=["evaluationStudent","feedbackStudent","gradeStudent","reportStudent","portfolioStudent","parentStudent","interestStudent","attentionStudent","monthlyStudent"];
+    ids.forEach(function(id){ try{ fillStudentSelect(id); }catch(e){ console.warn("student selector refresh failed",id,e); } });
 }
 
+function refreshAll(activeSectionId){
+    /* بهینه‌سازی عملکرد بدون تغییر امکانات: هنگام جابه‌جایی فقط بخش فعال رندر می‌شود. */
+    try{ renderBookBudget(); }catch(e){}
+    try{ loadTeacherProfile(); }catch(e){}
+    try{ updateStudentGradeField(); }catch(e){}
+    if(!currentClass) return;
+    setDefaultDates();
+    refreshStudentSelectorsSafely();
+    if(!activeSectionId){
+        [renderStudents,renderGroups,renderAttendance,renderHomework,renderEvaluations,renderGrades,renderFeedback,renderPortfolio,renderReport,renderGoals,renderParents,renderInterests,renderDaily,renderWeekly,renderBudget,renderExperiments,renderMonthlyPerformance,renderAttention,updateDashboard].forEach(function(fn){try{fn();}catch(e){}});
+        return;
+    }
+    const renderers={students:renderStudents,groups:renderGroups,attendance:renderAttendance,homework:renderHomework,evaluations:renderEvaluations,grades:renderGrades,feedback:renderFeedback,portfolio:renderPortfolio,report:renderReport,goals:renderGoals,parents:renderParents,interests:renderInterests,daily:renderDaily,weekly:renderWeekly,budget:renderBudget,experiments:renderExperiments,monthly:renderMonthlyPerformance,attention:renderAttention,dashboard:updateDashboard,bookBudget:renderBookBudget,teacherProfile:renderTeacherProfile};
+    const fn=renderers[activeSectionId];
+    if(fn){try{fn();}catch(e){console.warn('section render:',activeSectionId,e);}}
+}
+
+function addPersianSpeechButtonsToTextFields(){
+    /* هر فیلد قابل ورود متن یک میکروفون مستقل دارد؛ نتیجه دقیقاً در همان فیلد نوشته می‌شود. */
+    const fields=Array.from(document.querySelectorAll('textarea, input[type="text"]')).filter(function(el){
+        if(!el.id || el.dataset.speechReady) return false;
+        if(el.disabled || el.readOnly) return false;
+        if(["globalSearch","authLoginUsername","authRegisterUsername","accountNewUsername"].includes(el.id)) return false;
+        if(el.closest && (el.closest("#offlineAuthOverlay") || el.closest("#accountSecurityCard"))) return false;
+        return true;
+    });
+    fields.forEach(function(el){
+        el.dataset.speechReady="1";
+        const wrapper=document.createElement("div");
+        wrapper.className="speech-field-wrap";
+        wrapper.setAttribute("dir","rtl");
+        el.parentNode.insertBefore(wrapper,el);
+        wrapper.appendChild(el);
+
+        const btn=document.createElement("button");
+        btn.type="button";
+        btn.className="field-mic-btn";
+        btn.title="گفتار فارسی به متن";
+        btn.setAttribute("aria-label","گفتار فارسی به متن");
+        btn.innerHTML='<span>🎙️</span><b>گفتار</b>';
+        btn.onclick=function(ev){
+            ev.preventDefault();
+            ev.stopPropagation();
+            startSpeechToText(el.id,el.id+"VoiceStatus");
+        };
+        wrapper.appendChild(btn);
+
+        const status=document.createElement("div");
+        status.id=el.id+"VoiceStatus";
+        status.className="field-voice-status";
+        status.textContent="";
+        wrapper.appendChild(status);
+    });
+}
+
+let speechFieldObserver=null;
+function enableAutomaticPersianSpeechFields(){
+    addPersianSpeechButtonsToTextFields();
+    if(speechFieldObserver) return;
+    speechFieldObserver=new MutationObserver(function(){
+        addPersianSpeechButtonsToTextFields();
+    });
+    speechFieldObserver.observe(document.body,{childList:true,subtree:true});
+}
 
 /* =====================================================
    اجرای اولیه
@@ -8339,20 +9393,53 @@ document.addEventListener(
 
     function(){
 
-        initializeScalableStorage().then(function(){
-            renderHeaderImages();
-            document.getElementById("home").classList.remove("hidden");
-        }).catch(function(){
-            renderHeaderImages();
-            document.getElementById("home").classList.remove("hidden");
-        });
+        enableAutomaticPersianSpeechFields();
+        initializeOfflineAuth();
 
     }
 
 );
 
 
+
+// لایه پایدار رابط حرفه‌ای: آیکون‌های برداری و وضعیت اتصال بدون وابستگی به اینترنت
+(function(){
+  const ICONS={
+    "کارتابل معلم":"👤","داشبورد":"⌂","دانش‌آموزان":"♟","گروه‌بندی کلاس":"♣","حضور و غیاب":"✓","تکالیف":"▤","ارزشیابی":"★","بازخورد آموزشی":"◌","ارزشیابی کیفی":"▣","پوشه‌کار":"▱","آزمایش‌های علوم":"⚗","عملکرد ماهانه":"◷","وضعیت تحصیلی":"▥","اهداف آموزشی":"◎","اطلاعات والدین":"♧","علاقه‌مندی دانش‌آموز":"♡","دفتر روزانه":"▥","برنامه هفتگی":"▦","بودجه ساعات تدریس":"◫","بودجه‌بندی تدریس کتاب":"▤","نیازمند توجه":"!","پشتیبان":"↥","خروج از حساب":"↪"
+  };
+  function setIcon(el,key){ if(!el) return; el.textContent=ICONS[key]||"•"; el.setAttribute("aria-hidden","true"); }
+  function refreshIcons(){
+    document.querySelectorAll("#mainNav button").forEach(function(btn){
+      const label=(btn.querySelector(".sb-label")?.textContent||"").trim().replace(/^[^؀-ۿA-Za-z0-9]+/u,"").trim();
+      setIcon(btn.querySelector(".sb-icon"),label);
+    });
+    document.querySelectorAll(".capability-card").forEach(function(card){
+      const label=(card.querySelector("strong")?.textContent||"").trim();
+      setIcon(card.querySelector(".capability-icon"),label);
+    });
+  }
+  function updateConnection(){
+    const pill=document.getElementById("syncStatusPill"); if(!pill)return;
+    const text=pill.querySelector("span:last-child");
+    const online=navigator.onLine;
+    pill.classList.toggle("offline",!online);
+    if(text) text.textContent=online?"آنلاین · آماده همگام‌سازی":"آفلاین · ذخیره محلی فعال"; if(online) scheduleSyncFlush();
+  }
+  window.addEventListener("online",updateConnection,{passive:true});
+  window.addEventListener("offline",updateConnection,{passive:true});
+  window.addEventListener("error",function(e){ console.warn("UI error",e.error||e.message); });
+  document.addEventListener("DOMContentLoaded",function(){ refreshIcons(); updateConnection(); });
+  window.refreshProfessionalIcons=refreshIcons;
+})();
 </script>
 
+<div class="mobile-quickbar" id="mobileQuickbar" aria-label="دسترسی سریع موبایل">
+<button type="button" data-q-section="dashboard" onclick="showSection('dashboard')"><span>🏠</span>خانه</button>
+<button type="button" data-q-section="students" onclick="showSection('students')"><span>👨‍🎓</span>دانش‌آموزان</button>
+<button type="button" data-q-section="attendance" onclick="showSection('attendance')"><span>📋</span>حضور</button>
+<button type="button" data-q-section="homework" onclick="showSection('homework')"><span>📚</span>تکلیف</button>
+<button type="button" data-q-menu="1" onclick="toggleSidebar();event.stopPropagation()"><span>☰</span>همه</button>
+</div>
+<script>window.addEventListener('load',function(){try{setupProfessionalNavigation();updateMobileQuickbar(document.querySelector('#app .section.active')?.id||'dashboard')}catch(e){console.warn('professional navigation:',e)}});</script>
 </body>
 </html>

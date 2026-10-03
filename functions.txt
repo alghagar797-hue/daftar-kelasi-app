@@ -1,0 +1,160 @@
+7981:function renderGroups(){
+7982:    const box=document.getElementById('groupsTable'); if(!box)return; const d=getClassData(); const groups=d.groups||[];
+7986:function clearClassGroups(){getClassData().groups=[];saveDatabase();renderGroups();}
+7988:function getTeacherData(){
+7995:function openTeacherPanel(){
+8009:    const teacherButton = Array.from(document.querySelectorAll(".nav button"))
+8019:function loadTeacherProfile(){
+8022:    const t = getTeacherData();
+8024:    const values = {
+8039:        const el = document.getElementById(id);
+8046:async function saveTeacherPhoto(event){
+8048:    const file = event.target.files[0];
+8055:        const image = await resizeImage(file,900,0.88);
+8068:function saveTeacherProfile(){
+8070:    const t = getTeacherData();
+8090:function clearTeacherForm(){
+8092:    const ids = [
+8099:        const el = document.getElementById(id);
+8104:function teacherFullName(){
+8106:    const t = getTeacherData();
+8107:    const name = [t.firstName,t.lastName].filter(Boolean).join(" ").trim();
+8112:function renderTeacherProfile(){
+8114:    const t = getTeacherData();
+8116:    const heroName = document.getElementById("teacherHeroName");
+8121:    const heroPhoto = document.getElementById("teacherHeroPhoto");
+8128:            const img = document.createElement("img");
+8141:    const box = document.getElementById("teacherCardPreview");
+8146:    const photoHtml = t.photo
+8184:function downloadTeacherCard(){
+8186:    const t = getTeacherData();
+8188:    const canvas = document.createElement("canvas");
+8192:    const ctx = canvas.getContext("2d");
+8201:    const gradient = ctx.createLinearGradient(0,0,1600,0);
+8222:            const img = new Image();
+8225:                const x = 90, y = 260, w = 300, h = 400;
+8231:                const scale = Math.max(w/img.width,h/img.height);
+8232:                const dw = img.width*scale;
+8233:                const dh = img.height*scale;
+8256:        const rows = [
+8294:        const link = document.createElement("a");
+8301:function printTeacherCard(){
+8303:    const card = document.getElementById("teacherCardPreview");
+8308:    const win = window.open("", "_blank");
+8368:const voiceDrafts = {evaluation:"", grade:"", monthly:"", feedback:"", daily:""};
+8373:function openVoiceDB(){
+8376:        const req = indexedDB.open("دفتر_کلاسی_صوت_فارسی",1);
+8378:            const db=req.result;
+8386:function putVoiceBlob(blob){
+8389:            const id="voice-"+Date.now()+"-"+Math.random().toString(36).slice(2,8);
+8390:            const tx=db.transaction("clips","readwrite");
+8398:function getVoiceBlob(id){
+8401:            const tx=db.transaction("clips","readonly");
+8402:            const req=tx.objectStore("clips").get(id);
+8409:function deleteVoiceBlob(id){
+8413:            const tx=db.transaction("clips","readwrite");
+8421:function voiceButton(id){
+8427:function playVoiceClip(id){
+8430:        const url=URL.createObjectURL(blob);
+8431:        const audio=document.createElement("audio");
+8434:        const old=document.getElementById("voicePlayerOverlay"); if(old) old.remove();
+8435:        const wrap=document.createElement("div"); wrap.id="voicePlayerOverlay";
+8437:        const close=document.createElement("button"); close.type="button"; close.textContent="✕"; close.className="btn btn-danger btn-small";
+8444:function clearVoiceDraft(type){
+8445:    const oldId=voiceDrafts[type];
+8448:    const preview=document.getElementById(type+"VoicePreview");
+8449:    const status=document.getElementById(type+"VoiceStatus");
+8454:function renderVoiceDraft(type){
+8455:    const preview=document.getElementById(type+"VoicePreview");
+8461:function toggleVoiceRecording(type){
+8471:        const status=document.getElementById(type+"VoiceStatus");
+8492:    const status=document.getElementById(type+"VoiceStatus");
+8505:            const recorderType=activeVoiceRecorder && activeVoiceRecorder.mimeType;
+8506:            const blob=new Blob(activeVoiceChunks,{type:recorderType||"audio/webm"});
+8522:    const status=document.getElementById(type+"VoiceStatus");
+8523:    const done=function(id){
+8528:    const fail=function(){
+8539:function importVoiceFile(type,input){
+8540:    const file=input && input.files ? input.files[0] : null;
+8542:    const status=document.getElementById(type+"VoiceStatus");
+8554:function cleanPersianText(value){
+8569:function ensureSpeechStatus(textareaId,statusId){
+8576:        const area=document.getElementById(textareaId);
+8582:async function startSpeechToText(textareaId,statusId){
+8583:    const area=document.getElementById(textareaId);
+8585:    const status=ensureSpeechStatus(textareaId,statusId);
+8586:    const fieldWrap=area.parentElement;
+8587:    const micButton=fieldWrap && fieldWrap.querySelector('.field-mic-btn');
+8600:    const SR=window.SpeechRecognition || window.webkitSpeechRecognition;
+8611:            const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+8622:    const recognition=new SR();
+8634:            const part=event.results[i][0].transcript;
+8641:        const code=event.error||"unknown";
+8642:        const msg={
+8666:    const area=document.getElementById(textareaId);
+8668:    const spoken=cleanPersianText(text||"");
+8669:    const existing=String(area.value||"").trim();
+8673:    const status=ensureSpeechStatus(textareaId,textareaId+"VoiceStatus");
+8675:    const btn=area.parentElement && area.parentElement.querySelector('.field-mic-btn');
+8679:function saveFeedback(){
+8680:    const studentId=document.getElementById("feedbackStudent").value;
+8681:    const date=normalizePersianDate(document.getElementById("feedbackDate").value);
+8682:    const subject=document.getElementById("feedbackSubject").value.trim();
+8683:    const notes=cleanPersianText(document.getElementById("feedbackNotes").value);
+8696:function editFeedback(id){
+8697:    const item=(getClassData().feedback||[]).find(function(x){return String(x.id)===String(id)});
+8699:    const notes=prompt("متن بازخورد:",item.notes||"");
+8705:function deleteFeedback(id){
+8706:    const item=getClassData().feedback.find(function(x){return String(x.id)===String(id)});
+8714:function renderFeedback(){
+8715:    const box=document.getElementById("feedbackTable");
+8717:    const records=getClassData().feedback||[];
+8727:function saveMonthlyPerformance(){
+8728:    const studentId=document.getElementById("monthlyStudent").value;
+8729:    const month=document.getElementById("monthlyMonth").value;
+8731:    const record={
+8754:function editMonthlyPerformance(id){
+8755:    const item=(getClassData().monthlyPerformance||[]).find(function(x){return String(x.id)===String(id)});
+8757:    const notes=prompt("جمع‌بندی عملکرد:",item.notes||"");
+8763:function deleteMonthlyPerformance(id){
+8764:    const item=(getClassData().monthlyPerformance||[]).find(function(x){return String(x.id)===String(id)});
+8771:function renderMonthlyPerformance(){
+8773:    const data=getClassData(), records=data.monthlyPerformance||[];
+8774:    const studentId=(document.getElementById("monthlyStudent")||{}).value||"";
+8775:    const month=(document.getElementById("monthlyMonth")||{}).value||"مهر";
+8776:    const summary=document.getElementById("monthlyAutoSummary");
+8778:        const studentRecords=records.filter(function(r){return String(r.studentId)===String(studentId)&&r.month===month});
+8779:        const attendance=(data.attendance||[]).filter(function(a){return String(a.studentId)===String(studentId)});
+8780:        const evaluations=(data.evaluations||[]).filter(function(e){return String(e.studentId)===String(studentId)});
+8783:    const box=document.getElementById("monthlyTable");
+8800:async function collectAllVoiceIds(){
+8801:    const ids=new Set();
+8803:        const d=database[c]; if(!d) return;
+8811:function blobToDataURL(blob){
+8813:        const reader=new FileReader();
+8820:function dataURLToBlob(dataURL){
+8821:    const parts=String(dataURL).split(",");
+8822:    const mime=(parts[0].match(/data:([^;]+)/)||[])[1]||"audio/webm";
+8823:    const binary=atob(parts[1]||"");
+8824:    const bytes=new Uint8Array(binary.length);
+8829:async function exportData(){
+8830:    const backup=JSON.parse(JSON.stringify(database));
+8834:        const ids=await collectAllVoiceIds();
+8836:            const blob=await getVoiceBlob(id);
+8840:    const data=JSON.stringify(backup,null,2);
+8841:    const blob=new Blob([data],{type:"application/json"});
+8842:    const url=URL.createObjectURL(blob);
+8843:    const a=document.createElement("a");
+8851:function importData(event){
+8853:    const file =
+8864:    const reader =
+8873:                const imported =
+8893:                    const data = database[classNumber];
+8924:                            const d=database[c]; if(!d) return;
+8967:function refreshAll(){
+9068:function addPersianSpeechButtonsToTextFields(){
+9070:    const fields=Array.from(document.querySelectorAll('textarea, input[type="text"]')).filter(function(el){
+9079:        const wrapper=document.createElement("div");
+9085:        const btn=document.createElement("button");
+9098:        const status=document.createElement("div");
+9107:function enableAutomaticPersianSpeechFields(){
