@@ -3735,12 +3735,36 @@ async function loginOfflineAccount(){
     if(CLOUD_ENDPOINT && cloudToken()) await cloudInitialSync(account.username);
     enterAuthenticatedApp();
 }
+function getLastClassKey(username){
+    return "دفتر_کلاسی_آخرین_کلاس_" + encodeURIComponent(String(username || ""));
+}
+function getLastClassForAccount(username){
+    try{
+        const value=localStorage.getItem(getLastClassKey(username));
+        return ["1","2","3","4","5","6","multi"].includes(String(value)) ? String(value) : "";
+    }catch(e){ return ""; }
+}
+function setLastClassForAccount(username,classNumber){
+    try{
+        if(username && ["1","2","3","4","5","6","multi"].includes(String(classNumber))){
+            localStorage.setItem(getLastClassKey(username),String(classNumber));
+        }
+    }catch(e){}
+}
 function enterAuthenticatedApp(){
     hideAuthOverlay();
     const home=document.getElementById("home"), app=document.getElementById("app");
     if(home)home.classList.remove("hidden"); if(app)app.classList.add("hidden");
     currentClass=null;
-    initializeScalableStorage().then(function(){refreshAll();renderHeaderImages();}).catch(function(){refreshAll();renderHeaderImages();});
+    initializeScalableStorage().then(async function(){
+        const lastClass=getLastClassForAccount(activeAccountUsername);
+        if(lastClass && database && database[lastClass]){
+            await openClass(lastClass);
+        }else{
+            refreshAll();
+            renderHeaderImages();
+        }
+    }).catch(function(){refreshAll();renderHeaderImages();});
     updateAccountSecurityFields();
 }
 function updateAccountSecurityFields(){
@@ -4233,7 +4257,8 @@ function saveDatabase(){
 function getClassData(){
 
     if(!database) database = createFreshDatabase();
-    if(!currentClass) currentClass = "1";
+    /* جلوگیری از ثبت ناخواسته اطلاعات در کلاس اول وقتی هیچ کلاسی انتخاب نشده است. */
+    if(!currentClass) return null;
     if(!database[currentClass]) database[currentClass] = createClassData();
     if(!Array.isArray(database[currentClass].students)) database[currentClass].students = [];
     if(!Array.isArray(database[currentClass].attendance)) database[currentClass].attendance = [];
@@ -4374,8 +4399,14 @@ function updateStudentGradeField(){
 
 async function openClass(classNumber){
 
-    currentClass = classNumber;
-    await prepareClassMedia(classNumber);
+    const normalizedClass=String(classNumber);
+    if(!["1","2","3","4","5","6","multi"].includes(normalizedClass)){
+        alert("کلاس انتخاب‌شده معتبر نیست.");
+        return;
+    }
+    currentClass = normalizedClass;
+    setLastClassForAccount(activeAccountUsername,currentClass);
+    await prepareClassMedia(currentClass);
 
 
     document
@@ -4940,6 +4971,11 @@ function previewStudentPhoto(event){
 
 async function addStudent(){
 
+    if(!currentClass){
+        alert("ابتدا یک کلاس را انتخاب کنید.");
+        return;
+    }
+
     const firstName =
         document
         .getElementById("studentFirstName")
@@ -5283,6 +5319,11 @@ function renderStudents(){
         document.getElementById(
             "studentsTable"
         );
+    if(!box) return;
+    if(!currentClass){
+        box.innerHTML = '<div class="empty-box">ابتدا یک کلاس را انتخاب کنید.</div>';
+        return;
+    }
 
 
     const students =
