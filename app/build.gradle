@@ -11,8 +11,8 @@ android {
         applicationId 'com.classroom.daftar'
         minSdk 23
         targetSdk 36
-        versionCode 14
-        versionName '4.5.2'
+        versionCode 15
+        versionName '4.5.3'
     }
 
     compileOptions {
@@ -26,16 +26,23 @@ android {
 
     signingConfigs {
         release {
-            def storeFileProp = project.findProperty('android.injected.signing.store.file')
-            def storePasswordProp = project.findProperty('android.injected.signing.store.password')
-            def keyAliasProp = project.findProperty('android.injected.signing.key.alias')
-            def keyPasswordProp = project.findProperty('android.injected.signing.key.password')
+            def storeFileProp = System.getenv('DAFTAR_KEYSTORE_FILE')
+            def storePasswordProp = System.getenv('DAFTAR_KEYSTORE_PASSWORD')
+            def keyAliasProp = System.getenv('DAFTAR_KEY_ALIAS')
+            def keyPasswordProp = System.getenv('DAFTAR_KEY_PASSWORD')
 
             if (!storeFileProp || !storePasswordProp || !keyAliasProp || !keyPasswordProp) {
-                throw new GradleException('Release signing credentials are required. Configure the four Android signing properties before building release.')
+                throw new GradleException(
+                    'Release signing credentials are missing. The GitHub Actions workflow must provide DAFTAR_KEYSTORE_FILE, DAFTAR_KEYSTORE_PASSWORD, DAFTAR_KEY_ALIAS and DAFTAR_KEY_PASSWORD.'
+                )
             }
 
-            storeFile file(storeFileProp)
+            def keystore = file(storeFileProp)
+            if (!keystore.exists() || !keystore.isFile()) {
+                throw new GradleException('Release keystore file does not exist: ' + storeFileProp)
+            }
+
+            storeFile keystore
             storePassword storePasswordProp
             keyAlias keyAliasProp
             keyPassword keyPasswordProp
