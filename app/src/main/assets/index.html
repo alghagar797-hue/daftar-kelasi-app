@@ -3545,6 +3545,7 @@ function saveStudentRosterBackups(username,data){
     try{
         ["1","2","3","4","5","6","multi"].forEach(function(k){
             const roster=makeStudentRosterBackup(data[k] && data[k].students);
+            // حتی فهرست خالی هم ذخیره می‌شود؛ خالی بودن یک وضعیت معتبر است.
             localStorage.setItem(studentRosterBackupKey(username,k),JSON.stringify(roster));
         });
     }catch(e){
@@ -3552,18 +3553,8 @@ function saveStudentRosterBackups(username,data){
     }
 }
 function restoreStudentRosterBackups(username,data){
-    if(!username || !data) return data;
-    try{
-        ["1","2","3","4","5","6","multi"].forEach(function(k){
-            let roster=null;
-            try{ roster=JSON.parse(localStorage.getItem(studentRosterBackupKey(username,k)) || "null"); }catch(e){}
-            if(!Array.isArray(roster) || !roster.length) return;
-            if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
-            data[k].students=mergeRecordArrays(data[k].students,roster,function(item){return recordKey(item,"students");});
-        });
-    }catch(e){
-        console.warn("Student roster restore skipped",e);
-    }
+    // این بکاپ فقط برای مهاجرت داده‌های خیلی قدیمی است و دیگر نباید
+    // روی فهرست موجود merge شود؛ merge باعث بازگشت دانش‌آموز حذف‌شده می‌شد.
     return data;
 }
 
@@ -3629,24 +3620,19 @@ async function readRosterClass(username,classNumber){
     });
 }
 async function restoreRosterFromIDB(username,data){
+    // Store قدیمی فقط در صورتی استفاده می‌شود که هیچ Snapshot حسابی وجود نداشته باشد.
+    // اگر Snapshot وجود دارد، همان منبع اصلی است تا رکورد حذف‌شده از Store قدیمی برنگردد.
     if(!username || !data) return data;
-    for(const k of ["1","2","3","4","5","6","multi"]){
-        try{
-            const row=await readRosterClass(username,k);
-            if(row && Array.isArray(row.students)){
-                if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
-                data[k].students=row.students;
-            }else if(data[k] && Array.isArray(data[k].students) && data[k].students.length){
-                // اولین اجرا/مهاجرت: داده موجود را به Store پایدار منتقل کن.
-                await saveRosterClass(username,k,data[k].students);
-            }
-        }catch(e){console.warn("Roster IDB restore/seed skipped",k,e)}
-    }
     return data;
 }
 async function persistCurrentRoster(){
+    // این Store فقط بکاپ سازگاری است و نباید موفقیت ذخیره اصلی را تعیین کند.
     if(!activeAccountUsername || !currentClass || !database || !database[currentClass]) return;
-    await saveRosterClass(activeAccountUsername,currentClass,database[currentClass].students);
+    try{
+        await saveRosterClass(activeAccountUsername,currentClass,database[currentClass].students);
+    }catch(error){
+        console.warn("Legacy roster store skipped; main database remains authoritative.",error);
+    }
 }
 
 function setAuthMessage(id,text,type){const el=document.getElementById(id);if(!el)return;el.textContent=text||"";el.className="auth-message"+(type?" "+type:"");}
@@ -3760,66 +3746,50 @@ async function readJsonStorage(key){
 }
 async function loadDatabaseForAccount(username){
     let accountDb=null;
-    try{
-        accountDb=await readAccountDatabase(username);
-    }catch(e){
-        console.warn("Account DB read failed",e);
-    }
+    try{ accountDb=await readAccountDatabase(username); }catch(e){ console.warn("Account DB read failed",e); }
 
     let accountLegacy=null;
     let globalLegacy=null;
     try{ accountLegacy=await readJsonStorage(accountDataKey(username)); }catch(e){}
     try{ globalLegacy=await readJsonStorage(STORAGE_KEY); }catch(e){}
 
-    /*
-       منبع اصلی اطلاعات حساب = IndexedDB.
-       localStorage فقط برای مهاجرت/بازیابی نسخه‌های قدیمی استفاده می‌شود.
-       ترتیب قبلی باعث می‌شد نسخه قدیمی localStorage با mergeRecordArrays
-       دوباره دانش‌آموز حذف‌شده را برگرداند.
-    */
-    const sources=[];
-
-    if(accountDb){
-        sources.push(accountDb);
-    }else if(accountLegacy){
-        sources.push(accountLegacy);
-    }
-
+    // Snapshot حساب در IndexedDB منبع اصلی و قطعی اطلاعات این حساب است.
+    // اگر وجود داشته باشد، فهرست دانش‌آموزان آن هرگز با localStorage یا
+    // بکاپ‌های قدیمی merge نمی‌شود؛ این دقیقاً جلوی بازگشت رکورد حذف‌شده را می‌گیرد.
     const accounts=await getAuthAccounts();
-
-    if(!accountDb && !accountLegacy && accounts.length===1 && globalLegacy){
-        sources.push(globalLegacy);
+    let merged=null;
+    if(accountDb){
+        merged=migrateDatabaseSafely(accountDb);
+        ["1","2","3","4","5","6","multi"].forEach(function(k){
+            if(accountDb[k] && Array.isArray(accountDb[k].students)){
+                if(!merged[k] || typeof merged[k]!=="object") merged[k]=createClassData();
+                merged[k].students=cloneForSync(accountDb[k].students);
+            }
+        });
+    }else if(accountLegacy){
+        // فقط در مهاجرت/بازیابی نسخه‌های قدیمی استفاده می‌شود.
+        merged=migrateDatabaseSafely(accountLegacy);
+    }else if(accounts.length===1 && globalLegacy){
+        merged=migrateDatabaseSafely(globalLegacy);
     }
 
-    let merged=null;
-    sources.filter(Boolean).forEach(function(source){
-        merged=mergeDatabasesSafely(merged,source);
-    });
-
-    const beforeMigration=merged ? cloneForSync(merged) : null;
-    const versions=sources.filter(Boolean).map(databaseSchemaVersion);
+    const beforeMigration = merged ? cloneForSync(merged) : null;
+    const sourceVersions=[];
+    if(accountDb) sourceVersions.push(accountDb);
+    else if(accountLegacy) sourceVersions.push(accountLegacy);
+    else if(accounts.length===1 && globalLegacy) sourceVersions.push(globalLegacy);
+    const versions=sourceVersions.map(databaseSchemaVersion);
     const fromSchema=versions.length ? Math.min.apply(Math,versions) : 1;
-
     database=migrateDatabaseSafely(merged);
 
-    /*
-       بکاپ سبک فقط برای مهاجرت استفاده می‌شود.
-       اگر فهرست مستقل IndexedDB وجود داشته باشد، همان فهرست برنده است.
-    */
-    database=restoreStudentRosterBackups(username,database);
-    database=await restoreRosterFromIDB(username,database);
-
+    // بکاپ‌های قدیمی فقط برای بازیابی اضطراری نگه داشته می‌شوند و هرگز
+    // هنگام ورود روی فهرست فعلی دانش‌آموزان اعمال نمی‌شوند.
     if(beforeMigration && (fromSchema < APP_DATA_SCHEMA_VERSION || !!accountLegacy || !!globalLegacy)){
-        try{
-            await writeMigrationBackup(username,beforeMigration,fromSchema);
-        }catch(e){
-            console.warn("Migration backup skipped",e);
-        }
+        try{ await writeMigrationBackup(username,beforeMigration,fromSchema); }catch(e){ console.warn("Migration backup skipped",e); }
     }
 
     activeAccountUsername=username;
     localStorage.setItem(SESSION_STORAGE_KEY,username);
-
     await saveDatabase();
 }
 
@@ -4407,17 +4377,8 @@ function saveDatabase(){
             return Promise.resolve();
         }
         const username=activeAccountUsername;
-        // فهرست دانش‌آموزان باید بخشی از زنجیره ذخیره باشد؛
-        // هرگز آن را به صورت fire-and-forget ذخیره نمی‌کنیم.
-        if(currentClass && database[currentClass]){
-            jobs.push(
-                saveRosterClass(username,currentClass,database[currentClass].students)
-                .catch(function(e){
-                    console.error("Independent roster save failed",e);
-                    throw e;
-                })
-            );
-        }
+        // Store مستقل فهرست فقط بکاپ سازگاری است و نباید جلوی ذخیره اصلی را بگیرد.
+        // منبع اصلی همیشه Snapshot حساب است.
         // ذخیره فوری و مستقل در localStorage: این نسخه به عنوان پشتیبان محلی
         // همیشه تازه نگه داشته می‌شود تا حتی در صورت تأخیر/مشکل IndexedDB،
         // اطلاعات دانش‌آموزان بعد از بستن WebView از بین نرود.
@@ -4427,8 +4388,8 @@ function saveDatabase(){
         }catch(e){
             console.warn("Immediate local storage save skipped",e);
         }
-        // این بکاپ کوچک عمداً عکس‌های base64 را نگه نمی‌دارد؛ بنابراین حتی
-        // در صورت محدودیت WebView Storage، فهرست دانش‌آموزان حفظ می‌شود.
+        // بکاپ کوچک فقط برای سازگاری نسخه‌های قدیمی است و هیچ‌وقت هنگام
+        // بارگذاری روی Snapshot اصلی merge نمی‌شود.
         saveStudentRosterBackups(username,database);
         accountSaveQueue=accountSaveQueue
             .catch(function(){})
@@ -5281,15 +5242,16 @@ async function addStudent(){
 
     });
 
-    // اول فهرست را در Store مستقل و پایدار ثبت کن؛ سپس Snapshot اصلی را ذخیره کن.
-    try{ await persistCurrentRoster(); }
-    catch(e){
-        console.error("Roster save failed",e);
-        alert("ذخیره فهرست دانش‌آموزان انجام نشد. لطفاً دوباره تلاش کنید.");
+    // Snapshot اصلی تنها منبع معتبر فهرست است. Store قدیمی فقط بکاپ سازگاری است
+    // و نباید موفقیت ثبت دانش‌آموز را تعیین کند.
+    try{
+        await saveDatabase();
+    }catch(e){
+        console.error("Student save failed",e);
         classData.students.pop();
+        alert("ذخیره دانش‌آموز انجام نشد. لطفاً دوباره تلاش کنید.");
         return;
     }
-    await saveDatabase();
 
     // بلافاصله همه بخش‌های وابسته به فهرست دانش‌آموزان را تازه‌سازی می‌کنیم.
     renderStudents();
@@ -5501,9 +5463,23 @@ async function deleteStudent(id){
     updateDashboard();
 
     try{
-        // مهم: حتی فهرست خالی هم باید ذخیره شود؛ این رکورد وضعیت حذف را تثبیت می‌کند.
-        await persistCurrentRoster();
+        // Snapshot حساب منبع اصلی است؛ حتی فهرست خالی هم در آن ذخیره می‌شود.
         await saveDatabase();
+
+        // ذخیره را واقعاً راستی‌آزمایی می‌کنیم. saveDatabase برای سازگاری
+        // با سایر بخش‌های برنامه خطای IndexedDB را در fallback می‌گیرد؛
+        // اما حذف دانش‌آموز نباید بدون تأیید ذخیره موفق اعلام شود.
+        if(activeAccountUsername){
+            const persisted=await readAccountDatabase(activeAccountUsername);
+            const persistedClass=persisted && persisted[currentClass];
+            const stillExists=persistedClass && Array.isArray(persistedClass.students) && persistedClass.students.some(function(student){
+                return String(student.id)===targetId;
+            });
+            if(stillExists){
+                throw new Error("STUDENT_DELETE_NOT_PERSISTED");
+            }
+        }
+
         refreshAll();
         renderTeacherCardSafe();
         alert("دانش‌آموز با موفقیت حذف شد و تغییرات ذخیره شد.");
