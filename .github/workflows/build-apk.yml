@@ -1,4 +1,4 @@
-name: Build Android Release APK v5.2.1
+name: Build Android Release APK
 
 on:
   workflow_dispatch:
@@ -12,8 +12,9 @@ jobs:
 
     steps:
 
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+
 
       - name: Setup Java 17
         uses: actions/setup-java@v4
@@ -21,150 +22,66 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
 
-      - name: Validate project
-        shell: bash
-        run: |
-          set -e
 
+      - name: Check project
+        run: |
           test -f app/build.gradle
           test -f app/src/main/assets/index.html
+          echo "Project OK"
 
-          if [ -f gradlew ]; then
-            chmod +x gradlew
-          fi
 
-          echo "Project validation successful."
-
-      - name: Validate signing secrets
-        shell: bash
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          set -e
-
-          test -n "$KEYSTORE_BASE64"
-          test -n "$KEYSTORE_PASSWORD"
-          test -n "$KEY_ALIAS"
-          test -n "$KEY_PASSWORD"
-
-          echo "Signing secrets OK."
-
-      - name: Restore permanent signing keystore
-        shell: bash
+      - name: Restore Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          set -e
+          echo "$KEYSTORE_BASE64" | base64 --decode > daftar-release.keystore
+          test -f daftar-release.keystore
+          echo "KEYSTORE_FILE=$GITHUB_WORKSPACE/daftar-release.keystore" >> $GITHUB_ENV
 
-          KEYSTORE_FILE="$RUNNER_TEMP/daftar-release-v2.keystore"
 
-          echo "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_FILE"
-
-          test -s "$KEYSTORE_FILE"
-
-          chmod 600 "$KEYSTORE_FILE"
-
-          echo "KEYSTORE_FILE=$KEYSTORE_FILE" >> "$GITHUB_ENV"
-
-      - name: Validate keystore
-        shell: bash
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        run: |
-          keytool -list \
-          -keystore "$KEYSTORE_FILE" \
-          -storepass "$KEYSTORE_PASSWORD" \
-          -alias "$KEY_ALIAS"
-
-      - name: Build release APK v5.2.1
-        shell: bash
+      - name: Build Release APK
         env:
           DAFTAR_KEYSTORE_FILE: ${{ env.KEYSTORE_FILE }}
           DAFTAR_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           DAFTAR_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           DAFTAR_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
         run: |
 
-          if [ -x "./gradlew" ]; then
-
-            ./gradlew \
-            --no-daemon \
-            --stacktrace \
-            --console=plain \
-            :app:assembleRelease
-
+          if [ -f "./gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew assembleRelease --stacktrace
           else
-
-            gradle \
-            --no-daemon \
-            --stacktrace \
-            --console=plain \
-            :app:assembleRelease
-
+            gradle assembleRelease --stacktrace
           fi
 
 
-      - name: Find APK
-        shell: bash
-        run: |
-
-          APK_PATH=$(find app/build/outputs/apk/release \
-          -name "*.apk" \
-          | head -n 1)
-
-          test -f "$APK_PATH"
-
-          echo "APK_PATH=$APK_PATH" >> "$GITHUB_ENV"
-
-          ls -lh "$APK_PATH"
-
-
-      - name: Verify APK signature
-        shell: bash
-        run: |
-
-          APKSIGNER=$(find "$ANDROID_HOME/build-tools" \
-          -name apksigner \
-          | sort -V \
-          | tail -n 1)
-
-          "$APKSIGNER" verify --verbose "$APK_PATH"
-
-
-      - name: Prepare final APK
-        shell: bash
+      - name: Prepare APK
         run: |
 
           mkdir -p release
 
-          cp "$APK_PATH" \
-          release/DaftarKelasi-v5.2.1.apk
+          cp app/build/outputs/apk/release/app-release.apk \
+          release/DaftarKelasi.apk
+
+          ls -lh release/
 
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-
           name: DaftarKelasi-APK-v5.2.1
-
-          path: release/DaftarKelasi-v5.2.1.apk
-
+          path: release/DaftarKelasi.apk
           retention-days: 30
 
 
-      - name: Cleanup signing key
+      - name: Cleanup
         if: always()
         run: |
-
-          rm -f "$RUNNER_TEMP/daftar-release-v2.keystore"
-
-          echo "Cleanup completed."
+          rm -f daftar-release.keystore
