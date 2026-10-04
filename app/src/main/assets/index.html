@@ -3649,10 +3649,35 @@ async function restoreRosterFromIDB(username,data){
     }
     return data;
 }
-async function persistCurrentRoster()
-{console.log("SAVE CHECK", activeAccountUsername, currentClass, database);
-    if(!activeAccountUsername || !currentClass || !database || !database[currentClass]) return;
-    await saveRosterClass(activeAccountUsername,currentClass,database[currentClass].students || []);
+async function persistCurrentRoster(){
+
+    console.log(
+        "SAVE CHECK",
+        activeAccountUsername,
+        currentClass,
+        database
+    );
+
+    if(
+        !activeAccountUsername ||
+        !currentClass ||
+        !database ||
+        !database[currentClass]
+    ){
+        return;
+    }
+
+    if(
+        !Array.isArray(database[currentClass].students)
+    ){
+        database[currentClass].students = [];
+    }
+
+    await saveRosterClass(
+        activeAccountUsername,
+        currentClass,
+        database[currentClass].students
+    );
 }
 
 function setAuthMessage(id,text,type){const el=document.getElementById(id);if(!el)return;el.textContent=text||"";el.className="auth-message"+(type?" "+type:"");}
