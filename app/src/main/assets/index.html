@@ -3400,93 +3400,56 @@ const ACCOUNT_STORE = "accounts";
 let accountDbPromise = null;
 let activeAccountUsername = "";
 let accountSaveQueue = Promise.resolve();
+const LAST_USER_KEY = "دفتر_کلاسی_آخرین_کاربر_v1";
+const LOGGED_OUT_KEY = "دفتر_کلاسی_خروج_صریح_v1";
+function rememberSession(username){
+    try{
+        localStorage.setItem(SESSION_STORAGE_KEY,username);
+        localStorage.setItem(LAST_USER_KEY,username);
+        localStorage.removeItem(LOGGED_OUT_KEY);
+    }catch(e){ console.warn("Session remember failed",e); }
+}
 
 const ACCOUNT_META_STORE = "accountMeta";
 
 async function getAuthAccounts(){
-    /*
-       پایداری حساب کاربری:
-       فهرست حساب‌ها در دو محل نگهداری می‌شود:
-       1) IndexedDB برای ساختار اصلی برنامه
-       2) localStorage به عنوان پشتیبان پایدار برای WebView/APK
-       اگر یکی از این دو در دسترس نباشد، دیگری استفاده می‌شود.
-    */
-    let indexedAccounts=[];
-    let localAccounts=[];
     try{
         const db=await openAccountDB();
-        indexedAccounts=await new Promise(function(resolve,reject){
+        const rows=await new Promise(function(resolve,reject){
             const req=db.transaction(ACCOUNT_META_STORE,"readonly").objectStore(ACCOUNT_META_STORE).getAll();
             req.onsuccess=function(){resolve(req.result||[])};
             req.onerror=function(){reject(req.error)};
         });
+        if(rows.length) return rows.sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0)});
+        // مهاجرت یک‌باره فهرست حساب‌های نسخه‌های قدیمی
+        let legacy=[];
+        try{ legacy=JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY)||"[]")||[]; }catch(e){}
+        if(legacy.length){ await saveAuthAccounts(legacy); return legacy; }
+        return [];
     }catch(e){
-        console.warn("Account IndexedDB read skipped:",e);
+        try{return JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY)||"[]")||[]}catch(_){return []}
     }
-
-    try{
-        localAccounts=JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY)||"[]")||[];
-        if(!Array.isArray(localAccounts)) localAccounts=[];
-    }catch(e){
-        localAccounts=[];
-    }
-
-    /* ادغام امن دو فهرست بدون ایجاد حساب تکراری */
-    const merged=[];
-    const seen=new Set();
-    indexedAccounts.concat(localAccounts).forEach(function(account){
-        if(!account || !account.username) return;
-        const key=String(account.username).toLowerCase();
-        if(seen.has(key)) return;
-        seen.add(key);
-        merged.push(account);
-    });
-
-    merged.sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0)});
-
-    /* اگر فقط localStorage موجود بود، تلاش می‌کنیم IndexedDB را نیز ترمیم کنیم. */
-    if(merged.length && indexedAccounts.length===0){
-        try{ await saveAuthAccounts(merged); }catch(e){ console.warn("Account DB repair skipped:",e); }
-    }
-
-    return merged;
 }
-
 async function saveAuthAccounts(accounts){
-    const safeAccounts=Array.isArray(accounts)?accounts:[];
-    /* پشتیبان محلی را همیشه نگه می‌داریم؛ دیگر بعد از ذخیره موفق حذف نمی‌شود. */
-    try{
-        localStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(safeAccounts));
-    }catch(e){
-        console.warn("Auth localStorage save skipped:",e);
-    }
-
-    try{
-        const db=await openAccountDB();
-        return await new Promise(function(resolve,reject){
-            const tx=db.transaction(ACCOUNT_META_STORE,"readwrite");
-            const store=tx.objectStore(ACCOUNT_META_STORE);
-            store.clear();
-            safeAccounts.forEach(function(account){store.put(account)});
-            tx.oncomplete=function(){resolve()};
-            tx.onerror=function(){reject(tx.error||new Error("ذخیره فهرست حساب‌ها ناموفق بود."))};
-        });
-    }catch(e){
-        /*
-          اگر IndexedDB در WebView در دسترس نباشد، localStorage
-          همچنان فهرست حساب‌ها را حفظ کرده و برنامه می‌تواند با آن وارد شود.
-        */
-        console.warn("Account IndexedDB save skipped:",e);
-        return Promise.resolve();
-    }
+    const db=await openAccountDB();
+    return new Promise(function(resolve,reject){
+        const tx=db.transaction(ACCOUNT_META_STORE,"readwrite");
+        const store=tx.objectStore(ACCOUNT_META_STORE);
+        store.clear();
+        (accounts||[]).forEach(function(account){store.put(account)});
+        tx.oncomplete=function(){
+            try{localStorage.removeItem(AUTH_STORAGE_KEY)}catch(e){}
+            resolve();
+        };
+        tx.onerror=function(){reject(tx.error||new Error("ذخیره فهرست حساب‌ها ناموفق بود."))};
+    });
 }
 
 function openAccountDB(){
     if(accountDbPromise) return accountDbPromise;
     accountDbPromise = new Promise(function(resolve,reject){
-        if(!window.indexedDB){ reject(new Error("IndexedDB پشتیبانی نمی‌شود.")); return; }
-        const req=indexedDB.open(ACCOUNT_DB_NAME,5);
-        req.onupgradeneeded=function(){
+        if(!window.indexedDB){ accountDbPromise=null; reject(new Error("IndexedDB پشتیبانی نمی‌شود.")); return; }
+        function upgrade(req){
             const db=req.result;
             if(!db.objectStoreNames.contains(ACCOUNT_STORE)){
                 db.createObjectStore(ACCOUNT_STORE,{keyPath:"username"});
@@ -3509,9 +3472,32 @@ function openAccountDB(){
                 r.createIndex("username","username",{unique:false});
                 r.createIndex("classNumber","classNumber",{unique:false});
             }
-        };
-        req.onsuccess=function(){resolve(req.result)};
-        req.onerror=function(){reject(req.error||new Error("پایگاه حساب‌ها در دسترس نیست."))};
+        }
+        /* اگر پایگاه داده روی دستگاه نسخهٔ بالاتری داشته باشد (مثلاً از نسخه‌ای دیگر از برنامه)،
+           به‌جای شکست و نمایش صفحهٔ «ثبت‌نام»، همان نسخهٔ موجود را بدون تغییر باز می‌کنیم. */
+        function attempt(version){
+            let req;
+            try{ req = version ? indexedDB.open(ACCOUNT_DB_NAME,version) : indexedDB.open(ACCOUNT_DB_NAME); }
+            catch(err){ accountDbPromise=null; reject(err); return; }
+            req.onupgradeneeded=function(){ upgrade(req); };
+            req.onsuccess=function(){
+                const db=req.result;
+                db.onversionchange=function(){ try{db.close();}catch(x){} accountDbPromise=null; };
+                resolve(db);
+            };
+            req.onblocked=function(){ console.warn("Account DB open blocked; waiting for other tabs to close"); };
+            req.onerror=function(ev){
+                const err=req.error;
+                if(version && err && err.name==="VersionError"){
+                    try{ ev.preventDefault(); }catch(x){}
+                    attempt(0);
+                    return;
+                }
+                accountDbPromise=null;
+                reject(err||new Error("پایگاه حساب‌ها در دسترس نیست."));
+            };
+        }
+        attempt(5);
     });
     return accountDbPromise;
 }
@@ -3648,6 +3634,22 @@ function mergeClassDataSafely(primary,secondary){
     const out=mergeScalarObjects(primary||{},secondary||{});
     const arrayNames=["students","attendance","homework","evaluations","grades","feedback","portfolio","goals","parents","interests","daily","weekly","budget","experiments","monthlyPerformance","attention","exams","schedule","fees","activities","groups","reminders"];
     arrayNames.forEach(function(name){ out[name]=mergeRecordArrays(primary&&primary[name],secondary&&secondary[name],function(item){return recordKey(item,name);}); });
+    /* شناسهٔ دانش‌آموزان حذف‌شده (سنگ‌قبر): هیچ نسخهٔ قدیمی نمی‌تواند آن‌ها را برگرداند. */
+    const tomb=new Set();
+    [primary,secondary].forEach(function(src){
+        if(src && Array.isArray(src.deletedStudentIds)) src.deletedStudentIds.forEach(function(x){ tomb.add(String(x)); });
+    });
+    out.deletedStudentIds=Array.from(tomb);
+    if(tomb.size){
+        out.students=(out.students||[]).filter(function(s){ return !(s && tomb.has(String(s.id))); });
+        arrayNames.forEach(function(name){
+            if(name==="students" || name==="groups") return;
+            out[name]=(out[name]||[]).filter(function(it){
+                return !(it && typeof it==="object" && it.studentId!==undefined && it.studentId!==null && tomb.has(String(it.studentId)));
+            });
+        });
+        out.groups=(out.groups||[]).map(function(g){ return Array.isArray(g) ? g.filter(function(id){ return !tomb.has(String(id)); }) : g; });
+    }
     return out;
 }
 function mergeDatabasesSafely(primary,secondary){
@@ -3818,6 +3820,8 @@ async function restoreCanonicalRosters(username,data){
                     const old=oldStudents.find(function(o){return String(o&&o.id)===String(st&&st.id);});
                     return old ? mergeScalarObjects(st,old) : st;
                 });
+                const tombIds=new Set((Array.isArray(data[k].deletedStudentIds)?data[k].deletedStudentIds:[]).map(String));
+                if(tombIds.size) data[k].students=data[k].students.filter(function(st){ return !tombIds.has(String(st.id)); });
                 const keepIds=new Set(data[k].students.map(function(st){return String(st.id);}));
                 ["attendance","homework","evaluations","grades","portfolio","parents","interests","attention"].forEach(function(arrayName){
                     if(Array.isArray(data[k][arrayName])){
@@ -3874,7 +3878,7 @@ async function loadDatabaseForAccount(username){
         try{ await writeMigrationBackup(username,beforeMigration,fromSchema); }catch(e){ console.warn("Migration backup skipped",e); }
     }
 
-    localStorage.setItem(SESSION_STORAGE_KEY,username);
+    rememberSession(username);
     await saveDatabase();
 
 }
@@ -3966,7 +3970,6 @@ async function loginOfflineAccount(){
     if(CLOUD_ENDPOINT && cloudToken()) await cloudInitialSync(account.username);
     database=await restoreCanonicalRosters(account.username,database);
     await saveDatabase();
-    try{ localStorage.setItem(SESSION_STORAGE_KEY,account.username); }catch(e){}
     enterAuthenticatedApp();
 }
 function enterAuthenticatedApp(){
@@ -4000,7 +4003,7 @@ async function changeCurrentAccountCredentials(){
     localStorage.removeItem(oldKey); localStorage.removeItem(newKey);
     current.username=newUsername; current.passwordHash=hash; current.updatedAt=Date.now();
     await saveAuthAccounts(accounts);
-    activeAccountUsername=newUsername; localStorage.setItem(SESSION_STORAGE_KEY,newUsername);
+    activeAccountUsername=newUsername; rememberSession(newUsername);
     document.getElementById("accountNewPassword").value="";
     updateAccountSecurityFields();
     const name=teacherFullName(); if(document.getElementById("headerTeacherName"))document.getElementById("headerTeacherName").textContent=name;
@@ -4008,34 +4011,40 @@ async function changeCurrentAccountCredentials(){
 }
 function logoutOfflineAccount(){
     if(!activeAccountUsername)return;
-    activeAccountUsername=""; currentClass=null; localStorage.removeItem(SESSION_STORAGE_KEY); setCloudToken(""); showAuthOverlay(); showAuthMode("login");
+    activeAccountUsername=""; currentClass=null; try{ localStorage.removeItem(SESSION_STORAGE_KEY); localStorage.removeItem(LAST_USER_KEY); localStorage.setItem(LOGGED_OUT_KEY,"1"); }catch(e){} setCloudToken(""); showAuthOverlay(); showAuthMode("login");
     const u=document.getElementById("authLoginUsername"); const pw=document.getElementById("authLoginPassword"); if(u)u.value="";if(pw)pw.value="";
     setAuthMessage("authLoginMessage","از حساب خارج شدید.","success");
 }
 async function initializeOfflineAuth(){
-    const accounts=await getAuthAccounts();
-    let session="";
-    try{ session=normalizeAccountUsername(localStorage.getItem(SESSION_STORAGE_KEY)||""); }catch(e){}
-
-    /* نشست قبلی را فقط در صورتی خودکار بازیابی می‌کنیم که حساب واقعاً وجود داشته باشد. */
-    const matchedAccount=accounts.find(function(a){
-        return String(a.username||"").toLowerCase()===session.toLowerCase();
-    });
-
-    if(matchedAccount){
-        try{
-            await loadDatabaseForAccount(matchedAccount.username);
-            database=await restoreCanonicalRosters(matchedAccount.username,database);
-            await saveDatabase();
-            enterAuthenticatedApp();
-            return;
-        }catch(e){
-            console.error("Automatic account restore failed:",e);
+    /* درخواست ذخیره‌سازی ماندگار پیش از هر کار دیگر، تا مرورگر/WebView داده‌ها را خودسرانه پاک نکند. */
+    try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){}); }catch(e){}
+    let accounts=[];
+    try{ accounts=await getAuthAccounts(); }catch(e){ console.warn("Accounts read failed",e); }
+    let loggedOut=false, candidate="";
+    try{
+        loggedOut = localStorage.getItem(LOGGED_OUT_KEY)==="1";
+        candidate = localStorage.getItem(SESSION_STORAGE_KEY) || localStorage.getItem(LAST_USER_KEY) || "";
+    }catch(e){}
+    const exists=function(u){ return !!u && accounts.some(function(a){return a.username===u;}); };
+    /* ورود خودکار: فقط اگر کاربر آگاهانه «خروج از حساب» را نزده باشد. */
+    if(!loggedOut){
+        if(!exists(candidate) && accounts.length===1) candidate=accounts[0].username;
+        if(exists(candidate)){
+            for(let attempt=0; attempt<2; attempt++){
+                try{
+                    await loadDatabaseForAccount(candidate);
+                    database=await restoreCanonicalRosters(candidate,database);
+                    await saveDatabase();
+                    enterAuthenticatedApp();
+                    return;
+                }catch(e){
+                    console.error("Auto sign-in attempt failed",attempt,e);
+                    await new Promise(function(r){setTimeout(r,400);});
+                }
+            }
         }
     }
-
-    showAuthOverlay();
-    showAuthMode(accounts.length?"login":"register");
+    showAuthOverlay(); showAuthMode(accounts.length?"login":"register");
 }
 
 /* =====================================================
@@ -5425,7 +5434,7 @@ function changeStudentPhoto(id){
    حذف عکس دانش آموز
 ===================================================== */
 
-function removeStudentPhoto(id){
+async function removeStudentPhoto(id){
 
     const student =
         getStudent(id);
@@ -5439,9 +5448,7 @@ function removeStudentPhoto(id){
 
 
     if(
-        !confirm(
-            "عکس این دانش‌آموز حذف شود؟"
-        )
+        !(await appConfirm("عکس این دانش‌آموز حذف شود؟"))
     ){
 
         return;
@@ -5462,76 +5469,81 @@ function removeStudentPhoto(id){
    حذف دانش آموز
 ===================================================== */
 
+/* پنجرهٔ تأیید داخلی؛ confirm() بومی در بسیاری از WebViewهای اندروید همیشه «انصراف» برمی‌گرداند. */
+function appConfirm(message,okText){
+    return new Promise(function(resolve){
+        try{
+            const ov=document.createElement("div");
+            ov.setAttribute("dir","rtl");
+            ov.style.cssText="position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:18px;font-family:inherit";
+            const box=document.createElement("div");
+            box.style.cssText="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:right;line-height:1.9";
+            const p=document.createElement("div");
+            p.style.cssText="font-size:16px;color:#263238;margin-bottom:18px;white-space:pre-line";
+            p.textContent=message;
+            const row=document.createElement("div");
+            row.style.cssText="display:flex;gap:10px";
+            function done(v){ try{ov.remove();}catch(e){} resolve(v); }
+            const yes=document.createElement("button");
+            yes.type="button"; yes.textContent=okText||"بله، حذف شود";
+            yes.style.cssText="flex:1;border:0;border-radius:12px;padding:12px;background:#e53935;color:#fff;font-size:15px;cursor:pointer;font-family:inherit";
+            const no=document.createElement("button");
+            no.type="button"; no.textContent="انصراف";
+            no.style.cssText="flex:1;border:0;border-radius:12px;padding:12px;background:#eceff1;color:#263238;font-size:15px;cursor:pointer;font-family:inherit";
+            yes.onclick=function(){done(true);}; no.onclick=function(){done(false);};
+            ov.onclick=function(ev){ if(ev.target===ov) done(false); };
+            row.appendChild(yes); row.appendChild(no); box.appendChild(p); box.appendChild(row); ov.appendChild(box);
+            document.body.appendChild(ov);
+        }catch(e){ resolve(window.confirm(message)); }
+    });
+}
+
 async function deleteStudent(id){
+    const ok = await appConfirm("آیا از حذف این دانش‌آموز مطمئن هستید؟\nسوابق حضور، تکلیف، ارزشیابی و سایر اطلاعات وابسته به او هم حذف می‌شود.");
+    if(!ok) return false;
 
-    if(
-        !confirm(
-            "آیا از حذف این دانش‌آموز مطمئن هستید؟"
-        )
-    ){
+    const data = getClassData();
+    const sid = String(id);
+    const beforeCount = Array.isArray(data.students) ? data.students.length : 0;
+    data.students = (data.students || []).filter(function(student){ return String(student.id) !== sid; });
+    if(data.students.length === beforeCount) return false;
 
-        return;
+    /* سنگ‌قبر: این شناسه دیگر هرگز از نسخه‌های قدیمی/پشتیبان برنمی‌گردد. */
+    if(!Array.isArray(data.deletedStudentIds)) data.deletedStudentIds = [];
+    if(data.deletedStudentIds.indexOf(sid) === -1) data.deletedStudentIds.push(sid);
 
-    }
-
-
-    const data =
-        getClassData();
-
-
-    const relatedArrays = [
-
-        "attendance",
-
-        "homework",
-
-        "evaluations",
-
-        "grades",
-
-        "portfolio",
-
-        "parents",
-
-        "interests",
-
-        "attention"
-
-    ];
-
-
-    data.students =
-        data.students.filter(function(student){
-
-            return String(student.id) !== String(id);
-
-        });
-
-
-    relatedArrays.forEach(function(arrayName){
-
-        if(!data[arrayName]){
+    /* همهٔ سوابق وابسته (هر آرایه‌ای که studentId دارد) + عضویت در گروه‌ها */
+    Object.keys(data).forEach(function(key){
+        if(key === "students" || key === "deletedStudentIds" || !Array.isArray(data[key])) return;
+        if(key === "groups"){
+            data.groups = data.groups.map(function(g){ return Array.isArray(g) ? g.filter(function(x){ return String(x) !== sid; }) : g; });
             return;
         }
-
-
-        data[arrayName] =
-            data[arrayName].filter(function(item){
-
-                return String(item.studentId) !== String(id);
-
-            });
-
+        data[key] = data[key].filter(function(item){
+            return !(item && typeof item === "object" && item.studentId !== undefined && item.studentId !== null && String(item.studentId) === sid);
+        });
     });
 
-    if(activeAccountUsername && currentClass){
-        await persistCanonicalRoster(activeAccountUsername,String(currentClass),data.students);
+    /* ۱) اول ذخیرهٔ پایدار (تا خطای احتمالی نمایش، جلوی ذخیره را نگیرد) */
+    let saved = true;
+    try{
+        if(activeAccountUsername && currentClass){
+            await persistCanonicalRoster(activeAccountUsername, String(currentClass), data.students);
+        }
+        await saveDatabase();
+    }catch(error){
+        saved = false;
+        console.error("خطا در ذخیره حذف دانش‌آموز:", error);
     }
-    await saveDatabase();
 
-    refreshAll();
-    renderTeacherCardSafe();
+    /* ۲) سپس به‌روزرسانی رابط؛ هر مرحله مستقل و محافظت‌شده */
+    [renderStudents, refreshStudentSelectorsSafely, updateDashboard, renderTeacherCardSafe].forEach(function(fn){
+        try{ if(typeof fn === "function") fn(); }catch(error){ console.warn("Refresh after student deletion failed:", error); }
+    });
+    try{ refreshAll(); }catch(error){ console.warn("refreshAll after student deletion failed:", error); }
 
+    if(!saved) alert("دانش‌آموز از فهرست حذف شد، اما ذخیرهٔ تغییرات با مشکل روبه‌رو شد. لطفاً یک بار دیگر تلاش کنید.");
+    return false;
 }
 
 
@@ -5683,8 +5695,9 @@ function renderStudents(){
 
 
                     <button
+                        type="button"
                         class="btn btn-danger btn-small"
-                        onclick="deleteStudent('${student.id}')"
+                        onclick="deleteStudent('${student.id}'); return false;"
                     >
                         🗑️ حذف دانش‌آموز
                     </button>
