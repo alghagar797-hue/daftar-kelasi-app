@@ -3437,7 +3437,8 @@ async function saveAuthAccounts(accounts){
     return new Promise(function(resolve,reject){
         const tx=db.transaction(ACCOUNT_META_STORE,"readwrite");
         const store=tx.objectStore(ACCOUNT_META_STORE);
-        store.clear();
+        // ذخیره مستقیم حساب‌ها بدون پاک کردن کل جدول
+        // تا در صورت خطا یا قطع عملیات، حساب‌های قبلی از بین نروند.
         (accounts||[]).forEach(function(account){store.put(account)});
         tx.oncomplete=function(){
             try{localStorage.removeItem(AUTH_STORAGE_KEY)}catch(e){}
@@ -3771,12 +3772,12 @@ async function loadDatabaseForAccount(username){
     try{ accountLegacy=await readJsonStorage(accountDataKey(username)); }catch(e){}
     try{ globalLegacy=await readJsonStorage(STORAGE_KEY); }catch(e){}
 
-    // اولویت با نسخه پشتیبان محلیِ همان حساب است؛ اگر وجود نداشت، IndexedDB
-    // منبع اصلی خواهد بود. این ترتیب مانع برگشتن فهرست قدیمی دانش‌آموزان
-    // در زمان باز شدن دوباره برنامه می‌شود.
+    // IndexedDB منبع اصلی اطلاعات است.
+    // LocalStorage فقط برای مهاجرت نسخه‌های قدیمی استفاده می‌شود.
+    // این ترتیب از برگشت اطلاعات قدیمی و خالی شدن فهرست دانش‌آموزان جلوگیری می‌کند.
     const sources=[];
-    if(accountLegacy) sources.push(accountLegacy);
     if(accountDb) sources.push(accountDb);
+    if(accountLegacy) sources.push(accountLegacy);
     const accounts=await getAuthAccounts();
     if(sources.length===0 && (accounts.length===1 || !accountDb) && globalLegacy) sources.push(globalLegacy);
 
