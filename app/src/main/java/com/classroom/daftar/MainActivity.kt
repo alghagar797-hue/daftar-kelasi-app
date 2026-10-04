@@ -42,6 +42,9 @@ class MainActivity : Activity() {
     private var recordingType: String? = null
     private var recordingFile: File? = null
 
+    /** یک روش تشخیص گفتار: زبان + اینکه روی خود گوشی (آفلاین) باشد یا سرویس آنلاین گوگل. */
+    private data class SpeechAttempt(val lang: String, val onDevice: Boolean)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestAudioPermissionIfNeeded()
@@ -240,12 +243,16 @@ class MainActivity : Activity() {
             return
         }
         if (!android.speech.SpeechRecognizer.isRecognitionAvailable(this)) {
-            sendStatus(textareaId, "❌ سرویس تشخیص گفتار اندروید روی این گوشی در دسترس نیست.")
+            sendStatus(
+                textareaId,
+                "❌ سرویس تشخیص گفتار روی این گوشی در دسترس نیست. برنامه Google را نصب/به‌روز کنید و در تنظیمات، «Speech Services by Google» را پیش‌فرض بگذارید."
+            )
             return
         }
 
         speechCountdownRunnable?.let { speechHandler.removeCallbacks(it) }
         speechRecognizer?.destroy()
+        speechRecognizer = null
         pendingTextareaId = textareaId
 
         var remaining = 3
@@ -266,37 +273,96 @@ class MainActivity : Activity() {
         speechHandler.postDelayed(countdown, 1000L)
     }
 
-    private fun startPersianSpeechRecognition(textareaId: String) {
+    /**
+     * ترتیب تلاش‌ها:
+     *  ۱) سرویس آنلاین گوگل با fa-IR
+     *  ۲) سرویس آنلاین گوگل با fa  (بعضی گوشی‌ها فقط همین را می‌پذیرند)
+     *  ۳) تشخیص روی خود گوشی (آفلاین) در صورت وجود، مثلاً وقتی اینترنت نیست
+     */
+    private fun buildSpeechAttempts(): List<SpeechAttempt> {
+        val list = mutableListOf(
+            SpeechAttempt("fa-IR", false),
+            SpeechAttempt("fa", false)
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            android.speech.SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
+            list.add(SpeechAttempt("fa-IR", true))
+        }
+        return list
+    }
+
+    private fun startPersianSpeechRecognition(
+        textareaId: String,
+        attempts: List<SpeechAttempt> = buildSpeechAttempts(),
+        index: Int = 0
+    ) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             sendStatus(textareaId, "❌ اجازه میکروفون داده نشده است.")
             return
         }
-        val recognizer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            android.speech.SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
-            android.speech.SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
-        } else {
-            android.speech.SpeechRecognizer.createSpeechRecognizer(this)
+        val attempt = attempts[index]
+
+        speechRecognizer?.destroy()
+        speechRecognizer = null
+
+        val recognizer = try {
+            if (attempt.onDevice && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                android.speech.SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
+            } else {
+                android.speech.SpeechRecognizer.createSpeechRecognizer(this)
+            }
+        } catch (e: Exception) {
+            if (index + 1 < attempts.size) {
+                speechHandler.post { startPersianSpeechRecognition(textareaId, attempts, index + 1) }
+            } else {
+                sendStatus(textareaId, "❌ شروع تشخیص گفتار ممکن نشد.")
+            }
+            return
         }
         speechRecognizer = recognizer
+
         recognizer.setRecognitionListener(object : android.speech.RecognitionListener {
             override fun onReadyForSpeech(params: Bundle?) { sendStatus(textareaId, "🎙️ در حال شنیدن گفتار فارسی... صحبت کنید") }
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(rmsdB: Float) {}
             override fun onBufferReceived(buffer: ByteArray?) {}
             override fun onEndOfSpeech() { sendStatus(textareaId, "⏳ در حال تبدیل گفتار به متن...") }
+
             override fun onError(error: Int) {
+                // کالبک‌های دیرهنگام یک تشخیص‌دهندهٔ قدیمی را نادیده بگیر
+                if (speechRecognizer !== recognizer) return
+
+                val languageProblem = (error == 12 || error == 13)   // زبان پشتیبانی نمی‌شود / در دسترس نیست
+                val networkProblem = (error == 1 || error == 2 || error == 4 || error == 11)
+
+                // روش بعدی: برای مشکل زبان، روش بعدی؛ برای مشکل شبکه، مستقیم تشخیص آفلاین
+                val nextIndex = when {
+                    languageProblem && index + 1 < attempts.size -> index + 1
+                    networkProblem -> attempts.indexOfFirst { it.onDevice }.takeIf { it > index } ?: -1
+                    else -> -1
+                }
+                if (nextIndex != -1) {
+                    sendStatus(textareaId, "🎙️ تلاش با روش دیگر تشخیص گفتار...")
+                    speechHandler.post { startPersianSpeechRecognition(textareaId, attempts, nextIndex) }
+                    return
+                }
+
                 val msg = when (error) {
-                    1, 2 -> "❌ تشخیص آفلاین در این گوشی در دسترس نیست یا موتور گفتار پاسخ نداد."
+                    1, 2, 4, 11 -> "❌ برای تبدیل گفتار به متن به اینترنت نیاز است. اتصال را بررسی کنید."
                     3 -> "❌ خطای میکروفون."
+                    5 -> return   // لغو داخلی؛ پیام نشان نده
                     6, 7 -> "❌ صدایی شنیده نشد. دوباره و واضح‌تر بگویید."
                     8 -> "❌ سرویس مشغول است. چند ثانیه بعد تلاش کنید."
                     9 -> "❌ اجازه میکروفون داده نشده است."
-                    12, 13 -> "❌ زبان فارسی روی این گوشی فعال نیست. زبان فارسی گفتار را در تنظیمات گوشی فعال کنید."
+                    10 -> "❌ درخواست‌ها زیاد بود. چند ثانیه صبر کنید."
+                    12, 13 -> "❌ تشخیص گفتار فارسی روی این گوشی در دسترس نیست. برنامه Google را به‌روز کنید و در تنظیمات تایپ صوتی گوگل، فارسی را اضافه کنید."
                     else -> "❌ تشخیص گفتار انجام نشد (کد $error)."
                 }
                 sendStatus(textareaId, msg)
             }
+
             override fun onResults(results: Bundle?) {
+                if (speechRecognizer !== recognizer) return
                 val texts = results?.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION)
                 val text = texts?.firstOrNull().orEmpty()
                 if (text.isBlank()) { sendStatus(textareaId, "❌ صدایی شنیده نشد. دوباره تلاش کنید."); return }
@@ -307,15 +373,19 @@ class MainActivity : Activity() {
             override fun onPartialResults(partialResults: Bundle?) {}
             override fun onEvent(eventType: Int, params: Bundle?) {}
         })
+
         val intent = Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, "fa-IR")
-            putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "fa-IR")
+            putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, attempt.lang)
+            putExtra(android.speech.RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
             putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 3)
             putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            putExtra(android.speech.RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+            // آفلاین فقط در آخرین روش اجباری می‌شود، نه همیشه
+            if (attempt.onDevice) putExtra(android.speech.RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
         }
-        try { recognizer.startListening(intent) } catch (e: Exception) {
+        try {
+            recognizer.startListening(intent)
+        } catch (e: Exception) {
             sendStatus(textareaId, "❌ شروع تشخیص گفتار ممکن نشد.")
         }
     }
