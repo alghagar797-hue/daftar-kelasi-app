@@ -11,8 +11,10 @@ android {
         applicationId 'com.classroom.daftar'
         minSdk 23
         targetSdk 36
-        versionCode 17
-        versionName '5.2.0'
+
+        // Version 5.2.1
+        versionCode 18
+        versionName '5.2.1'
     }
 
     compileOptions {
@@ -32,12 +34,17 @@ android {
             def keyPasswordProp = System.getenv('DAFTAR_KEY_PASSWORD')
 
             if (!storeFileProp || !storePasswordProp || !keyAliasProp || !keyPasswordProp) {
-                throw new GradleException('Release signing credentials are missing. Configure the GitHub Actions secrets before building a release APK.')
+                throw new GradleException(
+                    'Release signing credentials are missing. Configure the GitHub Actions secrets before building a release APK.'
+                )
             }
 
             def keystore = file(storeFileProp)
+
             if (!keystore.exists() || !keystore.isFile()) {
-                throw new GradleException('Release keystore file does not exist: ' + storeFileProp)
+                throw new GradleException(
+                    'Release keystore file does not exist: ' + storeFileProp
+                )
             }
 
             storeFile keystore
@@ -50,6 +57,7 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
+
             minifyEnabled false
             shrinkResources false
             debuggable false
