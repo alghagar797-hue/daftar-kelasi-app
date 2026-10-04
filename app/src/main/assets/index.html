@@ -3649,7 +3649,8 @@ async function restoreRosterFromIDB(username,data){
     }
     return data;
 }
-async function persistCurrentRoster(){
+async function persistCurrentRoster()
+{console.log("SAVE CHECK", activeAccountUsername, currentClass, database);
     if(!activeAccountUsername || !currentClass || !database || !database[currentClass]) return;
     await saveRosterClass(activeAccountUsername,currentClass,database[currentClass].students || []);
 }
