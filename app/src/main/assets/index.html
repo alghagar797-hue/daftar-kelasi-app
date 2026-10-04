@@ -4444,6 +4444,17 @@ function getClassData(){
     if(!Array.isArray(database[currentClass].students)) database[currentClass].students = [];
     if(!Array.isArray(database[currentClass].attendance)) database[currentClass].attendance = [];
     if(!Array.isArray(database[currentClass].homework)) database[currentClass].homework = [];
+   if(!Array.isArray(database[currentClass].evaluations))
+    database[currentClass].evaluations = [];
+
+if(!Array.isArray(database[currentClass].grades))
+    database[currentClass].grades = [];
+
+if(!Array.isArray(database[currentClass].portfolio))
+    database[currentClass].portfolio = [];
+
+if(!Array.isArray(database[currentClass].goals))
+    database[currentClass].goals = [];
     return database[currentClass];
 
 }
