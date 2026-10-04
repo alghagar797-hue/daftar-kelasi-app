@@ -5299,13 +5299,12 @@ async function addStudent(){
     });
 
     // اول فهرست را در Store مستقل و پایدار ثبت کن؛ سپس Snapshot اصلی را ذخیره کن.
-    try{ await persistCurrentRoster(); }
-    catch(e){
-        console.error("Roster save failed",e);
-        alert("ذخیره فهرست دانش‌آموزان انجام نشد. لطفاً دوباره تلاش کنید.");
-        classData.students.pop();
-        return;
-    }
+    try { 
+    await persistCurrentRoster(); 
+}
+catch(e){
+    console.error("Roster save failed",e);
+}
     await saveDatabase();
 
     // بلافاصله همه بخش‌های وابسته به فهرست دانش‌آموزان را تازه‌سازی می‌کنیم.
