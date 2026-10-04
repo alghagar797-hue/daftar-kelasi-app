@@ -44,6 +44,7 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestAudioPermissionIfNeeded()
         setupWebView()
     }
 
@@ -64,12 +65,8 @@ class MainActivity : Activity() {
         webView.settings.allowFileAccessFromFileURLs = false
         webView.settings.allowUniversalAccessFromFileURLs = false
         webView.settings.databaseEnabled = true
-        webView.settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
-        webView.settings.loadsImagesAutomatically = true
-        webView.settings.blockNetworkImage = false
         webView.settings.safeBrowsingEnabled = true
         webView.settings.setSupportMultipleWindows(false)
-        webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
 
         val voiceDir = File(filesDir, "voice").apply { mkdirs() }
         val assetLoader = WebViewAssetLoader.Builder()
@@ -87,22 +84,6 @@ class MainActivity : Activity() {
                 assetLoader.shouldInterceptRequest(request.url)
             override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? =
                 assetLoader.shouldInterceptRequest(Uri.parse(url))
-
-            override fun onRenderProcessGone(view: WebView, detail: android.webkit.RenderProcessGoneDetail): Boolean {
-                // WebView renderer may be killed by Android on memory pressure. Recreate the
-                // renderer instead of allowing the whole Activity to appear broken.
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    runOnUiThread {
-                        try {
-                            view.stopLoading()
-                            view.destroy()
-                        } catch (_: Exception) {}
-                        if (!isFinishing && !isDestroyedCompat()) setupWebView()
-                    }
-                    return true
-                }
-                return false
-            }
         }
 
         webView.webChromeClient = object : WebChromeClient() {
@@ -290,9 +271,12 @@ class MainActivity : Activity() {
             sendStatus(textareaId, "❌ اجازه میکروفون داده نشده است.")
             return
         }
-        // از موتور استاندارد اندروید استفاده می‌کنیم تا اگر تشخیص آفلاین
-        // فارسی روی گوشی نصب نبود، موتور آنلاین سرویس گفتار بتواند کار کند.
-        val recognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(this)
+        val recognizer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            android.speech.SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
+            android.speech.SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
+        } else {
+            android.speech.SpeechRecognizer.createSpeechRecognizer(this)
+        }
         speechRecognizer = recognizer
         recognizer.setRecognitionListener(object : android.speech.RecognitionListener {
             override fun onReadyForSpeech(params: Bundle?) { sendStatus(textareaId, "🎙️ در حال شنیدن گفتار فارسی... صحبت کنید") }
@@ -329,7 +313,7 @@ class MainActivity : Activity() {
             putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "fa-IR")
             putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 3)
             putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            putExtra(android.speech.RecognizerIntent.EXTRA_PREFER_OFFLINE, false)
+            putExtra(android.speech.RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
         }
         try { recognizer.startListening(intent) } catch (e: Exception) {
             sendStatus(textareaId, "❌ شروع تشخیص گفتار ممکن نشد.")
@@ -343,26 +327,6 @@ class MainActivity : Activity() {
             if(s){s.textContent=${org.json.JSONObject.quote(message)};s.classList.remove("listening");}
         })();"""
         webView.evaluateJavascript(js, null)
-    }
-
-    private fun isDestroyedCompat(): Boolean {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && isDestroyed
-    }
-
-    override fun onTrimMemory(level: Int) {
-        super.onTrimMemory(level)
-        if (::webView.isInitialized && (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW || level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)) {
-            try { webView.clearHistory() } catch (_: Exception) {}
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -403,10 +367,6 @@ class MainActivity : Activity() {
         mediaRecorder = null
         speechRecognizer?.destroy()
         speechRecognizer = null
-        fileCallback?.onReceiveValue(null)
-        fileCallback = null
-        pendingWebPermission?.deny()
-        pendingWebPermission = null
         webView.destroy()
         super.onDestroy()
     }

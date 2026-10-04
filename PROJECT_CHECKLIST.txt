@@ -1,0 +1,14 @@
+DaftarKelasi v5.1.0 — checklist
+
+[OK] Android project structure
+[OK] WebViewAssetLoader
+[OK] JavaScript + DOM storage + IndexedDB
+[OK] Audio permission and recording bridge
+[OK] File chooser bridge
+[OK] Permanent release signing through GitHub Actions secrets
+[OK] IndexedDB account version 4 -> 5 downgrade bug fixed
+[OK] Student roster backup/restore path retained
+[OK] versionCode 17 / versionName 5.1.0
+
+IMPORTANT:
+Do not uninstall the previous app or clear its data when testing the upgrade.

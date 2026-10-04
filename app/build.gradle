@@ -11,8 +11,8 @@ android {
         applicationId 'com.classroom.daftar'
         minSdk 23
         targetSdk 36
-        versionCode 16
-        versionName '5.0.0'
+        versionCode 17
+        versionName '5.2.0'
     }
 
     compileOptions {
@@ -32,9 +32,7 @@ android {
             def keyPasswordProp = System.getenv('DAFTAR_KEY_PASSWORD')
 
             if (!storeFileProp || !storePasswordProp || !keyAliasProp || !keyPasswordProp) {
-                throw new GradleException(
-                    'Release signing credentials are missing. The GitHub Actions workflow must provide DAFTAR_KEYSTORE_FILE, DAFTAR_KEYSTORE_PASSWORD, DAFTAR_KEY_ALIAS and DAFTAR_KEY_PASSWORD.'
-                )
+                throw new GradleException('Release signing credentials are missing. Configure the GitHub Actions secrets before building a release APK.')
             }
 
             def keystore = file(storeFileProp)
@@ -60,7 +58,7 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.13.1'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.webkit:webkit:1.12.1'
+    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.webkit:webkit:1.13.0'
 }

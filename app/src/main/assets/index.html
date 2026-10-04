@@ -3451,7 +3451,7 @@ function openAccountDB(){
     if(accountDbPromise) return accountDbPromise;
     accountDbPromise = new Promise(function(resolve,reject){
         if(!window.indexedDB){ reject(new Error("IndexedDB پشتیبانی نمی‌شود.")); return; }
-        const req=indexedDB.open(ACCOUNT_DB_NAME,4);
+        const req=indexedDB.open(ACCOUNT_DB_NAME,5);
         req.onupgradeneeded=function(){
             const db=req.result;
             if(!db.objectStoreNames.contains(ACCOUNT_STORE)){
@@ -3557,9 +3557,13 @@ function restoreStudentRosterBackups(username,data){
         ["1","2","3","4","5","6","multi"].forEach(function(k){
             let roster=null;
             try{ roster=JSON.parse(localStorage.getItem(studentRosterBackupKey(username,k)) || "null"); }catch(e){}
-            if(!Array.isArray(roster) || !roster.length) return;
+            if(!Array.isArray(roster)) return;
             if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
-            data[k].students=mergeRecordArrays(data[k].students,roster,function(item){return recordKey(item,"students");});
+            if(roster.length===0){
+                data[k].students=[];
+            }else{
+                data[k].students=mergeRecordArrays(data[k].students,roster,function(item){return recordKey(item,"students");});
+            }
         });
     }catch(e){
         console.warn("Student roster restore skipped",e);
@@ -3644,10 +3648,9 @@ async function restoreRosterFromIDB(username,data){
     }
     return data;
 }
-async function persistCurrentRoster(){
-    // منبع اصلی ذخیره فهرست دانش‌آموزان، account database است.
-    // ذخیره جداگانه roster عمداً غیرفعال شده تا رکورد قدیمی دوباره برنگردد.
-    return Promise.resolve();
+async async function persistCurrentRoster(){
+    if(!activeAccountUsername || !currentClass || !database || !database[currentClass]) return;
+    await saveRosterClass(activeAccountUsername,currentClass,database[currentClass].students || []);
 }
 
 function setAuthMessage(id,text,type){const el=document.getElementById(id);if(!el)return;el.textContent=text||"";el.className="auth-message"+(type?" "+type:"");}
@@ -3738,16 +3741,7 @@ function recordKey(item,name){
 function mergeClassDataSafely(primary,secondary){
     const out=mergeScalarObjects(primary||{},secondary||{});
     const arrayNames=["students","attendance","homework","evaluations","grades","feedback","portfolio","goals","parents","interests","daily","weekly","budget","experiments","monthlyPerformance","attention","exams","schedule","fees","activities","groups","reminders"];
-    arrayNames.forEach(function(name){
-        if(name === "students") {
-            // فهرست دانش‌آموزان فقط از منبع اصلی می‌آید؛ merge کردن آن باعث بازگشت رکورد حذف‌شده می‌شود.
-            if(primary && Array.isArray(primary[name])) out[name]=cloneForSync(primary[name]);
-            else if(secondary && Array.isArray(secondary[name])) out[name]=cloneForSync(secondary[name]);
-            else out[name]=[];
-            return;
-        }
-        out[name]=mergeRecordArrays(primary&&primary[name],secondary&&secondary[name],function(item){return recordKey(item,name);});
-    });
+    arrayNames.forEach(function(name){ out[name]=mergeRecordArrays(primary&&primary[name],secondary&&secondary[name],function(item){return recordKey(item,name);}); });
     return out;
 }
 function mergeDatabasesSafely(primary,secondary){
@@ -3772,28 +3766,42 @@ async function loadDatabaseForAccount(username){
     let accountDb=null;
     try{ accountDb=await readAccountDatabase(username); }catch(e){ console.warn("Account DB read failed",e); }
 
-    // معماری جدید: اگر پایگاه حساب وجود دارد، همان تنها منبع اصلی است.
-    // localStorage فقط برای مهاجرت حساب‌های قدیمی و زمانی استفاده می‌شود که DB هنوز ساخته نشده باشد.
-    let legacy=null;
-    try{ legacy=await readJsonStorage(accountDataKey(username)); }catch(e){}
-    if(!accountDb){
-        try{ legacy=legacy || await readJsonStorage(STORAGE_KEY); }catch(e){}
-    }
+    let accountLegacy=null;
+    let globalLegacy=null;
+    try{ accountLegacy=await readJsonStorage(accountDataKey(username)); }catch(e){}
+    try{ globalLegacy=await readJsonStorage(STORAGE_KEY); }catch(e){}
 
-    const source=accountDb || legacy || createFreshDatabase();
-    const beforeMigration=cloneForSync(source);
-    const fromSchema=databaseSchemaVersion(source);
-    database=migrateDatabaseSafely(source);
+    // اولویت با نسخه پشتیبان محلیِ همان حساب است؛ اگر وجود نداشت، IndexedDB
+    // منبع اصلی خواهد بود. این ترتیب مانع برگشتن فهرست قدیمی دانش‌آموزان
+    // در زمان باز شدن دوباره برنامه می‌شود.
+    const sources=[];
+    if(accountLegacy) sources.push(accountLegacy);
+    if(accountDb) sources.push(accountDb);
+    const accounts=await getAuthAccounts();
+    if(sources.length===0 && (accounts.length===1 || !accountDb) && globalLegacy) sources.push(globalLegacy);
 
-    if(!accountDb && legacy){
+    let merged=null;
+    sources.filter(Boolean).forEach(function(source){ merged=mergeDatabasesSafely(merged,source); });
+
+    const beforeMigration = merged ? cloneForSync(merged) : null;
+    const versions=sources.filter(Boolean).map(databaseSchemaVersion);
+    const fromSchema=versions.length ? Math.min.apply(Math,versions) : 1;
+    database=migrateDatabaseSafely(merged);
+    // پشتیبان سبک فهرست دانش‌آموزان را هم وارد می‌کنیم تا وابستگی به Snapshot بزرگ کمتر شود.
+    database=restoreStudentRosterBackups(username,database);
+    // فهرست مستقل IndexedDB منبع اصلی فهرست دانش‌آموزان است.
+    database=await restoreRosterFromIDB(username,database);
+
+    // اگر داده‌ای از localStorage قدیمی یا حساب قدیمی پیدا شد، قبل از ذخیره نسخه جدید یک نسخه پشتیبان نگه می‌داریم.
+    if(beforeMigration && (fromSchema < APP_DATA_SCHEMA_VERSION || !!accountLegacy || !!globalLegacy)){
         try{ await writeMigrationBackup(username,beforeMigration,fromSchema); }catch(e){ console.warn("Migration backup skipped",e); }
     }
 
     activeAccountUsername=username;
     localStorage.setItem(SESSION_STORAGE_KEY,username);
     await saveDatabase();
-}
 
+}
 async function cloudRequest(path,options){
     if(!CLOUD_ENDPOINT) throw new Error("CLOUD_NOT_CONFIGURED");
     const opts=Object.assign({headers:{}},options||{});
@@ -4378,6 +4386,17 @@ function saveDatabase(){
             return Promise.resolve();
         }
         const username=activeAccountUsername;
+        // فهرست دانش‌آموزان باید بخشی از زنجیره ذخیره باشد؛
+        // هرگز آن را به صورت fire-and-forget ذخیره نمی‌کنیم.
+        if(currentClass && database[currentClass]){
+            jobs.push(
+                saveRosterClass(username,currentClass,database[currentClass].students)
+                .catch(function(e){
+                    console.error("Independent roster save failed",e);
+                    throw e;
+                })
+            );
+        }
         // ذخیره فوری و مستقل در localStorage: این نسخه به عنوان پشتیبان محلی
         // همیشه تازه نگه داشته می‌شود تا حتی در صورت تأخیر/مشکل IndexedDB،
         // اطلاعات دانش‌آموزان بعد از بستن WebView از بین نرود.
