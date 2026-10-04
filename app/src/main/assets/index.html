@@ -3649,7 +3649,7 @@ async function restoreRosterFromIDB(username,data){
     }
     return data;
 }
-async async function persistCurrentRoster(){
+async function persistCurrentRoster(){
     if(!activeAccountUsername || !currentClass || !database || !database[currentClass]) return;
     await saveRosterClass(activeAccountUsername,currentClass,database[currentClass].students || []);
 }
