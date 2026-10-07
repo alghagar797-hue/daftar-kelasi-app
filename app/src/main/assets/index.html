@@ -1553,7 +1553,7 @@ body{min-height:100dvh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scroll
 
 <div id="offlineAuthOverlay">
   <div class="auth-card">
-    <div class="auth-brand"><div class="logo">📚</div><h2>دفتر کلاسی من</h2><p>ورود امن و آماده کار آنلاین و آفلاین</p><div class="design-credit">طراح برنامه: <strong>محمد حسین ممشلی</strong></div></div>
+    <div class="auth-brand"><div class="logo">📚</div><h2>دفتر کلاسی من</h2><p>ورود امن و آماده کار آنلاین و آفلاین</p></div>
     <div class="auth-tabs">
       <button id="authLoginTab" class="auth-tab active" type="button" onclick="showAuthMode('login')">ورود</button>
       <button id="authRegisterTab" class="auth-tab" type="button" onclick="showAuthMode('register')">ساخت حساب</button>
@@ -1566,7 +1566,7 @@ body{min-height:100dvh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scroll
       <button class="auth-secondary" type="button" onclick="showAuthMode('register')">➕ ساخت حساب جدید برای یک معلم</button>
     </div>
     <div id="authRegisterPane" style="display:none">
-      <div class="auth-field"><label>نام کاربری دلخواه</label><input id="authRegisterUsername" autocomplete="username" placeholder="مثلاً teacher_mohammad"></div>
+      <div class="auth-field"><label>نام کاربری دلخواه</label><input id="authRegisterUsername" autocomplete="username" placeholder="مثلاً teacher_ali"></div>
       <div class="auth-field"><label>رمز عبور دلخواه</label><input id="authRegisterPassword" type="password" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر"></div>
       <div class="auth-field"><label>تکرار رمز عبور</label><input id="authRegisterPassword2" type="password" autocomplete="new-password" placeholder="رمز را دوباره وارد کنید"></div>
       <div id="authRegisterMessage" class="auth-message"></div>
@@ -1656,7 +1656,7 @@ onclick="goHome()"
      منوی برنامه
 ===================================================== -->
 
-<header class="smart-header" id="smartHeader"><div class="header-context"><button class="mobile-menu-btn" type="button" onclick="toggleSidebar()" aria-label="باز کردن منو">☰</button><div><div class="eyebrow">پنل مدیریت کلاس</div><h1 id="smartPageTitle">داشبورد</h1></div><span id="syncStatusPill" class="sync-pill offline"><i class="sync-dot"></i><span>آفلاین آماده</span></span></div><div class="header-actions"><div class="global-search"><button type="button" aria-label="جست‌وجو" onclick="focusGlobalSearch()" style="border:0;background:transparent;font-size:21px;cursor:pointer;color:#8b98aa;padding:0">⌕</button><input id="globalSearch" type="search" placeholder="جست‌وجو در بخش‌ها و ابزارها..." autocomplete="off" oninput="handleGlobalSearch(this.value)"><kbd>Ctrl K</kbd><div id="searchResults" class="search-results"></div></div><button class="icon-action notification-btn" type="button" onclick="toggleNotifications()">♢<i id="notificationBadge">0</i></button><button class="profile-chip" type="button" onclick="openHeaderProfile()"><span class="profile-avatar">م</span><span><b id="headerTeacherName">معلم</b><small>پروفایل</small></span></button></div><div id="notificationPanel" class="notification-panel"><div class="notification-head"><strong>اعلان‌ها</strong><button onclick="toggleNotifications()">×</button></div><div id="notificationContent" class="notification-content"></div></div></header><div class="page-workspace"><aside class="app-sidebar" id="appSidebar"><div class="sidebar-brand"><div class="brand-mark" aria-hidden="true">⌘</div><div><strong>دفتر کلاسی من</strong><small>Classroom Pro · Pro Edition</small><small style="margin-top:5px;color:#8ee7dc">طراح: محمد حسین ممشلی</small></div></div><div class="sidebar-nav-scroll"><div class="sidebar-caption">مدیریت کلاس</div><nav class="nav" id="mainNav"><button onclick="showSection('teacherProfile',this)" data-nav-label="👨‍🏫 کارتابل معلم"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🏫 کارتابل معلم</span></button><button class="active" onclick="showSection('dashboard',this)" data-nav-label="🏠 داشبورد"><span class="sb-icon">🏠 </span><span class="sb-label">🏠 داشبورد</span></button><button onclick="showSection('students',this)" data-nav-label="👨‍🎓 دانش‌آموزان"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🎓 دانش‌آموزان</span></button><button onclick="showSection('groups',this)" data-nav-label="👥 گروه‌بندی کلاس"><span class="sb-icon">👥</span><span class="sb-label">👥 گروه‌بندی کلاس</span></button><button onclick="showSection('attendance',this)" data-nav-label="📋 حضور و غیاب"><span class="sb-icon">📋 </span><span class="sb-label">📋 حضور و غیاب</span></button><button onclick="showSection('homework',this)" data-nav-label="📚 تکالیف"><span class="sb-icon">📚 </span><span class="sb-label">📚 تکالیف</span></button><button onclick="showSection('evaluation',this)" data-nav-label="⭐ ارزشیابی"><span class="sb-icon">⭐ </span><span class="sb-label">⭐ ارزشیابی</span></button><button onclick="showSection('feedback',this)" data-nav-label="💬 بازخورد آموزشی"><span class="sb-icon">💬</span><span class="sb-label">💬 بازخورد آموزشی</span></button><button onclick="showSection('grades',this)" data-nav-label="📝 ارزشیابی کیفی"><span class="sb-icon">📝 </span><span class="sb-label">📝 ارزشیابی کیفی</span></button><button onclick="showSection('portfolio',this)" data-nav-label="📁 پوشه‌کار"><span class="sb-icon">📁 </span><span class="sb-label">📁 پوشه‌کار</span></button><button onclick="showSection('experiments',this)" data-nav-label="🔬 آزمایش‌های علوم"><span class="sb-icon">🔬 </span><span class="sb-label">🔬 آزمایش‌های علوم</span></button><button onclick="showSection('monthly',this)" data-nav-label="📅 عملکرد ماهانه"><span class="sb-icon">📅 </span><span class="sb-label">📅 عملکرد ماهانه</span></button><button onclick="showSection('report',this)" data-nav-label="📊 وضعیت تحصیلی"><span class="sb-icon">📊 </span><span class="sb-label">📊 وضعیت تحصیلی</span></button><button onclick="showSection('goals',this)" data-nav-label="🎯 اهداف آموزشی"><span class="sb-icon">🎯 </span><span class="sb-label">🎯 اهداف آموزشی</span></button><button onclick="showSection('parents',this)" data-nav-label="👨‍👩‍👧 اطلاعات والدین"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍👩‍👧 اطلاعات والدین</span></button><button onclick="showSection('interests',this)" data-nav-label="❤️ علاقه‌مندی دانش‌آموز"><span class="sb-icon">❤️</span><span class="sb-label">❤️ علاقه‌مندی دانش‌آموز</span></button><button onclick="showSection('daily',this)" data-nav-label="📖 دفتر روزانه"><span class="sb-icon">📖 </span><span class="sb-label">📖 دفتر روزانه</span></button><button onclick="showSection('weekly',this)" data-nav-label="🗓️ برنامه هفتگی"><span class="sb-icon">🗓️</span><span class="sb-label">🗓️ برنامه هفتگی</span></button><button onclick="showSection('budget',this)" data-nav-label="⏱️ بودجه ساعات تدریس"><span class="sb-icon">📊 </span><span class="sb-label">⏱️ بودجه ساعات تدریس</span></button><button onclick="showSection('bookBudget',this)" data-nav-label="📘 بودجه‌بندی تدریس کتاب"><span class="sb-icon">📘</span><span class="sb-label">📘 بودجه‌بندی تدریس کتاب</span></button><button onclick="showSection('attention',this)" data-nav-label="⚠️ نیازمند توجه"><span class="sb-icon">⚠️</span><span class="sb-label">⚠️ نیازمند توجه</span></button><button onclick="showSection('backup',this)" data-nav-label="💾 پشتیبان"><span class="sb-icon">💾 </span><span class="sb-label">💾 پشتیبان</span></button></nav></div><div class="sidebar-footer"><button class="nav-logout-btn" type="button" onclick="logoutOfflineAccount()"><span class="sb-icon">🚪</span><span class="sb-label">🚪 خروج از حساب</span></button><button class="sidebar-collapse" type="button" onclick="toggleSidebar()"><span class="sb-icon">‹</span><span class="sb-label">جمع‌کردن منو</span></button></div></aside></div>
+<header class="smart-header" id="smartHeader"><div class="header-context"><button class="mobile-menu-btn" type="button" onclick="toggleSidebar()" aria-label="باز کردن منو">☰</button><div><div class="eyebrow">پنل مدیریت کلاس</div><h1 id="smartPageTitle">داشبورد</h1></div><span id="syncStatusPill" class="sync-pill offline"><i class="sync-dot"></i><span>آفلاین آماده</span></span></div><div class="header-actions"><div class="global-search"><button type="button" aria-label="جست‌وجو" onclick="focusGlobalSearch()" style="border:0;background:transparent;font-size:21px;cursor:pointer;color:#8b98aa;padding:0">⌕</button><input id="globalSearch" type="search" placeholder="جست‌وجو در بخش‌ها و ابزارها..." autocomplete="off" oninput="handleGlobalSearch(this.value)"><kbd>Ctrl K</kbd><div id="searchResults" class="search-results"></div></div><button class="icon-action notification-btn" type="button" onclick="toggleNotifications()">♢<i id="notificationBadge">0</i></button><button class="profile-chip" type="button" onclick="openHeaderProfile()"><span class="profile-avatar">م</span><span><b id="headerTeacherName">معلم</b><small>پروفایل</small></span></button></div><div id="notificationPanel" class="notification-panel"><div class="notification-head"><strong>اعلان‌ها</strong><button onclick="toggleNotifications()">×</button></div><div id="notificationContent" class="notification-content"></div></div></header><div class="page-workspace"><aside class="app-sidebar" id="appSidebar"><div class="sidebar-brand"><div class="brand-mark" aria-hidden="true">⌘</div><div><strong>دفتر کلاسی من</strong><small>Classroom Pro · Pro Edition</small></div></div><div class="sidebar-nav-scroll"><div class="sidebar-caption">مدیریت کلاس</div><nav class="nav" id="mainNav"><button onclick="showSection('teacherProfile',this)" data-nav-label="👨‍🏫 کارتابل معلم"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🏫 کارتابل معلم</span></button><button class="active" onclick="showSection('dashboard',this)" data-nav-label="🏠 داشبورد"><span class="sb-icon">🏠 </span><span class="sb-label">🏠 داشبورد</span></button><button onclick="showSection('students',this)" data-nav-label="👨‍🎓 دانش‌آموزان"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🎓 دانش‌آموزان</span></button><button onclick="showSection('studentFile',this)" data-nav-label="🗂️ کارتابل دانش‌آموز"><span class="sb-icon">🗂️</span><span class="sb-label">🗂️ کارتابل دانش‌آموز</span></button><button onclick="showSection('groups',this)" data-nav-label="👥 گروه‌بندی کلاس"><span class="sb-icon">👥</span><span class="sb-label">👥 گروه‌بندی کلاس</span></button><button onclick="showSection('attendance',this)" data-nav-label="📋 حضور و غیاب"><span class="sb-icon">📋 </span><span class="sb-label">📋 حضور و غیاب</span></button><button onclick="showSection('homework',this)" data-nav-label="📚 تکالیف"><span class="sb-icon">📚 </span><span class="sb-label">📚 تکالیف</span></button><button onclick="showSection('evaluation',this)" data-nav-label="⭐ ارزشیابی"><span class="sb-icon">⭐ </span><span class="sb-label">⭐ ارزشیابی</span></button><button onclick="showSection('feedback',this)" data-nav-label="💬 بازخورد آموزشی"><span class="sb-icon">💬</span><span class="sb-label">💬 بازخورد آموزشی</span></button><button onclick="showSection('grades',this)" data-nav-label="📝 ارزشیابی کیفی"><span class="sb-icon">📝 </span><span class="sb-label">📝 ارزشیابی کیفی</span></button><button onclick="showSection('portfolio',this)" data-nav-label="📁 پوشه‌کار"><span class="sb-icon">📁 </span><span class="sb-label">📁 پوشه‌کار</span></button><button onclick="showSection('experiments',this)" data-nav-label="🔬 آزمایش‌های علوم"><span class="sb-icon">🔬 </span><span class="sb-label">🔬 آزمایش‌های علوم</span></button><button onclick="showSection('monthly',this)" data-nav-label="📅 عملکرد ماهانه"><span class="sb-icon">📅 </span><span class="sb-label">📅 عملکرد ماهانه</span></button><button onclick="showSection('report',this)" data-nav-label="📊 وضعیت تحصیلی"><span class="sb-icon">📊 </span><span class="sb-label">📊 وضعیت تحصیلی</span></button><button onclick="showSection('goals',this)" data-nav-label="🎯 اهداف آموزشی"><span class="sb-icon">🎯 </span><span class="sb-label">🎯 اهداف آموزشی</span></button><button onclick="showSection('parents',this)" data-nav-label="👨‍👩‍👧 اطلاعات والدین"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍👩‍👧 اطلاعات والدین</span></button><button onclick="showSection('interests',this)" data-nav-label="❤️ علاقه‌مندی دانش‌آموز"><span class="sb-icon">❤️</span><span class="sb-label">❤️ علاقه‌مندی دانش‌آموز</span></button><button onclick="showSection('daily',this)" data-nav-label="📖 دفتر روزانه"><span class="sb-icon">📖 </span><span class="sb-label">📖 دفتر روزانه</span></button><button onclick="showSection('weekly',this)" data-nav-label="🗓️ برنامه هفتگی"><span class="sb-icon">🗓️</span><span class="sb-label">🗓️ برنامه هفتگی</span></button><button onclick="showSection('budget',this)" data-nav-label="⏱️ بودجه ساعات تدریس"><span class="sb-icon">📊 </span><span class="sb-label">⏱️ بودجه ساعات تدریس</span></button><button onclick="showSection('bookBudget',this)" data-nav-label="📘 بودجه‌بندی تدریس کتاب"><span class="sb-icon">📘</span><span class="sb-label">📘 بودجه‌بندی تدریس کتاب</span></button><button onclick="showSection('attention',this)" data-nav-label="⚠️ نیازمند توجه"><span class="sb-icon">⚠️</span><span class="sb-label">⚠️ نیازمند توجه</span></button><button onclick="showSection('backup',this)" data-nav-label="💾 پشتیبان"><span class="sb-icon">💾 </span><span class="sb-label">💾 پشتیبان</span></button></nav></div><div class="sidebar-footer"><button class="nav-logout-btn" type="button" onclick="logoutOfflineAccount()"><span class="sb-icon">🚪</span><span class="sb-label">🚪 خروج از حساب</span></button><button class="sidebar-collapse" type="button" onclick="toggleSidebar()"><span class="sb-icon">‹</span><span class="sb-label">جمع‌کردن منو</span></button></div></aside></div>
 
 <!-- =====================================================
      کارتابل معلم
@@ -1679,12 +1679,12 @@ onclick="goHome()"
 
             <div class="teacher-field">
                 <label>نام</label>
-                <input id="teacherFirstName" placeholder="مثلاً محمد حسین">
+                <input id="teacherFirstName" placeholder="مثلاً علی">
             </div>
 
             <div class="teacher-field">
                 <label>نام خانوادگی</label>
-                <input id="teacherLastName" placeholder="مثلاً ممشلی">
+                <input id="teacherLastName" placeholder="مثلاً رضایی">
             </div>
 
             <div class="teacher-field">
@@ -2038,6 +2038,8 @@ class="table-wrapper"
 <!-- =====================================================
      گروه‌بندی کلاس
 ===================================================== -->
+<section id="studentFile" class="section"><div class="card"><h2>🗂️ کارتابل دانش‌آموز</h2><label>دانش‌آموز</label><select id="studentFileSelect" onchange="renderStudentFileBody()"></select><div id="studentFileBody"></div></div></section>
+
 <section id="groups" class="section">
 <div class="card">
 <h2>👥 تقسیم‌بندی گروه‌های کلاس</h2>
@@ -3347,7 +3349,7 @@ onchange="importData(event)"
 
 <div class="footer">
 
-📚 دفتر کلاسی من | نسخه 4.1 حرفه‌ای معلم<br><span style="font-size:11px;opacity:.82">طراح برنامه: <strong>محمد حسین ممشلی</strong></span>
+📚 دفتر کلاسی من | نسخه 4.1 حرفه‌ای معلم
 
 </div>
 
@@ -4771,7 +4773,7 @@ function toggleSidebar(){
 
 function setupProfessionalNavigation(){
  const nav=document.getElementById('mainNav'); if(!nav||nav.dataset.grouped==='1') return;
- const groups={teacherProfile:'معلم و کلاس',dashboard:'معلم و کلاس',students:'معلم و کلاس',groups:'معلم و کلاس',attendance:'مدیریت روزانه',homework:'مدیریت روزانه',evaluation:'ارزشیابی و پرونده',feedback:'ارزشیابی و پرونده',grades:'ارزشیابی و پرونده',portfolio:'ارزشیابی و پرونده',experiments:'ارزشیابی و پرونده',monthly:'ارزشیابی و پرونده',report:'ارزشیابی و پرونده',goals:'ارزشیابی و پرونده',parents:'ارزشیابی و پرونده',interests:'ارزشیابی و پرونده',daily:'برنامه‌ریزی آموزشی',weekly:'برنامه‌ریزی آموزشی',budget:'برنامه‌ریزی آموزشی',bookBudget:'برنامه‌ریزی آموزشی',attention:'ابزارها و پشتیبان',backup:'ابزارها و پشتیبان'};
+ const groups={teacherProfile:'معلم و کلاس',dashboard:'معلم و کلاس',students:'معلم و کلاس',studentFile:'معلم و کلاس',groups:'معلم و کلاس',attendance:'مدیریت روزانه',homework:'مدیریت روزانه',evaluation:'ارزشیابی و پرونده',feedback:'ارزشیابی و پرونده',grades:'ارزشیابی و پرونده',portfolio:'ارزشیابی و پرونده',experiments:'ارزشیابی و پرونده',monthly:'ارزشیابی و پرونده',report:'ارزشیابی و پرونده',goals:'ارزشیابی و پرونده',parents:'ارزشیابی و پرونده',interests:'ارزشیابی و پرونده',daily:'برنامه‌ریزی آموزشی',weekly:'برنامه‌ریزی آموزشی',budget:'برنامه‌ریزی آموزشی',bookBudget:'برنامه‌ریزی آموزشی',attention:'ابزارها و پشتیبان',backup:'ابزارها و پشتیبان'};
  let last=''; Array.from(nav.querySelectorAll('button')).forEach(btn=>{const m=(btn.getAttribute('onclick')||'').match(/showSection\('([^']+)'/);const g=m&&groups[m[1]];if(g&&g!==last){const d=document.createElement('div');d.className='sidebar-group-label';d.textContent=g;nav.insertBefore(d,btn);last=g;}}); nav.dataset.grouped='1';
 }
 function updateMobileQuickbar(sectionId){document.querySelectorAll('#mobileQuickbar button[data-q-section]').forEach(b=>b.classList.toggle('active',b.dataset.qSection===sectionId));}
@@ -5694,7 +5696,9 @@ function renderStudents(){
                     }
 
 
-                    <button
+                    <button type="button" class="btn btn-green btn-small" onclick="openStudentFile('${student.id}')">🗂️ کارتابل</button>
+<button type="button" class="btn btn-blue btn-small" onclick="editStudent('${student.id}')">✏️ ویرایش</button>
+<button
                         type="button"
                         class="btn btn-danger btn-small"
                         onclick="deleteStudent('${student.id}'); return false;"
@@ -5944,15 +5948,6 @@ function renderAttendance(){
 
                 </td>
 
-                <td>
-                    <textarea
-                        id="homeworkFeedback_${student.id}"
-                        rows="2"
-                        placeholder="توضیح یا بازخورد معلم..."
-                        onblur="saveHomeworkFeedback('${student.id}')"
-                        style="width:100%;min-width:180px;box-sizing:border-box;"
-                    >${record ? escapeHTML(record.feedback || "") : ""}</textarea>
-                </td>
 
             </tr>
 
@@ -6166,6 +6161,16 @@ function renderHomework(){
 
                     </div>
 
+                </td>
+
+                <td>
+                    <textarea
+                        id="homeworkFeedback_${student.id}"
+                        rows="2"
+                        placeholder="توضیح یا بازخورد معلم..."
+                        onchange="saveHomeworkFeedback('${student.id}')"
+                        style="width:100%;min-width:180px;box-sizing:border-box;"
+                    >${record ? escapeHTML(record.feedback || "") : ""}</textarea>
                 </td>
 
             </tr>
@@ -6491,7 +6496,8 @@ function renderEvaluations(){
                     </button>
 
 
-                    <button
+                    <button class="btn btn-blue btn-small" onclick="editEvaluation(${item.id})">✏️</button>
+<button
                         class="btn btn-danger btn-small"
                         onclick="deleteEvaluation(${item.id})"
                     >
@@ -6678,7 +6684,8 @@ function renderGrades(){
 
                 <td>
 
-                    <button
+                    <button class="btn btn-blue btn-small" onclick="editGrade(${item.id})">✏️ ویرایش</button>
+<button
                         class="btn btn-danger btn-small"
                         onclick="deleteGrade(${item.id})"
                     >
@@ -6773,7 +6780,7 @@ function renderPortfolio(){
         const items=grouped[subject];
         html+=`<div class="portfolio-subject"><div class="portfolio-folder-head"><div><div class="portfolio-folder-icon">📂</div><div><div class="portfolio-subject-title">${escapeHTML(subject)}</div><div class="portfolio-folder-count">${items.length} نمونه‌کار</div></div></div><span class="portfolio-folder-badge">پوشه درس</span></div><div class="portfolio-folder-content">`;
         items.slice().reverse().forEach(function(item){
-            html+=`<div class="portfolio-item"><div class="portfolio-item-title">📄 ${escapeHTML(item.title)}</div><div class="portfolio-meta">📅 ${escapeHTML(formatPersianDate(item.date))} &nbsp; | &nbsp; ${item.sourceType==="evaluation" ? "⭐ ثبت شده از ارزشیابی" : "📝 ثبت دستی"}</div>${item.photo ? `<div class="portfolio-photo-box"><img src="${item.photo}" alt="عکس نمونه‌کار ${escapeHTML(item.title)}" loading="lazy"></div>` : ""}${item.notes ? `<div class="portfolio-note">${escapeHTML(item.notes)}</div>` : ""}<button class="btn btn-danger btn-small" onclick="deletePortfolio(${item.id})">🗑️ حذف از پوشه</button></div>`;
+            html+=`<div class="portfolio-item"><div class="portfolio-item-title">📄 ${escapeHTML(item.title)}</div><div class="portfolio-meta">📅 ${escapeHTML(formatPersianDate(item.date))} &nbsp; | &nbsp; ${item.sourceType==="evaluation" ? "⭐ ثبت شده از ارزشیابی" : "📝 ثبت دستی"}</div>${item.photo ? `<div class="portfolio-photo-box"><img src="${item.photo}" alt="عکس نمونه‌کار ${escapeHTML(item.title)}" loading="lazy"></div>` : ""}${item.notes ? `<div class="portfolio-note">${escapeHTML(item.notes)}</div>` : ""}<button class="btn btn-blue btn-small" onclick="editPortfolio(${item.id})">✏️ ویرایش</button><button class="btn btn-danger btn-small" onclick="deletePortfolio(${item.id})">🗑️ حذف از پوشه</button></div>`;
         });
         html+='</div></div>';
     });
@@ -9727,7 +9734,7 @@ function refreshAll(activeSectionId){
         ['renderStudents','renderGroups','renderAttendance','renderHomework','renderEvaluations','renderGrades','renderFeedback','renderPortfolio','renderReport','renderGoals','renderParents','renderInterests','renderDaily','renderWeekly','renderBudget','renderExperiments','renderMonthlyPerformance','renderAttention','updateDashboard'].forEach(function(name){try{if(typeof window[name]==='function') window[name]();}catch(e){console.warn('render failed:',name,e);}});
         return;
     }
-    const renderers={students:'renderStudents',groups:'renderGroups',attendance:'renderAttendance',homework:'renderHomework',evaluation:'renderEvaluations',evaluations:'renderEvaluations',grades:'renderGrades',feedback:'renderFeedback',portfolio:'renderPortfolio',report:'renderReport',goals:'renderGoals',parents:'renderParents',interests:'renderInterests',daily:'renderDaily',weekly:'renderWeekly',budget:'renderBudget',experiments:'renderExperiments',monthly:'renderMonthlyPerformance',attention:'renderAttention',dashboard:'updateDashboard',bookBudget:'renderBookBudget',teacherProfile:'renderTeacherProfile'};
+    const renderers={students:'renderStudents',groups:'renderGroups',attendance:'renderAttendance',homework:'renderHomework',evaluation:'renderEvaluations',evaluations:'renderEvaluations',grades:'renderGrades',feedback:'renderFeedback',portfolio:'renderPortfolio',report:'renderReport',goals:'renderGoals',parents:'renderParents',interests:'renderInterests',daily:'renderDaily',weekly:'renderWeekly',budget:'renderBudget',experiments:'renderExperiments',monthly:'renderMonthlyPerformance',attention:'renderAttention',dashboard:'updateDashboard',bookBudget:'renderBookBudget',teacherProfile:'renderTeacherProfile',studentFile:'renderStudentFile'};
     const fnName=renderers[activeSectionId];
     if(fnName && typeof window[fnName]==='function'){try{window[fnName]();}catch(e){console.warn('section render:',activeSectionId,e);}}
 }
@@ -9880,7 +9887,7 @@ function renderExperiments(){
         return '<div class="experiment-card">'+
             '<div class="experiment-head"><div><div class="experiment-title">🔬 '+escapeHTML(item.title)+'</div>'+
             '<div class="experiment-meta">📅 '+escapeHTML(formatPersianDate(item.date))+(item.page?' &nbsp;|&nbsp; 📖 '+escapeHTML(item.page):'')+'</div></div>'+
-            '<button class="btn btn-danger btn-small" onclick="deleteExperiment('+item.id+')">🗑️ حذف</button></div>'+
+            '<button class="btn btn-blue btn-small" onclick="editExperiment('+item.id+')">✏️ ویرایش</button>'+'<button class="btn btn-danger btn-small" onclick="deleteExperiment('+item.id+')">🗑️ حذف</button></div>'+
             '<div class="experiment-details">'+
               detail('🎯 هدف',item.goal)+detail('🧰 وسایل',item.materials)+detail('🧪 روش',item.method)+detail('💡 نتیجه',item.result)+detail('📝 توضیحات',item.notes)+
             '</div>'+(gallery?'<div class="experiment-gallery">'+gallery+'</div>':'')+'</div>';
@@ -9909,7 +9916,7 @@ document.addEventListener(
 // لایه پایدار رابط حرفه‌ای: آیکون‌های برداری و وضعیت اتصال بدون وابستگی به اینترنت
 (function(){
   const ICONS={
-    "کارتابل معلم":"👤","داشبورد":"⌂","دانش‌آموزان":"♟","گروه‌بندی کلاس":"♣","حضور و غیاب":"✓","تکالیف":"▤","ارزشیابی":"★","بازخورد آموزشی":"◌","ارزشیابی کیفی":"▣","پوشه‌کار":"▱","آزمایش‌های علوم":"⚗","عملکرد ماهانه":"◷","وضعیت تحصیلی":"▥","اهداف آموزشی":"◎","اطلاعات والدین":"♧","علاقه‌مندی دانش‌آموز":"♡","دفتر روزانه":"▥","برنامه هفتگی":"▦","بودجه ساعات تدریس":"◫","بودجه‌بندی تدریس کتاب":"▤","نیازمند توجه":"!","پشتیبان":"↥","خروج از حساب":"↪"
+    "کارتابل معلم":"👤","کارتابل دانش‌آموز":"▣","داشبورد":"⌂","دانش‌آموزان":"♟","گروه‌بندی کلاس":"♣","حضور و غیاب":"✓","تکالیف":"▤","ارزشیابی":"★","بازخورد آموزشی":"◌","ارزشیابی کیفی":"▣","پوشه‌کار":"▱","آزمایش‌های علوم":"⚗","عملکرد ماهانه":"◷","وضعیت تحصیلی":"▥","اهداف آموزشی":"◎","اطلاعات والدین":"♧","علاقه‌مندی دانش‌آموز":"♡","دفتر روزانه":"▥","برنامه هفتگی":"▦","بودجه ساعات تدریس":"◫","بودجه‌بندی تدریس کتاب":"▤","نیازمند توجه":"!","پشتیبان":"↥","خروج از حساب":"↪"
   };
   function setIcon(el,key){ if(!el) return; el.textContent=ICONS[key]||"•"; el.setAttribute("aria-hidden","true"); }
   function refreshIcons(){
@@ -9945,5 +9952,448 @@ document.addEventListener(
 <button type="button" data-q-menu="1" onclick="toggleSidebar();event.stopPropagation()"><span>☰</span>همه</button>
 </div>
 <script>window.addEventListener('load',function(){try{setupProfessionalNavigation();updateMobileQuickbar(document.querySelector('#app .section.active')?.id||'dashboard')}catch(e){console.warn('professional navigation:',e)}});</script>
+<style>
+/* ===== لایه ظاهر جدید (افزودنی؛ بدون حذف استایل‌های قبلی) ===== */
+.card{border-radius:18px;border:1px solid #e3ecee;box-shadow:0 1px 3px rgba(16,42,67,.06),0 10px 28px rgba(16,42,67,.05)}
+.card h2{font-size:20px}
+.btn{border-radius:10px;font-size:13px;padding:9px 14px}
+.btn-blue.btn-small,.btn-danger.btn-small,.btn-warning.btn-small{margin:2px}
+.table-wrapper{overflow-x:auto;border-radius:14px;border:1px solid #e6eef0}
+.table-wrapper table{border-collapse:separate;border-spacing:0;width:100%}
+.table-wrapper th{position:sticky;top:0;background:#eef7f7;color:#0b6b73;font-size:13px}
+.table-wrapper tr:nth-child(even) td{background:#fafdfd}
+.btn.is-current{outline:3px solid rgba(15,139,141,.4);outline-offset:1px;transform:scale(1.05)}
+textarea.saved-flash{border-color:#27ae60!important;box-shadow:0 0 0 3px rgba(39,174,96,.18)!important}
+.df-overlay{position:fixed;inset:0;z-index:100000;background:rgba(15,30,45,.55);display:flex;align-items:center;justify-content:center;padding:14px}
+.df-box{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:520px;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.df-box h3{margin:0 0 12px;color:#087f8c}.df-fields{display:grid;gap:10px}.df-actions{margin-top:14px;display:flex;gap:6px}
+.jc-box{background:#fff;border-radius:20px;padding:14px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.jc-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}
+.jc-head b{font-size:15px;color:#087f8c}.jc-head button{border:0;background:#eaf7f5;color:#087f8c;border-radius:10px;width:36px;height:36px;font-size:18px;cursor:pointer}
+.jc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.jc-grid span{font-size:11px;color:#78909c;padding:4px 0}
+.jc-grid button{border:0;background:#f5f9fa;border-radius:10px;height:38px;font-family:inherit;font-size:14px;cursor:pointer;color:#263238}
+.jc-grid button.sel{background:#16a085;color:#fff;font-weight:bold}.jc-grid button.today{outline:2px solid #3498db}.jc-grid button.fri{color:#e74c3c}
+.jc-foot{display:flex;gap:6px;margin-top:10px}.jc-foot button{flex:1}
+.sf-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}.sf-top img,.sf-ph{width:72px;height:72px;border-radius:50%;object-fit:cover;background:#eaf7f5;display:flex;align-items:center;justify-content:center;font-size:32px}
+.sf-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:12px}
+.sf-chip{background:#f3fafa;border:1px solid #dcefee;border-radius:14px;padding:10px;text-align:center}.sf-chip b{display:block;font-size:20px;color:#087f8c}.sf-chip small{color:#607d8b}
+.sf-sec{border:1px solid #e3ecee;border-radius:14px;margin-bottom:8px;background:#fff}.sf-sec summary{cursor:pointer;padding:12px 14px;font-weight:bold;color:#087f8c;list-style:none}
+.sf-sec summary i{font-style:normal;color:#78909c;font-weight:normal;font-size:12px;margin-right:6px}
+.sf-row{padding:9px 14px;border-top:1px solid #eef3f4;font-size:14px}.sf-row small{color:#78909c;display:block}
+@media(max-width:700px){.btn{padding:9px 11px}.card{padding:16px}}
+</style>
+<script>
+/* ===== ویرایش (مودال عمومی) ===== */
+function dfEdit(title,fields,save){
+ var old=document.getElementById('dfModal');if(old)old.remove();
+ var m=document.createElement('div');m.id='dfModal';m.className='df-overlay';
+ m.innerHTML='<div class="df-box" dir="rtl"><h3>'+escapeHTML(title)+'</h3><div class="df-fields">'+fields.map(function(f,i){
+  var v=escapeHTML(f.val==null?'':String(f.val)),c;
+  if(f.type==='textarea')c='<textarea id="dfF'+i+'">'+v+'</textarea>';
+  else if(f.type==='select')c='<select id="dfF'+i+'">'+f.opts.map(function(o){return '<option value="'+escapeHTML(o.v)+'"'+(o.v===String(f.val)?' selected':'')+'>'+escapeHTML(o.t)+'</option>'}).join('')+'</select>';
+  else c='<input id="dfF'+i+'" type="text" value="'+v+'"'+(f.type==='date'?' class="df-date"':'')+'>';
+  return '<div><label>'+f.label+'</label>'+c+'</div>'}).join('')+'</div><div class="df-actions"><button class="btn btn-primary" id="dfSave" type="button">💾 ذخیره تغییرات</button><button class="btn btn-gray" id="dfCancel" type="button">انصراف</button></div></div>';
+ document.body.appendChild(m);
+ m.querySelector('#dfCancel').onclick=function(){m.remove()};
+ m.onclick=function(e){if(e.target===m)m.remove()};
+ m.querySelector('#dfSave').onclick=function(){var vals=fields.map(function(f,i){return document.getElementById('dfF'+i).value});if(save(vals)!==false)m.remove()};
+}
+function dfOpts(id,cur){var o=Array.from((document.getElementById(id)||{options:[]}).options).map(function(x){return{v:x.value,t:x.textContent}});if(cur&&!o.some(function(x){return x.v===cur}))o.push({v:cur,t:cur});return o}
+function dfFind(col,id){return(getClassData()[col]||[]).find(function(x){return String(x.id)===String(id)})}
+function dfDate(v){return toPersianNumber(formatPersianDate(v)==='-'?'':formatPersianDate(v))}
+function editStudent(id){var s=getStudent(id);if(!s)return;
+ dfEdit('✏️ ویرایش دانش‌آموز',[{label:'نام',val:s.firstName},{label:'نام خانوادگی',val:s.lastName},{label:'پایه',type:'select',val:String(s.grade||''),opts:dfOpts('studentGrade',String(s.grade||''))},{label:'توضیحات',type:'textarea',val:s.notes||''}],function(v){
+  if(!v[0].trim()||!v[1].trim()){alert('نام و نام خانوادگی را وارد کنید.');return false}
+  s.firstName=v[0].trim();s.lastName=v[1].trim();s.grade=v[2];s.notes=v[3].trim();saveDatabase();
+  renderStudents();renderAttendance();renderHomework();try{refreshStudentSelectorsSafely()}catch(e){}updateDashboard();try{renderStudentFile()}catch(e){}});}
+function editEvaluation(id){var x=dfFind('evaluations',id);if(!x)return;
+ dfEdit('✏️ ویرایش ارزشیابی',[{label:'درس',val:x.subject},{label:'سطح',type:'select',val:x.level,opts:dfOpts('evaluationLevel',x.level)},{label:'تاریخ',type:'date',val:dfDate(x.date)},{label:'توضیحات',type:'textarea',val:x.notes||''}],function(v){
+  x.subject=v[0].trim();x.level=v[1];x.date=normalizePersianDate(v[2]);x.notes=cleanPersianText(v[3]);saveDatabase();renderEvaluations();updateDashboard()});}
+function editGrade(id){var x=dfFind('grades',id);if(!x)return;
+ dfEdit('✏️ ویرایش ارزشیابی کیفی',[{label:'درس',val:x.subject},{label:'سطح',type:'select',val:x.level,opts:dfOpts('gradeLevel',x.level)},{label:'تاریخ',type:'date',val:dfDate(x.date)},{label:'توضیحات',type:'textarea',val:x.notes||''}],function(v){
+  x.subject=v[0].trim();x.level=v[1];x.date=normalizePersianDate(v[2]);x.notes=cleanPersianText(v[3]);saveDatabase();renderGrades();updateDashboard()});}
+function editExperiment(id){var x=dfFind('experiments',id);if(!x)return;
+ dfEdit('✏️ ویرایش آزمایش',[{label:'عنوان',val:x.title},{label:'صفحه',val:x.page||''},{label:'تاریخ',type:'date',val:dfDate(x.date)},{label:'هدف',type:'textarea',val:x.goal||''},{label:'وسایل',type:'textarea',val:x.materials||''},{label:'روش',type:'textarea',val:x.method||''},{label:'نتیجه',type:'textarea',val:x.result||''},{label:'توضیحات',type:'textarea',val:x.notes||''}],function(v){
+  if(!v[0].trim()){alert('عنوان آزمایش را وارد کنید.');return false}
+  x.title=v[0].trim();x.page=v[1].trim();x.date=normalizePersianDate(v[2]);x.goal=v[3];x.materials=v[4];x.method=v[5];x.result=v[6];x.notes=v[7];saveDatabase();renderExperiments();updateDashboard()});}
+function editPortfolio(id){var x=dfFind('portfolio',id);if(!x)return;
+ dfEdit('✏️ ویرایش نمونه‌کار',[{label:'عنوان',val:x.title},{label:'تاریخ',type:'date',val:dfDate(x.date)},{label:'توضیحات',type:'textarea',val:x.notes||''}],function(v){
+  x.title=v[0].trim();x.date=normalizePersianDate(v[1]);x.notes=v[2];saveDatabase();renderPortfolio()});}
+function editFeedback(id){var x=dfFind('feedback',id);if(!x)return;
+ dfEdit('✏️ ویرایش بازخورد',[{label:'تاریخ',type:'date',val:dfDate(x.date)},{label:'درس / موضوع',val:x.subject||''},{label:'متن بازخورد',type:'textarea',val:x.notes||''}],function(v){
+  if(!v[2].trim()){alert('متن بازخورد را وارد کنید.');return false}
+  x.date=normalizePersianDate(v[0]);x.subject=v[1].trim();x.notes=cleanPersianText(v[2]);saveDatabase();renderFeedback()});}
+
+/* ===== بازخورد تکالیف: برجسته‌سازی وضعیت و تأیید ذخیره ===== */
+(function(){
+ var rh=renderHomework;renderHomework=function(){rh.apply(this,arguments);
+  document.querySelectorAll('#homeworkTable tr').forEach(function(tr){var b=tr.querySelector('b');if(!b)return;var st=b.textContent.trim();
+   tr.querySelectorAll('button').forEach(function(btn){if(btn.textContent.replace(/[^\u0600-\u06FF ]/g,'').trim()===st)btn.classList.add('is-current')})})};
+ var sf=saveHomeworkFeedback;saveHomeworkFeedback=function(id){sf.apply(this,arguments);var t=document.getElementById('homeworkFeedback_'+id);if(t){t.classList.add('saved-flash');setTimeout(function(){t.classList.remove('saved-flash')},1200)}};
+})();
+
+/* ===== تقویم شمسی ===== */
+(function(){
+ function div(a,b){return Math.trunc(a/b)}function mod(a,b){return a-div(a,b)*b}
+ function jalCal(jy){var br=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178],gy=jy+621,leapJ=-14,jp=br[0],jm,jump,leap,leapG,march,n,i;
+  for(i=1;i<br.length;i++){jm=br[i];jump=jm-jp;if(jy<jm)break;leapJ+=div(jump,33)*8+div(mod(jump,33),4);jp=jm}
+  n=jy-jp;leapJ+=div(n,33)*8+div(mod(n,33)+3,4);if(mod(jump,33)===4&&jump-n===4)leapJ++;
+  leapG=div(gy,4)-div((div(gy,100)+1)*3,4)-150;march=20+leapJ-leapG;if(jump-n<6)n=n-jump+div(jump+4,33)*33;
+  leap=mod(mod(n+1,33)-1,4);if(leap===-1)leap=4;return{leap:leap,gy:gy,march:march}}
+ function g2d(gy,gm,gd){var d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*mod(gm+9,12)+2,5)+gd-34840408;return d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752}
+ function d2g(j){var a=4*j+139361631;a+=div(div(4*j+183187720,146097)*3,4)*4-3908;var i=div(mod(a,1461),4)*5+308,gd=div(mod(i,153),5)+1,gm=mod(div(i,153),12)+1;return{gy:div(a,1461)-100100+div(8-gm,6),gm:gm,gd:gd}}
+ function j2d(jy,jm,jd){var r=jalCal(jy);return g2d(r.gy,3,r.march)+(jm-1)*31-div(jm,7)*(jm-7)+jd-1}
+ function d2j(j){var gy=d2g(j).gy,jy=gy-621,r=jalCal(jy),k=j-g2d(gy,3,r.march),jm,jd;
+  if(k>=0){if(k<=185){return{jy:jy,jm:1+div(k,31),jd:mod(k,31)+1}}k-=186}else{jy--;k+=179;if(r.leap===1)k++}
+  return{jy:jy,jm:7+div(k,30),jd:mod(k,30)+1}}
+ var MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+ function mlen(y,m){return m<=6?31:m<=11?30:(jalCal(y).leap===0?30:29)}
+ function p2(n){return String(n).padStart(2,'0')}
+ function today(){var d=new Date();return d2j(g2d(d.getFullYear(),d.getMonth()+1,d.getDate()))}
+ function parse(v){var s=String(v||'').replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/-/g,'/').split('/');
+  if(s.length===3&&+s[0]>1200&&+s[1]>=1&&+s[1]<=12&&+s[2]>=1)return{jy:+s[0],jm:+s[1],jd:+s[2]};return null}
+ function open(input){
+  var cur=parse(input.value),t=today(),y=(cur||t).jy,m=(cur||t).jm;
+  var ov=document.createElement('div');ov.className='df-overlay';ov.style.zIndex=100001;document.body.appendChild(ov);
+  function draw(){var first=(j2d(y,m,1)+2)%7,n=mlen(y,m),h='';
+   h+='<div class="jc-box" dir="rtl"><div class="jc-head"><button type="button" data-a="py">«</button><button type="button" data-a="pm">›</button><b>'+MN[m-1]+' '+toPersianNumber(y)+'</b><button type="button" data-a="nm">‹</button><button type="button" data-a="ny">»</button></div><div class="jc-grid">';
+   ['ش','ی','د','س','چ','پ','ج'].forEach(function(d){h+='<span>'+d+'</span>'});
+   for(var i=0;i<first;i++)h+='<span></span>';
+   for(var d=1;d<=n;d++){var c=[];if(cur&&cur.jy===y&&cur.jm===m&&cur.jd===d)c.push('sel');if(t.jy===y&&t.jm===m&&t.jd===d)c.push('today');if((first+d-1)%7===6)c.push('fri');
+    h+='<button type="button" data-d="'+d+'" class="'+c.join(' ')+'">'+toPersianNumber(d)+'</button>'}
+   h+='</div><div class="jc-foot"><button type="button" class="btn btn-blue" data-a="today">امروز</button><button type="button" class="btn btn-gray" data-a="close">بستن</button></div></div>';
+   ov.innerHTML=h}
+  function pick(Y,M,D){input.value=toPersianNumber(Y+'/'+p2(M)+'/'+p2(D));['input','change'].forEach(function(e){input.dispatchEvent(new Event(e,{bubbles:true}))});ov.remove()}
+  ov.onclick=function(e){var b=e.target.closest('button');if(e.target===ov){ov.remove();return}if(!b)return;
+   var a=b.dataset.a;if(b.dataset.d){pick(y,m,+b.dataset.d);return}
+   if(a==='close')ov.remove();else if(a==='today')pick(t.jy,t.jm,t.jd);
+   else{if(a==='pm'){m--;if(m<1){m=12;y--}}if(a==='nm'){m++;if(m>12){m=1;y++}}if(a==='py')y--;if(a==='ny')y++;draw()}};
+  draw();input.blur()}
+ function isDate(el){return el&&el.tagName==='INPUT'&&el.type==='text'&&(/Date$/.test(el.id)||el.classList.contains('df-date'))}
+ document.addEventListener('click',function(e){if(isDate(e.target)&&!document.querySelector('.jc-box'))open(e.target)});
+ document.addEventListener('focusin',function(e){if(isDate(e.target)){e.target.setAttribute('inputmode','none');if(!document.querySelector('.jc-box'))open(e.target)}});
+ window.openJalaliCalendar=open;
+})();
+
+/* ===== کارتابل دانش‌آموز ===== */
+function renderStudentFile(){var s=document.getElementById('studentFileSelect');if(!s)return;fillStudentSelect('studentFileSelect');renderStudentFileBody()}
+function openStudentFile(id){showSection('studentFile');var s=document.getElementById('studentFileSelect');if(s){s.value=String(id);renderStudentFileBody()}}
+function renderStudentFileBody(){
+ var box=document.getElementById('studentFileBody'),sel=document.getElementById('studentFileSelect');if(!box||!sel)return;
+ var st=getStudent(sel.value);if(!st){box.innerHTML='<div class="empty-box">یک دانش‌آموز را انتخاب کنید.</div>';return}
+ var d=getClassData(),id=String(st.id);
+ function mine(c){return(d[c]||[]).filter(function(x){return String(x.studentId)===id}).slice().reverse()}
+ function cnt(c,k,v){return mine(c).filter(function(x){return x[k]===v}).length}
+ var E=mine('evaluations'),F=mine('feedback'),H=mine('homework'),G=mine('grades'),M=mine('monthlyPerformance'),P=mine('portfolio'),PA=mine('parents'),IN=mine('interests');
+ function sec(t,arr,fn,open){return '<details class="sf-sec"'+(open?' open':'')+'><summary>'+t+' <i>'+toPersianNumber(arr.length)+' مورد</i></summary>'+(arr.length?arr.slice(0,10).map(function(x){return '<div class="sf-row">'+fn(x)+'</div>'}).join(''):'<div class="sf-row"><small>موردی ثبت نشده است.</small></div>')+'</details>'}
+ function dt(x){return '<small>'+escapeHTML(formatPersianDate(x.date))+'</small>'}
+ function chip(n,l){return '<div class="sf-chip"><b>'+toPersianNumber(n)+'</b><small>'+l+'</small></div>'}
+ box.innerHTML='<div class="sf-top">'+(st.photo?'<img src="'+st.photo+'" alt="">':'<div class="sf-ph">👤</div>')+'<div><b style="font-size:18px">'+escapeHTML(st.firstName+' '+st.lastName)+'</b><div style="color:#607d8b">'+escapeHTML(getStudentGradeLabel(st.grade))+(st.notes?' · '+escapeHTML(st.notes):'')+'</div></div><button class="btn btn-blue btn-small" type="button" onclick="editStudent(\''+id+'\')">✏️ ویرایش اطلاعات</button></div>'+
+ '<div class="sf-chips">'+chip(cnt('attendance','status','حاضر'),'حاضر')+chip(cnt('attendance','status','غایب'),'غایب')+chip(cnt('attendance','status','تأخیر'),'تأخیر')+chip(cnt('homework','status','انجام شد'),'تکلیف انجام‌شده')+chip(cnt('homework','status','ناقص')+cnt('homework','status','انجام نشده'),'تکلیف ناقص/نشده')+chip(P.length,'نمونه‌کار')+'</div>'+
+ sec('📚 تکالیف',H,function(x){return dt(x)+escapeHTML(x.status||'')+(x.feedback?' — '+escapeHTML(x.feedback):'')},true)+
+ sec('⭐ ارزشیابی',E,function(x){return dt(x)+'<b>'+escapeHTML(x.subject||'')+'</b> · '+escapeHTML(x.level||'')+(x.notes?'<br>'+escapeHTML(x.notes):'')})+
+ sec('💬 بازخورد آموزشی',F,function(x){return dt(x)+(x.subject?'<b>'+escapeHTML(x.subject)+'</b> · ':'')+escapeHTML(x.notes||'')})+
+ sec('📝 ارزشیابی کیفی',G,function(x){return dt(x)+'<b>'+escapeHTML(x.subject||'')+'</b> · '+escapeHTML(x.level||'')+(x.notes?'<br>'+escapeHTML(x.notes):'')})+
+ sec('📅 عملکرد ماهانه',M,function(x){return '<small>'+escapeHTML(x.month||'')+'</small>'+escapeHTML([x.academic,x.notes].filter(Boolean).join(' · '))})+
+ sec('👨‍👩‍👧 والدین',PA,function(x){return '<b>'+escapeHTML(x.name||'')+'</b> · '+escapeHTML(x.relation||'')+' · '+escapeHTML(x.phone||'')})+
+ sec('❤️ علاقه‌مندی‌ها',IN,function(x){return escapeHTML(x.text||'')});
+}
+</script>
+
+
+<style id="ui-refresh-v9">
+/* =====================================================================
+   لایهٔ ظاهر جدید — فقط ظاهر. هیچ‌یک از داده‌ها، کلیدهای ذخیره‌سازی
+   و منطق برنامه تغییر نکرده است.
+   ===================================================================== */
+:root{
+  --rf-p:#4f46e5; --rf-p2:#7c3aed; --rf-a:#06b6d4; --rf-ok:#10b981; --rf-warn:#f59e0b; --rf-bad:#ef4444;
+  --rf-ink:#0f172a; --rf-ink2:#334155; --rf-mute:#64748b; --rf-line:#e5e7f2; --rf-bg:#f4f5fb;
+  --rf-sh:0 1px 2px rgba(15,23,42,.04),0 10px 28px rgba(79,70,229,.07);
+  --rf-sh2:0 2px 6px rgba(15,23,42,.06),0 22px 46px rgba(79,70,229,.16);
+  --pro-accent:#4f46e5; --pro-ink:#0f172a; --pro-line:#e5e7f2; --ui-ink:#0f172a;
+}
+
+/* ---------- پایه ---------- */
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html body,html body button,html body input,html body select,html body textarea,
+html body table th,html body table td,html body h1,html body h2,html body h3,
+html body .nav button,html body .card{
+  font-family:"Vazirmatn","IRANSansX","IRANSans","Segoe UI",Tahoma,system-ui,-apple-system,sans-serif!important;
+}
+html body{
+  background:
+    radial-gradient(900px 520px at 100% -8%,rgba(124,58,237,.13),transparent 60%),
+    radial-gradient(800px 520px at 0% 0%,rgba(6,182,212,.11),transparent 55%),
+    radial-gradient(700px 500px at 50% 110%,rgba(79,70,229,.08),transparent 60%),
+    var(--rf-bg)!important;
+  background-attachment:fixed!important;
+  color:var(--rf-ink)!important;
+  line-height:1.8;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(99,102,241,.22)}
+*{-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid rgba(99,102,241,.45);outline-offset:2px;border-radius:8px}
+html body ::-webkit-scrollbar{width:10px;height:10px}
+html body ::-webkit-scrollbar-thumb{background:#c7cbe6;border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+html body ::-webkit-scrollbar-thumb:hover{background:#a5aadb;background-clip:padding-box;border:2px solid transparent}
+html body ::-webkit-scrollbar-track{background:transparent}
+
+@keyframes rfRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes rfFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+html body #app > .section.active,html body #home{animation:rfRise .38s cubic-bezier(.2,.7,.2,1) both}
+
+/* ---------- سربرگ صفحهٔ اصلی ---------- */
+html body .header{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#1e1b4b 0%,#3730a3 38%,#6d28d9 72%,#0891b2 125%)!important;
+  border-radius:0 0 40px 40px!important;
+  padding:46px 20px 56px!important;
+  box-shadow:0 24px 60px rgba(55,48,163,.30)!important;
+}
+html body .header:before{width:340px;height:340px;top:-170px;right:-90px;background:rgba(255,255,255,.07)!important}
+html body .header:after{width:260px;height:260px;bottom:-150px;left:-70px;background:rgba(6,182,212,.20)!important}
+html body .header h1{font-size:clamp(26px,5.2vw,42px)!important;font-weight:900;letter-spacing:-.4px;text-shadow:0 4px 20px rgba(0,0,0,.25);position:relative}
+html body .header p{position:relative;font-size:clamp(13px,2.4vw,16px);opacity:.92}
+
+html body .container{max-width:1400px;padding:26px 20px 40px}
+@media(max-width:600px){html body .container{padding:18px 12px 30px}}
+
+/* ---------- کارت‌ها ---------- */
+html body .card{
+  background:#fff!important;
+  border:1px solid var(--rf-line)!important;
+  border-radius:22px!important;
+  box-shadow:var(--rf-sh)!important;
+  padding:24px;
+  backdrop-filter:none!important;
+}
+html body .card h2{color:var(--rf-ink)!important;font-weight:800;font-size:19px;letter-spacing:-.2px}
+html body .card h3{color:#3730a3!important;font-weight:800}
+html body .card p{color:var(--rf-ink2)}
+html body .info-box{background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px solid #e0e4ff;border-right:5px solid var(--rf-p);border-radius:14px;color:#312e81}
+html body .success-box{border-radius:14px}
+html body .warning-box{border-radius:14px}
+html body .empty-box{background:#f8f9fe;border:2px dashed #dfe3f5;border-radius:16px;color:var(--rf-mute)}
+html body .teacher-note{border-radius:14px}
+@media(max-width:600px){html body .card{padding:16px;border-radius:18px!important}}
+
+/* ---------- کارت‌های انتخاب کلاس ---------- */
+html body .class-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+html body .class-card{
+  position:relative;overflow:hidden;border:0!important;color:#fff!important;text-align:right!important;
+  border-radius:24px!important;padding:26px 24px!important;min-height:128px;
+  box-shadow:0 12px 30px rgba(15,23,42,.16)!important;
+  transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s!important;
+}
+html body .class-card:after{inset:auto auto -70px -50px!important;width:190px!important;height:190px!important;background:rgba(255,255,255,.14)!important}
+html body .class-card:before{content:"";position:absolute;top:-40px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.10)}
+html body .class-card:hover{transform:translateY(-6px) scale(1.012)!important;box-shadow:0 22px 44px rgba(15,23,42,.24)!important}
+html body .class-card:active{transform:scale(.985)!important}
+html body .class-third{background:linear-gradient(135deg,#047857,#10b981 62%,#6ee7b7)!important}
+html body .class-fourth{background:linear-gradient(135deg,#1e40af,#4f46e5 62%,#a5b4fc)!important}
+html body .class-multi{background:linear-gradient(135deg,#6d28d9,#c026d3 62%,#f9a8d4)!important;grid-column:1/-1}
+html body .class-card h2{color:#fff!important;margin:0 0 6px;font-size:21px;font-weight:900;position:relative;z-index:1}
+html body .class-card p{margin:0;color:rgba(255,255,255,.9)!important;font-size:13px;position:relative;z-index:1}
+html body .teacher-home-card{background:linear-gradient(135deg,#fff,#f5f3ff)!important;border-color:#e4e0ff!important}
+
+/* ---------- دکمه‌ها ---------- */
+html body .btn{
+  border:1px solid transparent!important;border-radius:12px!important;
+  padding:10px 17px!important;font-size:13px!important;font-weight:700!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.10),0 4px 10px rgba(15,23,42,.06)!important;
+  transition:transform .15s ease,box-shadow .2s ease,filter .2s ease!important;
+}
+html body .btn:hover{transform:translateY(-2px)!important;box-shadow:0 10px 22px rgba(15,23,42,.16)!important;filter:brightness(1.05)}
+html body .btn:active{transform:translateY(0) scale(.97)!important}
+html body .btn-primary{background:linear-gradient(135deg,#4f46e5,#7c3aed)!important;color:#fff!important}
+html body .btn-blue{background:linear-gradient(135deg,#0ea5e9,#2563eb)!important;color:#fff!important}
+html body .btn-green{background:linear-gradient(135deg,#10b981,#059669)!important;color:#fff!important}
+html body .btn-danger,html body .danger-btn{background:linear-gradient(135deg,#f43f5e,#dc2626)!important;color:#fff!important}
+html body .btn-warning{background:linear-gradient(135deg,#fcd34d,#f59e0b)!important;color:#422006!important}
+html body .btn-purple{background:linear-gradient(135deg,#a855f7,#7c3aed)!important;color:#fff!important}
+html body .btn-gray,html body .btn-secondary{background:#eef0f8!important;color:#334155!important;border-color:#e0e3f0!important;box-shadow:none!important}
+html body .btn-small{padding:6px 11px!important;font-size:12px!important;border-radius:10px!important}
+html body .btn.is-current{outline:3px solid rgba(99,102,241,.45)!important}
+html body .btn:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
+
+/* ---------- فیلدها ---------- */
+html body label{color:var(--rf-ink2);font-weight:700;font-size:13px}
+body input:not([type]),body input[type=text],body input[type=search],body input[type=tel],body input[type=email],
+body input[type=number],body input[type=password],body input[type=date],body input[type=time],body input[type=url],
+body select,body textarea{
+  background:#f8f9fd;border:1.5px solid #e1e5f1;border-radius:12px;color:var(--rf-ink);
+  transition:border-color .2s,box-shadow .2s,background .2s;
+}
+body input:not([type]):hover,body input[type=text]:hover,body input[type=number]:hover,body input[type=password]:hover,
+body input[type=tel]:hover,body input[type=date]:hover,body select:hover,body textarea:hover{border-color:#c7cdf0}
+body input:not([type]):focus,body input[type=text]:focus,body input[type=search]:focus,body input[type=tel]:focus,
+body input[type=email]:focus,body input[type=number]:focus,body input[type=password]:focus,body input[type=date]:focus,
+body input[type=time]:focus,body select:focus,body textarea:focus{
+  background:#fff;border-color:#6366f1;box-shadow:0 0 0 4px rgba(99,102,241,.15);
+}
+body input::placeholder,body textarea::placeholder{color:#a0a8c0}
+body input[type=checkbox],body input[type=radio]{accent-color:#4f46e5}
+html body .teacher-field label{font-size:12px;color:var(--rf-mute)}
+
+/* ---------- جدول‌ها ---------- */
+html body .table-wrapper{background:#fff;border:1px solid var(--rf-line)!important;border-radius:16px!important}
+html body th{background:linear-gradient(180deg,#eef0ff,#e7e9fd)!important;color:#3730a3!important;font-weight:800;font-size:12.5px;border-color:#dde0f6!important}
+html body td{border-color:#eceef8!important}
+html body .table-wrapper tr:nth-child(even) td{background:#fafbff}
+html body .table-wrapper tr:hover td{background:#f1f3ff!important}
+html body .tag{background:#eef0ff;color:#3730a3;font-weight:700}
+
+/* ---------- ورود به برنامه ---------- */
+html body #offlineAuthOverlay{
+  background:
+    radial-gradient(700px 500px at 85% 10%,rgba(124,58,237,.35),transparent 60%),
+    radial-gradient(700px 500px at 10% 90%,rgba(6,182,212,.30),transparent 60%),
+    linear-gradient(135deg,#1e1b4b,#312e81 55%,#0f172a)!important;
+}
+html body .auth-card{
+  background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.6);border-radius:28px;
+  box-shadow:0 30px 80px rgba(0,0,0,.40);padding:32px;
+}
+html body .auth-brand .logo{
+  width:72px;height:72px;margin:0 auto 6px;display:grid;place-items:center;font-size:36px;border-radius:22px;
+  background:linear-gradient(135deg,#4f46e5,#7c3aed);box-shadow:0 14px 30px rgba(79,70,229,.40);animation:rfFloat 4s ease-in-out infinite;
+}
+html body .auth-brand h2{color:var(--rf-ink);font-size:26px;font-weight:900;margin:10px 0 4px}
+html body .auth-brand p{color:var(--rf-mute)}
+html body .auth-tabs{background:#f1f2fa;padding:5px;border-radius:15px;gap:4px}
+html body .auth-tab{border:0;background:transparent;color:var(--rf-mute);border-radius:11px}
+html body .auth-tab.active{background:#fff;color:#4338ca;box-shadow:0 4px 12px rgba(79,70,229,.15)}
+html body .auth-field label{color:var(--rf-ink2)}
+html body .auth-field input{background:#f8f9fd;border:1.5px solid #e1e5f1;border-radius:13px}
+html body .auth-field input:focus{border-color:#6366f1;background:#fff;box-shadow:0 0 0 4px rgba(99,102,241,.15)}
+html body .auth-main-btn{background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:14px;box-shadow:0 12px 26px rgba(79,70,229,.35);transition:transform .15s,box-shadow .2s}
+html body .auth-main-btn:hover{transform:translateY(-2px);box-shadow:0 16px 32px rgba(79,70,229,.42)}
+html body .auth-secondary{border-radius:14px;background:#f5f6fc;color:#4338ca;border-color:#e0e3f5}
+html body .design-credit{display:none!important}
+
+/* ---------- منوی کناری ---------- */
+html body .app-sidebar{
+  background:
+    radial-gradient(260px 200px at 100% 0%,rgba(124,58,237,.35),transparent 70%),
+    linear-gradient(180deg,#14163a 0%,#1a1d4f 55%,#0f1233 100%)!important;
+  border:1px solid rgba(255,255,255,.07);border-radius:26px!important;
+  box-shadow:0 28px 70px rgba(20,22,58,.38)!important;
+}
+html body .sidebar-brand{border-bottom:1px solid rgba(255,255,255,.08)}
+html body .brand-mark{background:linear-gradient(135deg,#6366f1,#a855f7 60%,#06b6d4)!important;box-shadow:0 10px 24px rgba(99,102,241,.45)}
+html body .sidebar-brand strong{font-size:16px;font-weight:900;color:#fff}
+html body .sidebar-brand small{color:#a5acd6}
+html body .sidebar-caption,html body .sidebar-group-label{color:#7b83b8;letter-spacing:.3px}
+html body .nav button{color:#c3c8e8!important;border-radius:14px!important;transition:background .2s,color .2s,transform .15s!important}
+html body .nav button:hover{background:rgba(255,255,255,.08)!important;color:#fff!important;transform:translateX(-3px)}
+html body .nav button.active{
+  background:linear-gradient(90deg,rgba(99,102,241,.55),rgba(168,85,247,.38))!important;color:#fff!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 8px 20px rgba(79,70,229,.30)!important;
+}
+html body .sb-icon{background:rgba(255,255,255,.08)!important}
+html body .nav button.active .sb-icon{background:rgba(255,255,255,.20)!important}
+html body .sidebar-collapse{background:rgba(255,255,255,.06);color:#b9bfe4;transition:background .2s}
+html body .sidebar-collapse:hover{background:rgba(255,255,255,.12)}
+html body .sidebar-nav-scroll{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+
+/* ---------- نوار بالایی ---------- */
+html body .smart-header{
+  background:rgba(255,255,255,.80)!important;backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border:1px solid rgba(255,255,255,.95)!important;border-radius:22px!important;box-shadow:0 14px 44px rgba(55,48,163,.10)!important;
+}
+html body .smart-header h1{font-size:20px;font-weight:900;color:var(--rf-ink)}
+html body .eyebrow{color:var(--rf-p)!important;letter-spacing:.2px}
+html body .global-search{background:#f3f4fc;border:1.5px solid #e4e7f6;border-radius:14px;transition:border-color .2s,box-shadow .2s,background .2s}
+html body .global-search:focus-within{background:#fff;border-color:#6366f1;box-shadow:0 0 0 4px rgba(99,102,241,.14)}
+html body .global-search input#globalSearch{background:transparent!important;border:0!important;box-shadow:none!important}
+html body .global-search kbd{border-radius:7px;background:#fff;color:#7b83a8}
+html body .icon-action,html body .profile-chip{border-color:#e4e7f6;border-radius:14px;transition:transform .15s,box-shadow .2s,border-color .2s}
+html body .icon-action:hover,html body .profile-chip:hover{transform:translateY(-1px);border-color:#c7cdf0;box-shadow:0 8px 18px rgba(79,70,229,.12)}
+html body .profile-avatar{background:linear-gradient(135deg,#6366f1,#a855f7)!important;color:#fff!important;border-radius:11px}
+html body .sync-pill{background:#ecfdf5;color:#047857;border-color:#c9f2de}
+html body .sync-pill.offline{background:#fff7ed;color:#b45309;border-color:#fde5c4}
+html body .search-results,html body .notification-panel{border-radius:18px;border-color:#e4e7f6;box-shadow:0 24px 60px rgba(55,48,163,.18)}
+html body .search-result:hover{background:#f1f3ff}
+html body .notice-item{background:#f6f7ff}
+
+/* ---------- داشبورد ---------- */
+html body .dashboard-hero{
+  background:linear-gradient(135deg,#312e81 0%,#4f46e5 48%,#7c3aed 80%,#0891b2 130%)!important;
+  border-radius:26px!important;box-shadow:0 20px 46px rgba(79,70,229,.32)!important;
+}
+html body .dashboard-hero h2{color:#fff!important}
+html body .dashboard-mini{
+  border:1px solid var(--rf-line)!important;border-radius:20px!important;box-shadow:var(--rf-sh)!important;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+html body .dashboard-mini:hover{transform:translateY(-4px);box-shadow:var(--rf-sh2)!important}
+html body .dashboard-mini span{color:#3730a3}
+html body .stat{border-top:5px solid var(--rf-p);border-radius:20px;box-shadow:var(--rf-sh)}
+html body .stat:nth-child(2){border-top-color:#06b6d4}
+html body .stat:nth-child(3){border-top-color:#10b981}
+html body .stat:nth-child(4){border-top-color:#f59e0b}
+html body .stat-number{color:#4338ca}
+html body .capability-card{
+  border:1px solid var(--rf-line)!important;border-radius:20px!important;background:#fff!important;
+  box-shadow:var(--rf-sh);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease!important;
+}
+html body .capability-card:hover{transform:translateY(-4px)!important;border-color:#c7cdf5!important;box-shadow:var(--rf-sh2)!important}
+html body .capability-card:active{transform:scale(.98)!important}
+html body .capability-icon{background:linear-gradient(135deg,#eef0ff,#f3e8ff)!important;border-radius:14px!important}
+html body .capability-card:hover .capability-icon{background:linear-gradient(135deg,#6366f1,#a855f7)!important}
+html body .capability-arrow{color:var(--rf-p)}
+html body .dashboard-showcase-main{background:linear-gradient(145deg,#fff,#f6f5ff)!important}
+html body .showcase-actions button{border:1px solid var(--rf-line);border-radius:18px;box-shadow:var(--rf-sh);transition:transform .2s,box-shadow .2s,border-color .2s}
+html body .showcase-actions button:hover{transform:translateY(-3px);border-color:#c7cdf5;box-shadow:var(--rf-sh2)}
+html body .showcase-actions button.featured{background:linear-gradient(145deg,#f5f3ff,#fff)}
+html body .showcase-link{color:var(--rf-p)}
+html body .dashboard-list li{border-color:#eceef8}
+html body .bar{background:#eceefb;border-radius:999px}
+html body .bar i{background:linear-gradient(90deg,#6366f1,#a855f7);border-radius:999px}
+
+/* بودجه‌بندی‌ها: هماهنگ با رنگ تازه */
+html body #budget .budget-hero,html body #bookBudget .book-budget-hero,html body .book-budget-hero{
+  background:linear-gradient(135deg,#3730a3,#4f46e5 55%,#7c3aed)!important;box-shadow:0 14px 34px rgba(79,70,229,.25)!important;border-radius:22px!important;
+}
+html body .teacher-card-head{background:linear-gradient(135deg,#3730a3,#6d28d9,#0891b2)}
+
+/* ---------- پنجره‌های گفتگو و تقویم ---------- */
+html body .df-overlay{background:rgba(15,18,51,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+html body .df-box,html body .jc-box{border-radius:26px;box-shadow:0 34px 80px rgba(15,18,51,.45);animation:rfRise .28s cubic-bezier(.2,.7,.2,1) both}
+html body .df-box h3,html body .jc-head b{color:#3730a3}
+html body .jc-head button{background:#eef0ff;color:#4338ca}
+html body .jc-grid button{background:#f6f7fd;border-radius:11px}
+html body .jc-grid button:hover{background:#e7e9ff}
+html body .jc-grid button.sel{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff}
+html body .jc-grid button.today{outline-color:#06b6d4}
+html body .sf-chip{background:#f5f6ff;border-color:#e2e5fb;border-radius:16px}
+html body .sf-chip b{color:#4338ca}
+html body .sf-sec{border-color:var(--rf-line);border-radius:16px}
+html body .sf-sec summary{color:#3730a3}
+
+/* ---------- نوار پایین موبایل ---------- */
+html body .mobile-quickbar{
+  background:rgba(20,22,58,.94)!important;border:1px solid rgba(255,255,255,.08);border-radius:22px!important;
+  box-shadow:0 18px 44px rgba(20,22,58,.42)!important;
+}
+html body .mobile-quickbar button{color:#aeb4dc!important;border-radius:15px!important;transition:background .2s,color .2s}
+html body .mobile-quickbar button.active{background:linear-gradient(135deg,rgba(99,102,241,.55),rgba(168,85,247,.40))!important;color:#fff!important}
+
+/* ---------- پایین صفحه ---------- */
+html body .footer{color:#8a91b4;font-size:12.5px;padding:26px 10px 40px}
+
+/* ---------- جزئیات ریز ---------- */
+html body .image-upload-label{border-radius:14px}
+html body .experiment-card,html body .portfolio-folder-head{border-radius:18px}
+html body .photo-preview img,html body .student-photo{border-radius:16px}
+
+@media(prefers-reduced-motion:reduce){
+  html body *,html body *:before,html body *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+
+</style>
 </body>
 </html>
