@@ -1535,6 +1535,23 @@ body{min-height:100dvh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scroll
 @media(max-width:520px){.dashboard-quick{grid-template-columns:repeat(2,minmax(0,1fr))!important}.showcase-actions,.dashboard-capabilities{grid-template-columns:1fr!important}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style>
+<style>
+/* --- دلیل غیبت و چندعکسی --- */
+.absence-reason-box{margin-top:8px}
+.absence-reason-input{width:100%;max-width:440px;padding:9px 12px;border:1px dashed #e0a458;border-radius:10px;background:#fffaf0;font-size:13px}
+.multi-image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:6px}
+.multi-image-item{background:#fff;border:1px solid #dbe7ea;border-radius:14px;padding:8px;box-shadow:0 6px 18px rgba(15,23,42,.08)}
+.multi-image-item img{width:100%;height:auto;max-height:360px;object-fit:contain;border-radius:10px;cursor:zoom-in;display:block;background:#f4f8f8}
+.multi-image-item .btn{width:100%;margin-top:8px}
+.pending-thumb{position:relative;display:inline-block;margin:6px 6px 0 0}
+.pending-thumb img{width:92px;height:92px;object-fit:cover;border-radius:10px;border:1px solid #dbe7ea;display:block}
+.pending-thumb button{position:absolute;top:-6px;left:-6px;width:24px;height:24px;padding:0;border:0;border-radius:50%;background:#e74c3c;color:#fff;font-size:16px;line-height:24px;cursor:pointer}
+.record-image-thumbs{display:flex;flex-wrap:wrap;gap:6px}
+.record-image-thumbs img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #dbe7ea;cursor:zoom-in}
+.multi-photo-row{display:flex;flex-wrap:wrap;gap:8px}
+.multi-photo-row .portfolio-photo-box{flex:0 1 180px;margin:0}
+.multi-photo-row .portfolio-photo-box img{width:100%;cursor:zoom-in}
+</style>
 </head>
 
 
@@ -2082,6 +2099,15 @@ id="attendanceTable"
 class="table-wrapper"
 ></div>
 
+<datalist id="absenceReasonList">
+<option value="بیماری"></option>
+<option value="مسافرت"></option>
+<option value="مراسم خانوادگی"></option>
+<option value="مشکل رفت‌وآمد"></option>
+<option value="اطلاع داده نشده"></option>
+<option value="شرکت در برنامه مدرسه"></option>
+</datalist>
+
 <div class="attendance-export-row">
     <button class="btn btn-blue" onclick="exportAttendanceCSV()">📥 خروجی جداگانه حضور و غیاب</button>
     <button class="btn btn-gray" onclick="exportAttendanceDateCSV()">📄 خروجی همین تاریخ</button>
@@ -2457,8 +2483,8 @@ class="section"
 </div>
 </div>
 
-<label>📷 عکس نمونه‌کار</label>
-<input id="portfolioPhoto" type="file" accept="image/*" onchange="previewPortfolioPhoto(event)">
+<label>📷 عکس‌های نمونه‌کار (می‌توانی چند عکس انتخاب کنی)</label>
+<input id="portfolioPhoto" type="file" accept="image/*" multiple onchange="previewPortfolioPhoto(event)">
 <div id="portfolioPhotoPreview" class="photo-preview"></div>
 
 <label>توضیحات</label>
@@ -2557,9 +2583,9 @@ id="goalNotes"
 
 <div class="image-upload-box">
     <div style="font-size:34px;">🖼️</div>
-    <h3>افزودن عکس به هدف آموزشی</h3>
+    <h3>افزودن عکس به هدف آموزشی (چند عکس)</h3>
     <label class="image-upload-label" for="goalImageInput">📷 انتخاب عکس</label>
-    <input id="goalImageInput" type="file" accept="image/*" onchange="prepareGoalImage(event)">
+    <input id="goalImageInput" type="file" accept="image/*" multiple onchange="prepareGoalImage(event)">
     <div id="goalImagePreview"></div>
 </div>
 
@@ -2836,9 +2862,9 @@ id="dailyNotes"
 
 <div class="image-upload-box">
     <div style="font-size:34px;">🖼️</div>
-    <h3>افزودن عکس به دفتر روزانه</h3>
+    <h3>افزودن عکس به دفتر روزانه (چند عکس)</h3>
     <label class="image-upload-label" for="dailyImageInput">📷 انتخاب عکس</label>
-    <input id="dailyImageInput" type="file" accept="image/*" onchange="prepareDailyImage(event)">
+    <input id="dailyImageInput" type="file" accept="image/*" multiple onchange="prepareDailyImage(event)">
     <div id="dailyImagePreview"></div>
 </div>
 
@@ -2886,16 +2912,17 @@ class="table-wrapper"
         <div class="image-upload-box">
             <div style="font-size:45px;">🖼️🗓️</div>
             <h3>افزودن تصویر برنامه هفتگی</h3>
-            <p>عکس برنامه هفتگی همین کلاس را انتخاب کن.</p>
+            <p>می‌توانی چند عکس را همزمان انتخاب کنی (مثلاً برنامه هفته‌های مختلف یا صبح و عصر).</p>
 
             <label class="image-upload-label" for="weeklyImageInput">
-                📷 انتخاب تصویر برنامه هفتگی
+                📷 انتخاب یک یا چند تصویر برنامه هفتگی
             </label>
 
             <input
                 id="weeklyImageInput"
                 type="file"
                 accept="image/*"
+                multiple
                 onchange="saveWeeklyImage(event)"
             >
         </div>
@@ -4056,7 +4083,9 @@ async function initializeOfflineAuth(){
 const APP_DATA_SCHEMA_VERSION = 5;
 let currentClass = null;
 let dailyPendingImage = "";
+let dailyPendingImages = [];
 let goalPendingImage = "";
+let goalPendingImages = [];
 
 const STORAGE_KEY = "دفتر_کلاسی_جدید";
 
@@ -4231,6 +4260,8 @@ function createClassData(){
 
         weeklyImage: "",
 
+        weeklyImages: [],
+
         budget: [],
 
         budgetHours: null,
@@ -4304,7 +4335,7 @@ else{
         if(!data.interests) data.interests = [];
         if(!data.daily) data.daily = [];
         if(!data.weekly) data.weekly = [];
-        if(typeof data.weeklyImage === "undefined") data.weeklyImage = "";
+        if(typeof data.weeklyImage === "undefined") data.weeklyImage = ""; if(!Array.isArray(data.weeklyImages)) data.weeklyImages = [];
         if(!data.budget) data.budget = [];
         if(typeof data.budgetHours === "undefined") data.budgetHours = null;
         if(typeof data.budgetImage === "undefined") data.budgetImage = "";
@@ -5748,9 +5779,9 @@ function exportAttendanceCSV(){
         alert("هنوز هیچ سابقه‌ای برای حضور و غیاب ثبت نشده است.");
         return;
     }
-    const rows = [["تاریخ","نام و نام خانوادگی","وضعیت"]];
+    const rows = [["تاریخ","نام و نام خانوادگی","وضعیت","دلیل غیبت/تأخیر"]];
     data.attendance.slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); }).forEach(function(item){
-        rows.push([formatPersianDate(item.date), getStudentName(item.studentId), item.status || ""]);
+        rows.push([formatPersianDate(item.date), getStudentName(item.studentId), item.status || "", item.reason || ""]);
     });
     const csv = rows.map(function(row){ return row.map(csvCell).join(","); }).join("\r\n");
     downloadTextFile("حضور-و-غیاب-" + (getClassTitleForKey(currentClass).replace(/\s+/g,"-")) + ".csv", csv, "text/csv;charset=utf-8");
@@ -5764,8 +5795,8 @@ function exportAttendanceDateCSV(){
         alert("برای تاریخ انتخاب‌شده سابقه‌ای ثبت نشده است.");
         return;
     }
-    const rows = [["تاریخ","نام و نام خانوادگی","وضعیت"]];
-    records.forEach(function(item){ rows.push([formatPersianDate(item.date), getStudentName(item.studentId), item.status || ""]); });
+    const rows = [["تاریخ","نام و نام خانوادگی","وضعیت","دلیل غیبت/تأخیر"]];
+    records.forEach(function(item){ rows.push([formatPersianDate(item.date), getStudentName(item.studentId), item.status || "", item.reason || ""]); });
     const csv = rows.map(function(row){ return row.map(csvCell).join(","); }).join("\r\n");
     downloadTextFile("حضور-و-غیاب-" + date.replace(/\//g,"-") + ".csv", csv, "text/csv;charset=utf-8");
 }
@@ -5803,6 +5834,7 @@ function setAttendance(studentId,status){
     if(old){
 
         old.status = status;
+        if(status === "حاضر"){ old.reason = ""; }
 
     }
 
@@ -5829,6 +5861,19 @@ function setAttendance(studentId,status){
     try { ntRefresh(); } catch(err) { console.warn('ntRefresh:', err); }
 
 
+}
+
+
+function setAttendanceReason(studentId,reason){
+    const date = normalizePersianDate(document.getElementById("attendanceDate").value);
+    const data = getClassData();
+    const rec = data.attendance.find(function(item){
+        return String(item.studentId) === String(studentId) &&
+               normalizePersianDate(item.date) === date;
+    });
+    if(!rec) return;
+    rec.reason = String(reason || "").trim();
+    saveDatabase();
 }
 
 
@@ -5945,6 +5990,21 @@ function renderAttendance(){
                         </b>
 
                     </div>
+
+                    ${
+                        record && (record.status === "غایب" || record.status === "تأخیر")
+                        ? `<div class="absence-reason-box">
+                               <input type="text"
+                                      class="absence-reason-input"
+                                      list="absenceReasonList"
+                                      maxlength="200"
+                                      placeholder="دلیل ${record.status === "غایب" ? "غیبت" : "تأخیر"} را بنویسید (مثلاً بیماری)"
+                                      value="${escapeHTML(record.reason || "")}"
+                                      onchange="setAttendanceReason('${student.id}',this.value)">
+                           </div>`
+                        : ""
+                    }
+
 
                 </td>
 
@@ -6714,26 +6774,37 @@ function renderGrades(){
 
 let portfolioPendingPhoto = "";
 
-function previewPortfolioPhoto(event){
-    const file = event.target.files && event.target.files[0];
+let portfolioPendingPhotos = [];
+
+async function previewPortfolioPhoto(event){
+    const files = event.target.files;
+    if(!files || !files.length) return;
+    const imgs = await dfReadImages(files,900,0.78);
+    portfolioPendingPhotos = portfolioPendingPhotos.concat(imgs);
+    renderPortfolioPending();
+    event.target.value = "";
+}
+
+function renderPortfolioPending(){
     const preview = document.getElementById("portfolioPhotoPreview");
-    if(!file){ portfolioPendingPhoto=""; preview.innerHTML=""; return; }
-    if(!file.type.startsWith("image/")){
-        alert("لطفاً فقط فایل تصویری انتخاب کنید.");
-        event.target.value=""; portfolioPendingPhoto=""; preview.innerHTML=""; return;
-    }
-    resizeImage(file,900,0.78).then(function(dataUrl){
-        portfolioPendingPhoto=dataUrl;
-        preview.innerHTML=`<div class="portfolio-photo-preview-box"><img src="${dataUrl}" alt="پیش‌نمایش عکس"><button type="button" class="btn btn-danger btn-small" onclick="clearPortfolioPhoto()">حذف عکس</button></div>`;
-    }).catch(function(){ alert("خواندن عکس انجام نشد. لطفاً یک عکس دیگر انتخاب کنید."); });
+    if(!preview) return;
+    preview.innerHTML = portfolioPendingPhotos.length
+        ? '<div>'+dfPendingThumbs(portfolioPendingPhotos,"removePortfolioPendingPhoto")+'</div>'
+        : "";
+}
+
+function removePortfolioPendingPhoto(i){
+    portfolioPendingPhotos.splice(i,1);
+    renderPortfolioPending();
 }
 
 function clearPortfolioPhoto(){
-    portfolioPendingPhoto="";
-    const input=document.getElementById("portfolioPhoto");
-    const preview=document.getElementById("portfolioPhotoPreview");
-    if(input) input.value="";
-    if(preview) preview.innerHTML="";
+    portfolioPendingPhoto = "";
+    portfolioPendingPhotos = [];
+    const input = document.getElementById("portfolioPhoto");
+    const preview = document.getElementById("portfolioPhotoPreview");
+    if(input) input.value = "";
+    if(preview) preview.innerHTML = "";
 }
 
 function addPortfolio(){
@@ -6747,7 +6818,7 @@ function addPortfolio(){
     }
     getClassData().portfolio.push({
         id:Date.now(), studentId:String(studentId), subject:subject, title:title,
-        date:date, notes:notes, photo:portfolioPendingPhoto || "",
+        date:date, notes:notes, photo:"", photos:portfolioPendingPhotos.slice(),
         sourceType:"manual", sourceId:null
     });
     saveDatabase();
@@ -6780,7 +6851,7 @@ function renderPortfolio(){
         const items=grouped[subject];
         html+=`<div class="portfolio-subject"><div class="portfolio-folder-head"><div><div class="portfolio-folder-icon">📂</div><div><div class="portfolio-subject-title">${escapeHTML(subject)}</div><div class="portfolio-folder-count">${items.length} نمونه‌کار</div></div></div><span class="portfolio-folder-badge">پوشه درس</span></div><div class="portfolio-folder-content">`;
         items.slice().reverse().forEach(function(item){
-            html+=`<div class="portfolio-item"><div class="portfolio-item-title">📄 ${escapeHTML(item.title)}</div><div class="portfolio-meta">📅 ${escapeHTML(formatPersianDate(item.date))} &nbsp; | &nbsp; ${item.sourceType==="evaluation" ? "⭐ ثبت شده از ارزشیابی" : "📝 ثبت دستی"}</div>${item.photo ? `<div class="portfolio-photo-box"><img src="${item.photo}" alt="عکس نمونه‌کار ${escapeHTML(item.title)}" loading="lazy"></div>` : ""}${item.notes ? `<div class="portfolio-note">${escapeHTML(item.notes)}</div>` : ""}<button class="btn btn-blue btn-small" onclick="editPortfolio(${item.id})">✏️ ویرایش</button><button class="btn btn-danger btn-small" onclick="deletePortfolio(${item.id})">🗑️ حذف از پوشه</button></div>`;
+            html+=`<div class="portfolio-item"><div class="portfolio-item-title">📄 ${escapeHTML(item.title)}</div><div class="portfolio-meta">📅 ${escapeHTML(formatPersianDate(item.date))} &nbsp; | &nbsp; ${item.sourceType==="evaluation" ? "⭐ ثبت شده از ارزشیابی" : "📝 ثبت دستی"}</div>${dfImages(item,"photos","photo").length ? `<div class="multi-photo-row">${dfImages(item,"photos","photo").map(function(src){ return `<div class="portfolio-photo-box"><img src="${src}" alt="عکس نمونه‌کار ${escapeHTML(item.title)}" loading="lazy" onclick="showImageLarge(this.src)"></div>`; }).join("")}</div>` : ""}${item.notes ? `<div class="portfolio-note">${escapeHTML(item.notes)}</div>` : ""}<button class="btn btn-blue btn-small" onclick="editPortfolio(${item.id})">✏️ ویرایش</button><button class="btn btn-danger btn-small" onclick="deletePortfolio(${item.id})">🗑️ حذف از پوشه</button></div>`;
         });
         html+='</div></div>';
     });
@@ -7025,21 +7096,31 @@ function renderReport(){
 ===================================================== */
 
 async function prepareGoalImage(event){
-    const file = event.target.files[0];
-    if(!file) return;
+    const files = event.target.files;
+    if(!files || !files.length) return;
     try{
-        goalPendingImage = await resizeImage(file,1100,0.82);
-        const box = document.getElementById("goalImagePreview");
-        if(box) box.innerHTML = `<img class="image-preview-small" src="${goalPendingImage}" alt="پیش‌نمایش عکس هدف آموزشی">`;
+        const imgs = await dfReadImages(files,1100,0.82);
+        goalPendingImages = goalPendingImages.concat(imgs);
+        renderGoalPending();
     }catch(error){
-        goalPendingImage = "";
-        alert("در آماده‌سازی تصویر مشکلی پیش آمد.");
+        alert("در آماده‌سازی تصاویر مشکلی پیش آمد.");
     }
     event.target.value = "";
 }
 
+function renderGoalPending(){
+    const box = document.getElementById("goalImagePreview");
+    if(box) box.innerHTML = goalPendingImages.length ? '<div>'+dfPendingThumbs(goalPendingImages,"removeGoalPendingImage")+'</div>' : "";
+}
+
+function removeGoalPendingImage(i){
+    goalPendingImages.splice(i,1);
+    renderGoalPending();
+}
+
 function clearGoalPendingImage(){
     goalPendingImage = "";
+    goalPendingImages = [];
     const box=document.getElementById("goalImagePreview");
     if(box) box.innerHTML="";
 }
@@ -7090,7 +7171,7 @@ function addGoal(){
 
             notes:notes,
 
-            image:goalPendingImage || ""
+            image:"", images:goalPendingImages.slice()
 
         });
 
@@ -7179,7 +7260,7 @@ function renderGoals(){
                 </td>
 
                 <td>
-                    ${item.image ? `<img class="record-image-thumb" src="${item.image}" alt="تصویر هدف آموزشی">` : "—"}
+                    ${dfThumbsHTML(dfImages(item,"images","image"),"تصویر هدف آموزشی")}
                 </td>
 
             </tr>
@@ -7525,21 +7606,31 @@ function renderInterests(){
 ===================================================== */
 
 async function prepareDailyImage(event){
-    const file = event.target.files[0];
-    if(!file) return;
+    const files = event.target.files;
+    if(!files || !files.length) return;
     try{
-        dailyPendingImage = await resizeImage(file,1100,0.82);
-        const box = document.getElementById("dailyImagePreview");
-        if(box) box.innerHTML = `<img class="image-preview-small" src="${dailyPendingImage}" alt="پیش‌نمایش عکس دفتر روزانه">`;
+        const imgs = await dfReadImages(files,1100,0.82);
+        dailyPendingImages = dailyPendingImages.concat(imgs);
+        renderDailyPending();
     }catch(error){
-        dailyPendingImage = "";
-        alert("در آماده‌سازی تصویر مشکلی پیش آمد.");
+        alert("در آماده‌سازی تصاویر مشکلی پیش آمد.");
     }
     event.target.value = "";
 }
 
+function renderDailyPending(){
+    const box = document.getElementById("dailyImagePreview");
+    if(box) box.innerHTML = dailyPendingImages.length ? '<div>'+dfPendingThumbs(dailyPendingImages,"removeDailyPendingImage")+'</div>' : "";
+}
+
+function removeDailyPendingImage(i){
+    dailyPendingImages.splice(i,1);
+    renderDailyPending();
+}
+
 function clearDailyPendingImage(){
     dailyPendingImage = "";
+    dailyPendingImages = [];
     const box=document.getElementById("dailyImagePreview");
     if(box) box.innerHTML="";
 }
@@ -7611,7 +7702,7 @@ function addDaily(){
 
             voiceId:voiceDrafts.daily || "",
 
-            image:dailyPendingImage || ""
+            image:"", images:dailyPendingImages.slice()
 
         });
 
@@ -7729,7 +7820,7 @@ function renderDaily(){
                 </td>
 
                 <td>
-                    ${item.image ? `<img class="record-image-thumb" src="${item.image}" alt="تصویر دفتر روزانه">` : "—"}
+                    ${dfThumbsHTML(dfImages(item,"images","image"),"تصویر دفتر روزانه")}
                 </td>
 
             </tr>
@@ -7750,30 +7841,46 @@ function renderDaily(){
    برنامه هفتگی تصویری
 ===================================================== */
 
+function getWeeklyImagesOf(data){
+    if(!data) return [];
+    if(!Array.isArray(data.weeklyImages)) data.weeklyImages = [];
+    if(typeof data.weeklyImage === "string" && data.weeklyImage){
+        if(data.weeklyImages.indexOf(data.weeklyImage) < 0) data.weeklyImages.unshift(data.weeklyImage);
+        data.weeklyImage = "";
+    }
+    return data.weeklyImages;
+}
+
 async function saveWeeklyImage(event){
 
-    const file = event.target.files[0];
+    const files = event.target.files;
 
-    if(!file){
+    if(!files || !files.length){
         return;
     }
 
     try{
 
-        const image = await resizeImage(file,1400,0.85);
+        const images = await dfReadImages(files,1400,0.85);
 
-        getClassData().weeklyImage = image;
+        if(!images.length){
+            event.target.value = "";
+            return;
+        }
+
+        const list = getWeeklyImagesOf(getClassData());
+        images.forEach(function(img){ list.push(img); });
 
         saveDatabase();
         renderWeekly();
         updateDashboard();
 
-        alert("تصویر برنامه هفتگی با موفقیت ذخیره شد.");
+        alert(images.length + " تصویر به برنامه هفتگی اضافه شد.");
 
     }
     catch(error){
 
-        alert("در ذخیره تصویر برنامه هفتگی مشکلی پیش آمد.");
+        alert("در ذخیره تصاویر برنامه هفتگی مشکلی پیش آمد.");
 
     }
 
@@ -7781,13 +7888,14 @@ async function saveWeeklyImage(event){
 }
 
 
-function deleteWeeklyImage(){
+function deleteWeeklyImage(index){
 
-    if(!confirm("تصویر برنامه هفتگی حذف شود؟")){
+    if(!confirm("این تصویر از برنامه هفتگی حذف شود؟")){
         return;
     }
 
-    getClassData().weeklyImage = "";
+    const list = getWeeklyImagesOf(getClassData());
+    list.splice(index,1);
 
     saveDatabase();
     renderWeekly();
@@ -7803,34 +7911,25 @@ function renderWeekly(){
         return;
     }
 
-    const image = getClassData().weeklyImage || "";
+    const images = getWeeklyImagesOf(getClassData());
 
-    if(!image){
+    if(!images.length){
         box.innerHTML = `
             <div class="image-empty">
                 🗓️
                 <h3>هنوز تصویر برنامه هفتگی ثبت نشده است.</h3>
-                <p>از قسمت بالا یک تصویر برای برنامه هفتگی انتخاب کن.</p>
+                <p>از قسمت بالا یک یا چند تصویر برای برنامه هفتگی انتخاب کن.</p>
             </div>
         `;
+        return;
     }
-    else{
-        box.innerHTML = `
-            <div>
-                <img
-                    src="${image}"
-                    class="image-preview-large"
-                    alt="برنامه هفتگی"
-                    onclick="showImageLarge(this.src)"
-                >
-                <div class="image-actions">
-                    <button class="btn btn-danger" onclick="deleteWeeklyImage()">
-                        🗑️ حذف تصویر
-                    </button>
-                </div>
-            </div>
-        `;
-    }
+
+    box.innerHTML = '<div class="multi-image-grid">' + images.map(function(src,i){
+        return '<div class="multi-image-item">' +
+            '<img src="'+src+'" alt="برنامه هفتگی '+(i+1)+'" loading="lazy" onclick="showImageLarge(this.src)">' +
+            '<button class="btn btn-danger" type="button" onclick="deleteWeeklyImage('+i+')">🗑️ حذف این تصویر</button>' +
+            '</div>';
+    }).join("") + '</div>';
 
 }
 
@@ -8388,7 +8487,7 @@ function updateDashboard(){
     if(weeklyStatus){
 
         weeklyStatus.innerHTML =
-            data.weeklyImage
+            getWeeklyImagesOf(data).length > 0
             ?
             '🟢 برنامه هفتگی: تصویر ثبت شده است.'
             :
@@ -9652,7 +9751,7 @@ function importData(event){
                     if(!data.interests) data.interests = [];
                     if(!data.daily) data.daily = [];
                     if(!data.weekly) data.weekly = [];
-                    if(typeof data.weeklyImage === "undefined") data.weeklyImage = "";
+                    if(typeof data.weeklyImage === "undefined") data.weeklyImage = ""; if(!Array.isArray(data.weeklyImages)) data.weeklyImages = [];
                     if(!data.budget) data.budget = [];
                     if(typeof data.budgetHours === "undefined") data.budgetHours = null;
                     if(typeof data.budgetImage === "undefined") data.budgetImage = "";
@@ -9794,6 +9893,42 @@ function enableAutomaticPersianSpeechFields(){
 let experimentPendingImages = [];
 
 function ntRefresh(){ /* نگه‌داشته‌شده برای سازگاری */ }
+
+/* ---------- کمکی: چند عکس ---------- */
+function dfImages(item,arrKey,singleKey){
+    const out = (item && Array.isArray(item[arrKey])) ? item[arrKey].filter(Boolean) : [];
+    if(item && singleKey && typeof item[singleKey] === "string" && item[singleKey] && out.indexOf(item[singleKey]) < 0){
+        out.unshift(item[singleKey]);
+    }
+    return out;
+}
+
+async function dfReadImages(fileList,maxSize,quality){
+    const files = Array.from(fileList || []);
+    const out = [];
+    let bad = 0;
+    for(let i=0;i<files.length;i++){
+        try{
+            const img = await resizeImage(files[i],maxSize,quality);
+            if(img) out.push(img);
+        }catch(e){ bad++; }
+    }
+    if(bad) alert(bad + " فایل، تصویر نبود یا خوانده نشد و نادیده گرفته شد.");
+    return out;
+}
+
+function dfPendingThumbs(list,removeFn){
+    return list.map(function(src,i){
+        return '<span class="pending-thumb"><img src="'+src+'" alt="پیش‌نمایش"><button type="button" aria-label="حذف عکس" onclick="'+removeFn+'('+i+')">×</button></span>';
+    }).join("");
+}
+
+function dfThumbsHTML(list,alt){
+    if(!list.length) return "—";
+    return '<div class="record-image-thumbs">'+list.map(function(src){
+        return '<img src="'+src+'" alt="'+alt+'" loading="lazy" onclick="showImageLarge(this.src)">';
+    }).join("")+'</div>';
+}
 
 function showImageLarge(src){
     if(!src) return;
