@@ -2060,7 +2060,7 @@ class="table-wrapper"
 <section id="groups" class="section">
 <div class="card">
 <h2>👥 تقسیم‌بندی گروه‌های کلاس</h2>
-<p>تعداد گروه‌ها را مشخص کن؛ دانش‌آموزان به صورت تصادفی و متعادل بین گروه‌ها تقسیم می‌شوند.</p>
+<p>تعداد گروه‌ها را مشخص کن؛ دانش‌آموزان به صورت تصادفی و متعادل بین گروه‌ها تقسیم می‌شوند. بعد از تقسیم می‌توانی نام هر گروه را تغییر بدهی، دانش‌آموزان را جابه‌جا کنی، گروه اضافه یا حذف کنی.</p>
 <div class="grid">
 <div><label>تعداد گروه</label><input id="groupCount" type="number" min="1" value="2"></div>
 </div>
@@ -3595,6 +3595,7 @@ function migrateDatabaseSafely(source){
         if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
         if(!Array.isArray(data[k].students)) data[k].students=[];
         if(!Array.isArray(data[k].groups)) data[k].groups=[];
+        if(!Array.isArray(data[k].groupNames)) data[k].groupNames=[];
     });
     if(!data.teacher || typeof data.teacher!=="object") data.teacher=createTeacherData();
     data.dataSchemaVersion=APP_DATA_SCHEMA_VERSION;
@@ -3663,6 +3664,13 @@ function mergeClassDataSafely(primary,secondary){
     const out=mergeScalarObjects(primary||{},secondary||{});
     const arrayNames=["students","attendance","homework","evaluations","grades","feedback","portfolio","goals","parents","interests","daily","weekly","budget","experiments","monthlyPerformance","attention","exams","schedule","fees","activities","groups","reminders"];
     arrayNames.forEach(function(name){ out[name]=mergeRecordArrays(primary&&primary[name],secondary&&secondary[name],function(item){return recordKey(item,name);}); });
+    /* گروه‌ها قابل‌ویرایش‌اند؛ اگر نسخهٔ اصلی نام‌گروه دارد، همان معتبر است و با نسخهٔ قدیمی ادغام نمی‌شود (تا گروه حذف/تغییرنام‌یافته برنگردد). */
+    if(primary && Array.isArray(primary.groupNames) && Array.isArray(primary.groups)){
+        out.groups=JSON.parse(JSON.stringify(primary.groups));
+        out.groupNames=primary.groupNames.slice();
+    }else if(!Array.isArray(out.groupNames)){
+        out.groupNames=[];
+    }
     /* شناسهٔ دانش‌آموزان حذف‌شده (سنگ‌قبر): هیچ نسخهٔ قدیمی نمی‌تواند آن‌ها را برگرداند. */
     const tomb=new Set();
     [primary,secondary].forEach(function(src){
@@ -4278,6 +4286,7 @@ function createClassData(){
         fees: [],
         activities: [],
         groups: [],
+        groupNames: [],
         reminders: [],
         settings: { passMark: 10 }
 
@@ -5757,16 +5766,86 @@ function renderStudents(){
    حضور و غیاب
 ===================================================== */
 
+function safeFileName(name){
+    return String(name||"file").replace(/[\\\/:*?"<>|]+/g,"-").replace(/\s+/g,"-");
+}
+
+function isWebViewLike(){
+    const ua=navigator.userAgent||"";
+    return /; wv\)|\bwv\b|Android.*Version\/[\d.]+.*Chrome|FBAN|FBAV|Instagram|Line\//i.test(ua) || !!window.AndroidAudio || !!window.AndroidSpeech;
+}
+
+/* پنجرهٔ کمکی: وقتی مرورگر/WebView دانلود خودکار را نمی‌پذیرد، کاربر می‌تواند فایل را با لمس لینک ذخیره یا متن را کپی کند */
+function showFileFallback(filename, blob, textContent){
+    const old=document.getElementById("fileFallbackOverlay"); if(old) old.remove();
+    const url=URL.createObjectURL(blob);
+    const ov=document.createElement("div");
+    ov.id="fileFallbackOverlay"; ov.setAttribute("dir","rtl");
+    ov.style.cssText="position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit";
+    const box=document.createElement("div");
+    box.style.cssText="background:#fff;border-radius:18px;max-width:560px;width:100%;max-height:88vh;overflow:auto;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:right;line-height:1.9";
+    box.innerHTML='<h3 style="margin:0 0 6px">📥 فایل آماده است</h3>'
+        +'<p style="margin:0 0 12px;font-size:14px;color:#475569">اگر دانلود به‌صورت خودکار شروع نشد، یکی از گزینه‌های زیر را بزنید.</p>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>';
+    const row=box.querySelector("div");
+    const a=document.createElement("a");
+    a.href=url; a.download=filename; a.className="btn btn-blue"; a.textContent="⬇️ ذخیره فایل";
+    a.style.cssText="text-decoration:none;display:inline-block";
+    row.appendChild(a);
+    if(typeof textContent==="string"){
+        const copy=document.createElement("button");
+        copy.type="button"; copy.className="btn btn-gray"; copy.textContent="📋 کپی متن";
+        copy.onclick=function(){
+            const ta=box.querySelector("textarea"); ta.focus(); ta.select();
+            let ok=false;
+            try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(textContent); ok=true; } }catch(e){}
+            if(!ok){ try{ ok=document.execCommand("copy"); }catch(e){} }
+            copy.textContent=ok?"✅ کپی شد":"متن انتخاب شد؛ کپی کنید";
+        };
+        row.appendChild(copy);
+    }
+    const close=document.createElement("button");
+    close.type="button"; close.className="btn btn-gray"; close.textContent="بستن";
+    close.onclick=function(){ ov.remove(); setTimeout(function(){URL.revokeObjectURL(url);},500); };
+    row.appendChild(close);
+    if(typeof textContent==="string"){
+        const ta=document.createElement("textarea");
+        ta.readOnly=true; ta.value=textContent; ta.style.cssText="width:100%;min-height:160px;direction:rtl;font-size:13px;border:1px solid #cbd5e1;border-radius:10px;padding:8px";
+        box.appendChild(ta);
+    }
+    ov.appendChild(box); document.body.appendChild(ov);
+}
+
+/* تحویل فایل به کاربر: اشتراک‌گذاری (موبایل) ← دانلود مستقیم ← پنجرهٔ کمکی */
+async function deliverFile(filename, blob, textContent){
+    filename=safeFileName(filename);
+    try{
+        if(window.File && navigator.canShare && navigator.share){
+            const file=new File([blob],filename,{type:blob.type||"application/octet-stream"});
+            if(navigator.canShare({files:[file]})){
+                await navigator.share({files:[file],title:filename});
+                return true;
+            }
+        }
+    }catch(e){
+        if(e && e.name==="AbortError") return false; /* کاربر خودش بستن را زد */
+    }
+    let clicked=false;
+    try{
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement("a");
+        a.href=url; a.download=filename; a.style.display="none";
+        document.body.appendChild(a); a.click(); a.remove();
+        clicked=true;
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 30000);
+    }catch(e){}
+    if(!clicked || isWebViewLike()) showFileFallback(filename, blob, textContent);
+    return clicked;
+}
+
 function downloadTextFile(filename, content, mimeType){
     const blob = new Blob(["\ufeff" + content], {type:mimeType || "text/plain;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 500);
+    return deliverFile(filename, blob, content);
 }
 
 function csvCell(value){
@@ -8821,18 +8900,72 @@ async function saveHeaderImage(event,which){
         saveDatabase(); renderHeaderImages(); alert("تصویر با موفقیت ذخیره شد.");
     }catch(e){alert("در ذخیره تصویر مشکلی پیش آمد.");} event.target.value="";
 }
+function ensureGroupData(){
+    const d=getClassData();
+    if(!Array.isArray(d.groups)) d.groups=[];
+    if(!Array.isArray(d.groupNames)) d.groupNames=[];
+    /* حذف شناسه‌های دانش‌آموزانی که دیگر وجود ندارند و جلوگیری از تکرار */
+    const valid=new Set((d.students||[]).map(function(x){return String(x.id);})), seen=new Set();
+    d.groups=d.groups.map(function(g){
+        return (Array.isArray(g)?g:[]).filter(function(id){ id=String(id); if(!valid.has(id)||seen.has(id)) return false; seen.add(id); return true; });
+    });
+    while(d.groupNames.length<d.groups.length) d.groupNames.push("");
+    d.groupNames.length=d.groups.length;
+    return d;
+}
+function groupTitle(d,i){ return (d.groupNames[i]&&String(d.groupNames[i]).trim()) || ("گروه "+(i+1)); }
+
 function makeClassGroups(){
     const d=getClassData(), students=d.students||[], n=Math.max(1,Number(document.getElementById('groupCount').value)||1);
     if(!students.length){alert('ابتدا دانش‌آموزان را ثبت کنید.');return;}
     const shuffled=students.slice().sort(()=>Math.random()-0.5), groups=Array.from({length:Math.min(n,students.length)},()=>[]);
-    shuffled.forEach((s,i)=>groups[i%groups.length].push(s.id)); d.groups=groups; saveDatabase(); renderGroups();
+    shuffled.forEach((s,i)=>groups[i%groups.length].push(s.id)); d.groups=groups; d.groupNames=groups.map(function(){return "";}); saveDatabase(); renderGroups();
 }
 function renderGroups(){
-    const box=document.getElementById('groupsTable'); if(!box)return; const d=getClassData(); const groups=d.groups||[];
-    if(!groups.length){box.innerHTML='<div class="empty-box">هنوز گروهی تشکیل نشده است.</div>';return;}
-    box.innerHTML=groups.map((g,i)=>'<div class="card" style="margin:10px 0;padding:14px"><h3>👥 گروه '+(i+1)+'</h3><div>'+g.map(id=>escapeHTML(getStudentName(id))).join('، ')+'</div></div>').join('');
+    const box=document.getElementById('groupsTable'); if(!box)return;
+    const d=ensureGroupData(), groups=d.groups, students=d.students||[];
+    const assigned=new Set(); groups.forEach(function(g){g.forEach(function(id){assigned.add(String(id));});});
+    const free=students.filter(function(s){return !assigned.has(String(s.id));});
+    const groupOptions=function(skip){ return groups.map(function(g,i){ return i===skip?'':'<option value="'+i+'">'+escapeHTML(groupTitle(d,i))+'</option>'; }).join(''); };
+    let html='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px"><button class="btn btn-blue btn-small" onclick="addEmptyGroup()">➕ افزودن گروه جدید</button></div>';
+    if(!groups.length) html+='<div class="empty-box">هنوز گروهی تشکیل نشده است. می‌توانید تقسیم تصادفی انجام دهید یا «افزودن گروه جدید» را بزنید.</div>';
+    html+=groups.map(function(g,i){
+        const members=g.map(function(id){
+            return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed #e2e8f0">'
+                +'<span style="flex:1;min-width:110px">'+escapeHTML(getStudentName(id))+'</span>'
+                +'<select onchange="moveGroupStudent(\''+String(id).replace(/'/g,"\\'")+'\',this.value);this.value=\'\'" style="max-width:150px;padding:4px"><option value="">انتقال به…</option>'+groupOptions(i)+'<option value="free">بدون گروه</option></select>'
+                +'<button class="btn btn-danger btn-small" title="خارج کردن از گروه" onclick="moveGroupStudent(\''+String(id).replace(/'/g,"\\'")+'\',\'free\')">×</button></div>';
+        }).join('') || '<div class="empty-box" style="padding:10px">این گروه خالی است.</div>';
+        return '<div class="card" style="margin:10px 0;padding:14px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+            +'<span>👥</span><input type="text" value="'+escapeHTML(d.groupNames[i]||'')+'" placeholder="گروه '+(i+1)+'" onchange="renameGroup('+i+',this.value)" style="flex:1;min-width:140px;font-weight:700">'
+            +'<span style="font-size:12px;color:#64748b">'+g.length+' نفر</span>'
+            +'<button class="btn btn-danger btn-small" onclick="deleteGroup('+i+')">🗑️ حذف گروه</button></div>'+members+'</div>';
+    }).join('');
+    if(groups.length && free.length){
+        html+='<div class="card" style="margin:10px 0;padding:14px;border:2px dashed #cbd5e1"><h3 style="margin:0 0 8px">🧍 بدون گروه ('+free.length+' نفر)</h3>'
+            +free.map(function(s){
+                return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed #e2e8f0"><span style="flex:1;min-width:110px">'+escapeHTML(getStudentName(s.id))+'</span>'
+                    +'<select onchange="moveGroupStudent(\''+String(s.id).replace(/'/g,"\\'")+'\',this.value);this.value=\'\'" style="max-width:150px;padding:4px"><option value="">افزودن به گروه…</option>'+groupOptions(-1)+'</select></div>';
+            }).join('')+'</div>';
+    }
+    box.innerHTML=html;
 }
-function clearClassGroups(){getClassData().groups=[];saveDatabase();renderGroups();}
+function addEmptyGroup(){ const d=ensureGroupData(); d.groups.push([]); d.groupNames.push(""); saveDatabase(); renderGroups(); }
+function renameGroup(i,name){ const d=ensureGroupData(); if(i<0||i>=d.groups.length) return; d.groupNames[i]=String(name||"").trim(); saveDatabase(); renderGroups(); }
+function moveGroupStudent(id,target){
+    if(target===""||target==null) return;
+    const d=ensureGroupData(), sid=String(id);
+    d.groups=d.groups.map(function(g){ return g.filter(function(x){return String(x)!==sid;}); });
+    if(target!=="free"){ const t=Number(target), st=(d.students||[]).find(function(x){return String(x.id)===sid;}); if(d.groups[t]&&st) d.groups[t].push(st.id); }
+    saveDatabase(); renderGroups();
+}
+async function deleteGroup(i){
+    const d=ensureGroupData(); if(!d.groups[i]) return;
+    const ok=await appConfirm('«'+groupTitle(d,i)+'» حذف شود؟ دانش‌آموزان آن بدون گروه می‌شوند (حذف نمی‌شوند).','حذف گروه');
+    if(!ok) return;
+    d.groups.splice(i,1); d.groupNames.splice(i,1); saveDatabase(); renderGroups();
+}
+function clearClassGroups(){const d=getClassData();d.groups=[];d.groupNames=[];saveDatabase();renderGroups();}
 
 function getTeacherData(){
     if(!database.teacher){
@@ -9689,11 +9822,7 @@ async function exportData(){
     }catch(e){}
     const data=JSON.stringify(backup,null,2);
     const blob=new Blob([data],{type:"application/json"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url; a.download="پشتیبان-دفتر-کلاسی.json";
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function(){URL.revokeObjectURL(url)},500);
+    await deliverFile("پشتیبان-دفتر-کلاسی.json", blob);
     alert("پشتیبان اطلاعات تهیه شد. صوت‌های ثبت‌شده نیز در صورت پشتیبانی دستگاه داخل فایل قرار گرفتند.");
 }
 
