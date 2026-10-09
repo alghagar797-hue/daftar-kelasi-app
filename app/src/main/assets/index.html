@@ -1552,6 +1552,30 @@ body{min-height:100dvh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scroll
 .multi-photo-row .portfolio-photo-box{flex:0 1 180px;margin:0}
 .multi-photo-row .portfolio-photo-box img{width:100%;cursor:zoom-in}
 </style>
+
+<style id="df-photo-pdf-css">
+/* عکس کوچک دانش‌آموز کنار نام */
+.sn-wrap{display:inline-flex;align-items:center;gap:8px;vertical-align:middle;max-width:100%}
+.sn-av{width:38px;height:38px;border-radius:50%;object-fit:cover;flex:none;border:2px solid #d5eeee;background:#eef8f8;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.sn-ph{display:inline-flex;align-items:center;justify-content:center;font-size:20px;line-height:1}
+.sn-nm{font-weight:700}
+.sn-wrap.sn-lg .sn-av{width:56px;height:56px}
+h3 .sn-wrap{font-size:inherit}
+/* نمایشگر PDF داخل برنامه */
+#dfPdfViewer{position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.72);display:flex;flex-direction:column;font-family:inherit}
+#dfPdfViewer .dfbar{background:#fff;padding:10px 12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+#dfPdfViewer .dfbar b{flex:1;min-width:140px}
+#dfPdfViewer .dfpages{flex:1;overflow:auto;padding:12px;text-align:center;-webkit-overflow-scrolling:touch}
+#dfPdfViewer .dfpages img{width:100%;max-width:820px;margin:0 auto 12px;display:block;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.3)}
+#dfPdfViewer .dfhint{font-size:12px;color:#475569;width:100%}
+#dfPrintArea{display:none}
+@media print{
+  @page{size:A4;margin:0}
+  body.df-printing > *:not(#dfPrintArea){display:none!important}
+  body.df-printing #dfPrintArea{display:block!important}
+  #dfPrintArea img{display:block;width:100%;page-break-after:always;break-after:page}
+}
+</style>
 </head>
 
 
@@ -2109,8 +2133,10 @@ class="table-wrapper"
 </datalist>
 
 <div class="attendance-export-row">
-    <button class="btn btn-blue" onclick="exportAttendanceCSV()">📥 خروجی جداگانه حضور و غیاب</button>
-    <button class="btn btn-gray" onclick="exportAttendanceDateCSV()">📄 خروجی همین تاریخ</button>
+    <button class="btn btn-blue" onclick="exportAttendancePDF('all')">📄 خروجی PDF — همهٔ تاریخ‌ها</button>
+    <button class="btn btn-primary" onclick="exportAttendancePDF('date')">📄 خروجی PDF — همین تاریخ</button>
+    <button class="btn btn-gray" onclick="exportAttendanceCSV()">📊 خروجی CSV (همه)</button>
+    <button class="btn btn-gray" onclick="exportAttendanceDateCSV()">📊 CSV همین تاریخ</button>
 </div>
 
 </div>
@@ -4954,6 +4980,17 @@ function getStudentName(id){
 }
 
 
+/* نمایش عکس دانش‌آموز کنار نام (برای همهٔ بخش‌ها) */
+function studentWithPhoto(idOrStudent,large){
+    const s = (idOrStudent && typeof idOrStudent === "object") ? idOrStudent : getStudent(idOrStudent);
+    if(!s) return '<span class="sn-nm">-</span>';
+    const name = escapeHTML((s.firstName||"") + " " + (s.lastName||""));
+    const av = (s.photo && /^(data:image|blob:)/.test(String(s.photo)))
+        ? '<img class="sn-av" loading="lazy" src="'+String(s.photo).replace(/"/g,"&quot;")+'" alt="">'
+        : '<span class="sn-av sn-ph">👤</span>';
+    return '<span class="sn-wrap'+(large?' sn-lg':'')+'">'+av+'<span class="sn-nm">'+name+'</span></span>';
+}
+
 function getStudent(id){
 
     return getClassData()
@@ -5880,6 +5917,447 @@ function exportAttendanceDateCSV(){
     downloadTextFile("حضور-و-غیاب-" + date.replace(/\//g,"-") + ".csv", csv, "text/csv;charset=utf-8");
 }
 
+/* =====================================================
+   خروجی PDF (بدون کتابخانهٔ خارجی — کاملاً آفلاین)
+   صفحه‌ها روی canvas رسم می‌شوند (متن فارسی درست نمایش داده می‌شود)
+   و سپس در یک فایل PDF واقعی بسته‌بندی می‌شوند.
+===================================================== */
+const DF_PDF_FONT = '"Vazirmatn","IRANSansX","IRANSans","Noto Naskh Arabic","Noto Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif';
+
+function dfLoadImage(src){
+    return new Promise(function(resolve){
+        if(!src || !/^(data:image|blob:)/.test(String(src))){ resolve(null); return; }
+        const img = new Image();
+        img.onload = function(){ resolve(img); };
+        img.onerror = function(){ resolve(null); };
+        img.src = src;
+    });
+}
+
+function dfCanvasToJpeg(canvas){
+    const b64 = canvas.toDataURL("image/jpeg", 0.9).split(",")[1];
+    const bin = atob(b64);
+    const u = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) u[i] = bin.charCodeAt(i);
+    return u;
+}
+
+function dfBuildPdf(pages){
+    const enc = new TextEncoder();
+    const chunks = [];
+    let offset = 0;
+    const offsets = [];
+    function push(x){
+        const u = (typeof x === "string") ? enc.encode(x) : x;
+        chunks.push(u); offset += u.length;
+    }
+    function obj(n, body){ offsets[n] = offset; push(n + " 0 obj\n" + body + "\nendobj\n"); }
+    const PW = 595.28, PH = 841.89;
+    const total = 2 + pages.length * 3;
+
+    push("%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n");
+    obj(1, "<< /Type /Catalog /Pages 2 0 R >>");
+    const kids = pages.map(function(p,i){ return (3 + i*3) + " 0 R"; }).join(" ");
+    obj(2, "<< /Type /Pages /Kids [" + kids + "] /Count " + pages.length + " >>");
+
+    pages.forEach(function(p,i){
+        const pn = 3 + i*3, im = 4 + i*3, ct = 5 + i*3;
+        obj(pn, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + PW + " " + PH + "] /Resources << /XObject << /Im0 " + im + " 0 R >> >> /Contents " + ct + " 0 R >>");
+        offsets[im] = offset;
+        push(im + " 0 obj\n<< /Type /XObject /Subtype /Image /Width " + p.w + " /Height " + p.h + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + p.bytes.length + " >>\nstream\n");
+        push(p.bytes);
+        push("\nendstream\nendobj\n");
+        const content = "q " + PW + " 0 0 " + PH + " 0 0 cm /Im0 Do Q";
+        obj(ct, "<< /Length " + content.length + " >>\nstream\n" + content + "\nendstream");
+    });
+
+    const xrefPos = offset;
+    let xref = "xref\n0 " + (total + 1) + "\n0000000000 65535 f \n";
+    for(let n=1;n<=total;n++){
+        xref += String(offsets[n]).padStart(10,"0") + " 00000 n \n";
+    }
+    push(xref);
+    push("trailer\n<< /Size " + (total + 1) + " /Root 1 0 R >>\nstartxref\n" + xrefPos + "\n%%EOF");
+
+    const all = new Uint8Array(offset);
+    let pos = 0;
+    chunks.forEach(function(c){ all.set(c,pos); pos += c.length; });
+    return all;
+}
+
+function dfBytesToBase64(bytes){
+    let s = "";
+    const step = 0x8000;
+    for(let i=0;i<bytes.length;i+=step){
+        s += String.fromCharCode.apply(null, bytes.subarray(i,i+step));
+    }
+    return btoa(s);
+}
+
+/* ذخیره در اپ‌های بومی (Capacitor) در صورت وجود */
+async function dfNativeSave(filename, bytes){
+    const cap = window.Capacitor;
+    const P = cap && cap.Plugins;
+    if(!P || !P.Filesystem) return false;
+    try{
+        const r = await P.Filesystem.writeFile({ path: filename, data: dfBytesToBase64(bytes), directory: "DOCUMENTS", recursive: true });
+        if(P.Share){ try{ await P.Share.share({ title: filename, url: r.uri, dialogTitle: "ذخیره / ارسال PDF" }); }catch(e){} }
+        else alert("فایل در پوشهٔ Documents ذخیره شد: " + filename);
+        return true;
+    }catch(e){ return false; }
+}
+
+function dfClosePdfViewer(){
+    const v = document.getElementById("dfPdfViewer");
+    if(v){
+        (v._urls || []).forEach(function(u){ try{ URL.revokeObjectURL(u); }catch(e){} });
+        v.remove();
+    }
+}
+
+function dfPrintPages(urls){
+    let area = document.getElementById("dfPrintArea");
+    if(area) area.remove();
+    area = document.createElement("div");
+    area.id = "dfPrintArea";
+    urls.forEach(function(u){ const im = document.createElement("img"); im.src = u; area.appendChild(im); });
+    document.body.appendChild(area);
+    document.body.classList.add("df-printing");
+    const done = function(){
+        document.body.classList.remove("df-printing");
+        const a = document.getElementById("dfPrintArea"); if(a) a.remove();
+        window.removeEventListener("afterprint", done);
+    };
+    window.addEventListener("afterprint", done);
+    setTimeout(function(){ try{ window.print(); }catch(e){ done(); alert("چاپ در این محیط پشتیبانی نمی‌شود."); } }, 250);
+}
+
+/* نمایشگر داخل برنامه: اگر محیط (WebView) دانلود را مسدود کرد، کاربر باز هم به فایل می‌رسد */
+function dfShowPdfViewer(filename, blob, bytes, pageUrls){
+    dfClosePdfViewer();
+    const pdfUrl = URL.createObjectURL(blob);
+    const ov = document.createElement("div");
+    ov.id = "dfPdfViewer"; ov.setAttribute("dir","rtl");
+    ov._urls = pageUrls.concat([pdfUrl]);
+
+    const bar = document.createElement("div"); bar.className = "dfbar";
+    const title = document.createElement("b"); title.textContent = "📄 " + filename; bar.appendChild(title);
+
+    const a1 = document.createElement("a");
+    a1.href = pdfUrl; a1.download = filename; a1.className = "btn btn-blue"; a1.textContent = "⬇️ ذخیرهٔ PDF";
+    a1.style.cssText = "text-decoration:none;display:inline-block"; bar.appendChild(a1);
+
+    const a2 = document.createElement("a");
+    a2.href = "data:application/pdf;base64," + dfBytesToBase64(bytes); a2.download = filename;
+    a2.className = "btn btn-gray"; a2.textContent = "⬇️ ذخیره (روش دوم)";
+    a2.style.cssText = "text-decoration:none;display:inline-block"; bar.appendChild(a2);
+
+    const pr = document.createElement("button"); pr.type = "button"; pr.className = "btn btn-green";
+    pr.textContent = "🖨️ چاپ / ذخیره به‌صورت PDF"; pr.onclick = function(){ dfPrintPages(pageUrls); }; bar.appendChild(pr);
+
+    if(navigator.share){
+        const sh = document.createElement("button"); sh.type = "button"; sh.className = "btn btn-gray"; sh.textContent = "📤 اشتراک‌گذاری";
+        sh.onclick = async function(){
+            try{
+                const f = new File([blob], filename, {type:"application/pdf"});
+                if(navigator.canShare && navigator.canShare({files:[f]})) await navigator.share({files:[f], title:filename});
+                else await navigator.share({title:filename, text:filename});
+            }catch(e){}
+        };
+        bar.appendChild(sh);
+    }
+    const cl = document.createElement("button"); cl.type = "button"; cl.className = "btn btn-danger"; cl.textContent = "✖ بستن";
+    cl.onclick = dfClosePdfViewer; bar.appendChild(cl);
+
+    const hint = document.createElement("div"); hint.className = "dfhint";
+    hint.textContent = "اگر دکمه‌ها دانلود نکردند: روی هر صفحه نگه دارید و «ذخیرهٔ تصویر» را بزنید، یا از دکمهٔ چاپ استفاده کنید.";
+    bar.appendChild(hint);
+
+    const pg = document.createElement("div"); pg.className = "dfpages";
+    pageUrls.forEach(function(u){ const im = document.createElement("img"); im.src = u; im.alt = "صفحهٔ PDF"; pg.appendChild(im); });
+
+    ov.appendChild(bar); ov.appendChild(pg); document.body.appendChild(ov);
+}
+
+async function dfDeliverPdf(filename, pageCanvases){
+    filename = safeFileName(filename);
+    const pages = pageCanvases.map(function(c){ return { bytes: dfCanvasToJpeg(c), w: c.width, h: c.height }; });
+    const bytes = dfBuildPdf(pages);
+    const blob = new Blob([bytes], {type:"application/pdf"});
+
+    /* برای نمایشگر داخلی از JPEG استفاده می‌کنیم (سبک‌تر) */
+    const pageUrls = pages.map(function(p){ return URL.createObjectURL(new Blob([p.bytes], {type:"image/jpeg"})); });
+
+    if(await dfNativeSave(filename, bytes)){ pageUrls.forEach(function(u){ URL.revokeObjectURL(u); }); return true; }
+
+    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+    if(mobile){
+        try{
+            if(window.File && navigator.canShare && navigator.share){
+                const file = new File([blob], filename, {type:"application/pdf"});
+                if(navigator.canShare({files:[file]})){
+                    await navigator.share({files:[file], title:filename});
+                    pageUrls.forEach(function(u){ URL.revokeObjectURL(u); });
+                    return true;
+                }
+            }
+        }catch(e){
+            if(e && e.name === "AbortError"){ pageUrls.forEach(function(u){ URL.revokeObjectURL(u); }); return false; }
+        }
+    }
+
+    let clicked = false;
+    try{
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = filename; a.style.display = "none";
+        document.body.appendChild(a); a.click(); a.remove();
+        clicked = true;
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 30000);
+    }catch(e){}
+
+    /* در WebView اپ‌ها دانلود blob اغلب بی‌صدا شکست می‌خورد؛ پس نمایشگر داخلی را همیشه نشان می‌دهیم */
+    if(!clicked || isWebViewLike() || mobile) dfShowPdfViewer(filename, blob, bytes, pageUrls);
+    else pageUrls.forEach(function(u){ setTimeout(function(){ URL.revokeObjectURL(u); }, 1000); });
+    return clicked;
+}
+
+function dfWrapText(ctx, text, maxWidth, maxLines){
+    const words = String(text||"").split(/\s+/).filter(Boolean);
+    const lines = [];
+    let cur = "";
+    for(let i=0;i<words.length;i++){
+        const test = cur ? cur + " " + words[i] : words[i];
+        if(ctx.measureText(test).width <= maxWidth){ cur = test; }
+        else{
+            if(cur) lines.push(cur);
+            cur = words[i];
+            if(lines.length >= maxLines) break;
+        }
+    }
+    if(cur && lines.length < maxLines) lines.push(cur);
+    if(lines.length > maxLines) lines.length = maxLines;
+    const joined = words.join(" ");
+    if(lines.join(" ").length < joined.length && lines.length){
+        let last = lines[lines.length-1];
+        while(last.length > 1 && ctx.measureText(last + "…").width > maxWidth) last = last.slice(0,-1);
+        lines[lines.length-1] = last + "…";
+    }
+    return lines;
+}
+
+function dfRoundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+    ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+    ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+
+/* ساخت صفحه‌های گزارش حضور و غیاب */
+async function dfRenderAttendancePages(opts){
+    try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+    const W = 1240, H = 1754, M = 70;
+    const showDate = !!opts.showDate;
+    const rows = opts.rows;
+
+    /* عکس‌ها را یک‌بار بارگذاری می‌کنیم */
+    const photoCache = {};
+    for(let i=0;i<rows.length;i++){
+        const s = rows[i].student;
+        if(s && photoCache[s.id] === undefined) photoCache[s.id] = await dfLoadImage(s.photo);
+    }
+
+    const STATUS = {
+        "حاضر":{bg:"#dcfce7",fg:"#15803d"},
+        "غایب":{bg:"#fee2e2",fg:"#b91c1c"},
+        "تأخیر":{bg:"#fef3c7",fg:"#b45309"},
+        "ثبت نشده":{bg:"#e5e7eb",fg:"#475569"}
+    };
+    const cnt = {"حاضر":0,"غایب":0,"تأخیر":0,"ثبت نشده":0};
+    rows.forEach(function(r){ cnt[r.status] = (cnt[r.status]||0) + 1; });
+
+    /* ستون‌ها از راست به چپ */
+    const tableW = W - 2*M;
+    const colIdx = 70, colPhoto = 100, colStatus = 170, colDate = showDate ? 190 : 0;
+    const colName = 330;
+    const colReason = tableW - colIdx - colPhoto - colName - colStatus - colDate;
+    const X0 = W - M; /* لبهٔ راست جدول */
+    const xIdx = X0, xPhoto = xIdx - colIdx, xName = xPhoto - colPhoto;
+    const xDate = xName - colName, xStatus = xDate - colDate, xReason = xStatus - colStatus; /* لبهٔ راست هر ستون */
+
+    const ROW_H = 92, HEAD_H = 62;
+    const pages = [];
+    let canvas, ctx, y, pageNo = 0;
+
+    function newPage(first){
+        canvas = document.createElement("canvas"); canvas.width = W; canvas.height = H;
+        ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(0,0,W,H);
+        ctx.direction = "rtl"; ctx.textBaseline = "middle";
+        pages.push(canvas); pageNo++;
+        if(first){
+            const g = ctx.createLinearGradient(0,0,W,0);
+            g.addColorStop(0,"#3498db"); g.addColorStop(.5,"#16a085"); g.addColorStop(1,"#087f8c");
+            ctx.fillStyle = g; ctx.fillRect(0,0,W,230);
+            ctx.fillStyle = "#fff"; ctx.textAlign = "right";
+            ctx.font = "800 54px " + DF_PDF_FONT; ctx.fillText(opts.title, W-M, 82);
+            ctx.font = "500 28px " + DF_PDF_FONT; ctx.fillText(opts.subtitle, W-M, 140);
+            if(opts.meta){ ctx.font = "400 24px " + DF_PDF_FONT; ctx.globalAlpha = .92; ctx.fillText(opts.meta, W-M, 188); ctx.globalAlpha = 1; }
+            y = 262;
+            /* خلاصه */
+            const chips = [["حاضر",cnt["حاضر"]],["غایب",cnt["غایب"]],["تأخیر",cnt["تأخیر"]]];
+            if(cnt["ثبت نشده"]) chips.push(["ثبت نشده",cnt["ثبت نشده"]]);
+            let cx = W - M;
+            const cw = 210, gap = 18;
+            chips.forEach(function(c){
+                const st = STATUS[c[0]];
+                ctx.fillStyle = st.bg; dfRoundRect(ctx, cx-cw, y, cw, 78, 18); ctx.fill();
+                ctx.fillStyle = st.fg; ctx.textAlign = "center"; ctx.direction = "rtl";
+                ctx.font = "800 32px " + DF_PDF_FONT; ctx.fillText(toPersianNumber(c[1]), cx-cw/2-0, y+26);
+                ctx.font = "500 22px " + DF_PDF_FONT; ctx.fillText(c[0], cx-cw/2, y+56);
+                cx -= cw + gap;
+            });
+            y += 78 + 34;
+        }else{
+            y = M;
+        }
+        drawHeader();
+    }
+
+    function drawHeader(){
+        ctx.fillStyle = "#087f8c"; dfRoundRect(ctx, M, y, tableW, HEAD_H, 14); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.font = "700 25px " + DF_PDF_FONT; ctx.textAlign = "center";
+        ctx.fillText("ردیف", xIdx - colIdx/2, y + HEAD_H/2);
+        ctx.fillText("عکس", xPhoto - colPhoto/2, y + HEAD_H/2);
+        ctx.fillText("نام و نام خانوادگی", xName - colName/2, y + HEAD_H/2);
+        if(showDate) ctx.fillText("تاریخ", xDate - colDate/2, y + HEAD_H/2);
+        ctx.fillText("وضعیت", xStatus - colStatus/2, y + HEAD_H/2);
+        ctx.fillText("دلیل غیبت / تأخیر", xReason - colReason/2, y + HEAD_H/2);
+        y += HEAD_H + 8;
+    }
+
+    function drawFooter(n,total){
+        ctx.fillStyle = "#94a3b8"; ctx.font = "400 21px " + DF_PDF_FONT; ctx.textAlign = "center"; ctx.direction = "rtl";
+        ctx.fillText("دفتر کلاسی من  •  صفحهٔ " + toPersianNumber(n) + " از " + toPersianNumber(total), W/2, H - 38);
+    }
+
+    newPage(true);
+
+    for(let i=0;i<rows.length;i++){
+        if(y + ROW_H > H - 90){ newPage(false); }
+        const r = rows[i];
+        const s = r.student;
+        /* زمینهٔ ردیف */
+        ctx.fillStyle = (i % 2 === 0) ? "#f6fbfb" : "#ffffff";
+        ctx.fillRect(M, y, tableW, ROW_H);
+        ctx.strokeStyle = "#e2eeee"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(M, y+ROW_H); ctx.lineTo(M+tableW, y+ROW_H); ctx.stroke();
+
+        const cy = y + ROW_H/2;
+        ctx.fillStyle = "#475569"; ctx.font = "500 24px " + DF_PDF_FONT; ctx.textAlign = "center";
+        ctx.fillText(toPersianNumber(i+1), xIdx - colIdx/2, cy);
+
+        /* عکس دایره‌ای */
+        const pr = 32, pcx = xPhoto - colPhoto/2;
+        const img = s ? photoCache[s.id] : null;
+        ctx.save();
+        ctx.beginPath(); ctx.arc(pcx, cy, pr, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+        if(img){
+            const side = Math.min(img.naturalWidth, img.naturalHeight);
+            const sx = (img.naturalWidth - side)/2, sy = (img.naturalHeight - side)/2;
+            ctx.drawImage(img, sx, sy, side, side, pcx-pr, cy-pr, pr*2, pr*2);
+        }else{
+            ctx.fillStyle = "#e2f1f1"; ctx.fillRect(pcx-pr, cy-pr, pr*2, pr*2);
+            ctx.fillStyle = "#7aa6a6";
+            ctx.beginPath(); ctx.arc(pcx, cy-9, 11, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(pcx, cy+22, 20, 16, 0, Math.PI, 0); ctx.fill();
+        }
+        ctx.restore();
+        ctx.strokeStyle = "#bfe5e1"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(pcx, cy, pr, 0, Math.PI*2); ctx.stroke();
+
+        /* نام */
+        ctx.fillStyle = "#263238"; ctx.font = "700 27px " + DF_PDF_FONT; ctx.textAlign = "right";
+        const nameLines = dfWrapText(ctx, r.name, colName - 28, 2);
+        const nlh = 34;
+        nameLines.forEach(function(t,k){ ctx.fillText(t, xName - 14, cy + (k - (nameLines.length-1)/2)*nlh); });
+
+        /* تاریخ */
+        if(showDate){
+            ctx.fillStyle = "#475569"; ctx.font = "500 24px " + DF_PDF_FONT; ctx.textAlign = "center";
+            ctx.fillText(toPersianNumber(r.dateText), xDate - colDate/2, cy);
+        }
+
+        /* وضعیت */
+        const st = STATUS[r.status] || STATUS["ثبت نشده"];
+        const bw = 130, bh = 46, bx = xStatus - colStatus/2 - bw/2;
+        ctx.fillStyle = st.bg; dfRoundRect(ctx, bx, cy - bh/2, bw, bh, 23); ctx.fill();
+        ctx.fillStyle = st.fg; ctx.font = "700 24px " + DF_PDF_FONT; ctx.textAlign = "center";
+        ctx.fillText(r.status, bx + bw/2, cy);
+
+        /* دلیل */
+        ctx.fillStyle = "#37474f"; ctx.font = "400 23px " + DF_PDF_FONT; ctx.textAlign = "right";
+        if(r.reason){
+            const rl = dfWrapText(ctx, r.reason, colReason - 28, 2);
+            rl.forEach(function(t,k){ ctx.fillText(t, xReason - 14, cy + (k - (rl.length-1)/2)*30); });
+        }else{
+            ctx.fillStyle = "#b0bec5"; ctx.textAlign = "center"; ctx.fillText("—", xReason - colReason/2, cy);
+        }
+        y += ROW_H;
+    }
+
+    /* شمارهٔ صفحه */
+    const total = pages.length;
+    pages.forEach(function(c,i){
+        ctx = c.getContext("2d"); ctx.direction = "rtl"; ctx.textBaseline = "middle";
+        drawFooter(i+1, total);
+    });
+    return pages;
+}
+
+async function exportAttendancePDF(mode){
+    const data = getClassData();
+    const students = data.students || [];
+    const att = data.attendance || [];
+    const classTitle = getClassTitleForKey(currentClass);
+    let teacherName = "";
+    try{ const t = getTeacherData(); teacherName = [t.firstName, t.lastName].filter(Boolean).join(" ").trim(); }catch(e){}
+    let rows = [], opts, fname;
+
+    if(mode === "date"){
+        const dateEl = document.getElementById("attendanceDate");
+        const date = normalizePersianDate(dateEl ? dateEl.value : "");
+        if(!students.length){ alert("ابتدا دانش‌آموزان را ثبت کنید."); return; }
+        students.forEach(function(s){
+            const rec = att.find(function(it){ return String(it.studentId) === String(s.id) && normalizePersianDate(it.date) === date; });
+            rows.push({ student:s, name:(s.firstName||"")+" "+(s.lastName||""), dateText:formatPersianDate(date),
+                        status: rec ? (rec.status || "ثبت نشده") : "ثبت نشده", reason: rec ? (rec.reason || "") : "" });
+        });
+        opts = { title:"گزارش حضور و غیاب", subtitle: classTitle + "  —  تاریخ: " + toPersianNumber(formatPersianDate(date)),
+                 meta: teacherName ? ("معلم: " + teacherName) : "", rows:rows, showDate:false };
+        fname = "حضور-و-غیاب-" + classTitle.replace(/\s+/g,"-") + "-" + String(date).replace(/\//g,"-") + ".pdf";
+    }else{
+        if(!att.length){ alert("هنوز هیچ سابقه‌ای برای حضور و غیاب ثبت نشده است."); return; }
+        att.slice().sort(function(a,b){ return String(normalizePersianDate(a.date)).localeCompare(String(normalizePersianDate(b.date))); }).forEach(function(it){
+            const s = getStudent(it.studentId);
+            rows.push({ student:s || null, name: s ? ((s.firstName||"")+" "+(s.lastName||"")) : "-", dateText:formatPersianDate(it.date),
+                        status: it.status || "ثبت نشده", reason: it.reason || "" });
+        });
+        opts = { title:"گزارش کامل حضور و غیاب", subtitle: classTitle + "  —  همهٔ تاریخ‌های ثبت‌شده",
+                 meta: teacherName ? ("معلم: " + teacherName) : "", rows:rows, showDate:true };
+        fname = "حضور-و-غیاب-" + classTitle.replace(/\s+/g,"-") + "-کامل.pdf";
+    }
+
+    try{
+        const pages = await dfRenderAttendancePages(opts);
+        await dfDeliverPdf(fname, pages);
+    }catch(err){
+        console.error(err);
+        alert("ساخت PDF با خطا روبه‌رو شد. لطفاً دوباره تلاش کنید.");
+    }
+}
+
 function setAttendance(studentId,status){
 
     const date =
@@ -6022,11 +6500,7 @@ function renderAttendance(){
 
                 <td>
 
-                    ${escapeHTML(
-                        student.firstName +
-                        " " +
-                        student.lastName
-                    )}
+                    ${studentWithPhoto(student)}
 
                 </td>
 
@@ -6252,11 +6726,7 @@ function renderHomework(){
 
                 <td>
 
-                    ${escapeHTML(
-                        student.firstName +
-                        " " +
-                        student.lastName
-                    )}
+                    ${studentWithPhoto(student)}
 
                 </td>
 
@@ -6586,9 +7056,7 @@ function renderEvaluations(){
 
 
                 <td>
-                    ${escapeHTML(
-                        getStudentName(item.studentId)
-                    )}
+                    ${studentWithPhoto(item.studentId)}
                 </td>
 
 
@@ -6790,9 +7258,7 @@ function renderGrades(){
 
 
                 <td>
-                    ${escapeHTML(
-                        getStudentName(item.studentId)
-                    )}
+                    ${studentWithPhoto(item.studentId)}
                 </td>
 
 
@@ -7040,9 +7506,7 @@ function renderReport(){
 
                     👨‍🎓
 
-                    ${escapeHTML(
-                        getStudentName(studentId)
-                    )}
+                    ${escapeHTML(getStudentName(studentId))}
 
                 </h3>
 
@@ -7509,9 +7973,7 @@ function renderParents(){
             <tr>
 
                 <td>
-                    ${escapeHTML(
-                        getStudentName(item.studentId)
-                    )}
+                    ${studentWithPhoto(item.studentId)}
                 </td>
 
                 <td>
@@ -7657,9 +8119,7 @@ function renderInterests(){
             <tr>
 
                 <td>
-                    ${escapeHTML(
-                        getStudentName(item.studentId)
-                    )}
+                    ${studentWithPhoto(item.studentId)}
                 </td>
 
                 <td>
@@ -8414,9 +8874,7 @@ function renderAttention(){
             <tr>
 
                 <td>
-                    ${escapeHTML(
-                        getStudentName(item.studentId)
-                    )}
+                    ${studentWithPhoto(item.studentId)}
                 </td>
 
                 <td>
@@ -8623,9 +9081,7 @@ function updateDashboard(){
                             return `
                                 <li>
                                     ⭐
-                                    ${escapeHTML(
-                                        getStudentName(item.studentId)
-                                    )}
+                                    ${studentWithPhoto(item.studentId)}
                                     —
                                     ${escapeHTML(item.subject)}
                                     <br>
@@ -8710,9 +9166,7 @@ function updateDashboard(){
                                 <li>
                                     <span class="status-dot dot-orange"></span>
                                     <b>
-                                        ${escapeHTML(
-                                            getStudentName(item.studentId)
-                                        )}
+                                        ${studentWithPhoto(item.studentId)}
                                     </b>
                                     <br>
                                     ${escapeHTML(item.reason)}
@@ -8932,7 +9386,7 @@ function renderGroups(){
     html+=groups.map(function(g,i){
         const members=g.map(function(id){
             return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed #e2e8f0">'
-                +'<span style="flex:1;min-width:110px">'+escapeHTML(getStudentName(id))+'</span>'
+                +'<span style="flex:1;min-width:110px">'+studentWithPhoto(id)+'</span>'
                 +'<select onchange="moveGroupStudent(\''+String(id).replace(/'/g,"\\'")+'\',this.value);this.value=\'\'" style="max-width:150px;padding:4px"><option value="">انتقال به…</option>'+groupOptions(i)+'<option value="free">بدون گروه</option></select>'
                 +'<button class="btn btn-danger btn-small" title="خارج کردن از گروه" onclick="moveGroupStudent(\''+String(id).replace(/'/g,"\\'")+'\',\'free\')">×</button></div>';
         }).join('') || '<div class="empty-box" style="padding:10px">این گروه خالی است.</div>';
@@ -8944,7 +9398,7 @@ function renderGroups(){
     if(groups.length && free.length){
         html+='<div class="card" style="margin:10px 0;padding:14px;border:2px dashed #cbd5e1"><h3 style="margin:0 0 8px">🧍 بدون گروه ('+free.length+' نفر)</h3>'
             +free.map(function(s){
-                return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed #e2e8f0"><span style="flex:1;min-width:110px">'+escapeHTML(getStudentName(s.id))+'</span>'
+                return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed #e2e8f0"><span style="flex:1;min-width:110px">'+studentWithPhoto(s)+'</span>'
                     +'<select onchange="moveGroupStudent(\''+String(s.id).replace(/'/g,"\\'")+'\',this.value);this.value=\'\'" style="max-width:150px;padding:4px"><option value="">افزودن به گروه…</option>'+groupOptions(-1)+'</select></div>';
             }).join('')+'</div>';
     }
@@ -9701,7 +10155,7 @@ function renderFeedback(){
     if(!records.length){box.innerHTML='<div class="empty-box">هنوز بازخوردی ثبت نشده است.</div>';return;}
     box.innerHTML='<table><tr><th>تاریخ</th><th>دانش‌آموز</th><th>درس/موضوع</th><th>بازخورد</th><th>صوت</th><th>عملیات</th></tr>'+
       records.slice().reverse().map(function(item){
-        return '<tr><td>'+escapeHTML(formatPersianDate(item.date))+'</td><td>'+escapeHTML(getStudentName(item.studentId))+
+        return '<tr><td>'+escapeHTML(formatPersianDate(item.date))+'</td><td>'+studentWithPhoto(item.studentId)+
         '</td><td>'+escapeHTML(item.subject||"—")+'</td><td style="text-align:right;min-width:280px">'+escapeHTML(item.notes||"—")+
         '</td><td>'+(item.voiceId?voiceButton(item.voiceId):"—")+'</td><td><button class="btn btn-blue btn-small" onclick="editFeedback('+item.id+')">✏️ ویرایش</button><button class="btn btn-danger btn-small" onclick="deleteFeedback('+item.id+')">🗑️ حذف</button></td></tr>';
       }).join("")+'</table>';
@@ -9768,7 +10222,7 @@ function renderMonthlyPerformance(){
     if(!records.length){box.innerHTML='<div class="empty-box">هنوز عملکرد ماهانه‌ای ثبت نشده است.</div>';return;}
     box.innerHTML='<table><tr><th>ماه</th><th>دانش‌آموز</th><th>وضعیت درسی</th><th>فعالیت کلاسی</th><th>تکالیف</th><th>مشارکت</th><th>جمع‌بندی</th><th>صوت</th><th>عملیات</th></tr>'+
       records.slice().reverse().map(function(item){
-        return '<tr><td>'+escapeHTML(item.month)+'</td><td>'+escapeHTML(getStudentName(item.studentId))+
+        return '<tr><td>'+escapeHTML(item.month)+'</td><td>'+studentWithPhoto(item.studentId)+
         '</td><td>'+escapeHTML(item.academic||"—")+'</td><td>'+escapeHTML(item.classActivity||"—")+
         '</td><td>'+escapeHTML(item.homework||"—")+'</td><td>'+escapeHTML(item.participation||"—")+
         '</td><td style="text-align:right;min-width:260px">'+escapeHTML(item.notes||"—")+
