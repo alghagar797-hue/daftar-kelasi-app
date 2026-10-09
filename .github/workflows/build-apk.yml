@@ -33,7 +33,12 @@ jobs:
         run: |
           test -f app/build.gradle
           test -f app/src/main/assets/index.html
-          echo "Project OK"
+          test -f index.html
+          cmp -s index.html app/src/main/assets/index.html || {
+            echo "ERROR: root index.html and Android app asset differ; synchronize them before building."
+            exit 1
+          }
+          echo "Project OK: web and Android HTML sources are synchronized."
 
 
       - name: Restore Keystore
