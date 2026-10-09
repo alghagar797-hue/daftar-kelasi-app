@@ -2025,6 +2025,15 @@ placeholder="توضیحات اختیاری"
 
 </div>
 
+<div>
+<label>📞 شماره تلفن پدر</label>
+<input id="studentFatherPhone" type="tel" inputmode="tel" placeholder="شماره تماس پدر">
+</div>
+
+<div>
+<label>📞 شماره تلفن مادر</label>
+<input id="studentMotherPhone" type="tel" inputmode="tel" placeholder="شماره تماس مادر">
+</div>
 
 <div>
 
@@ -5377,6 +5386,10 @@ async function addStudent(){
 
         notes:notes,
 
+        fatherPhone:(document.getElementById("studentFatherPhone").value || "").trim(),
+
+        motherPhone:(document.getElementById("studentMotherPhone").value || "").trim(),
+
         photo:photo
 
     });
@@ -5405,9 +5418,9 @@ async function addStudent(){
         .value = "";
 
 
-    document
-        .getElementById("studentNotes")
-        .value = "";
+    document.getElementById("studentNotes").value = "";
+    document.getElementById("studentFatherPhone").value = "";
+    document.getElementById("studentMotherPhone").value = "";
 
     updateStudentGradeField();
 
@@ -6358,6 +6371,36 @@ async function exportAttendancePDF(mode){
     }
 }
 
+function editAttendanceRecord(studentId){
+    const date = normalizePersianDate(document.getElementById("attendanceDate").value);
+    const data = getClassData();
+    let rec = data.attendance.find(function(item){
+        return String(item.studentId) === String(studentId) && normalizePersianDate(item.date) === date;
+    });
+    if(!rec){
+        const status = prompt("وضعیت را وارد کنید: حاضر، غایب یا تأخیر", "حاضر");
+        if(status === null) return;
+        const allowed = ["حاضر","غایب","تأخیر"];
+        if(!allowed.includes(status.trim())){ alert("وضعیت باید حاضر، غایب یا تأخیر باشد."); return; }
+        rec = {studentId:String(studentId), date:date, status:status.trim(), reason:""};
+        data.attendance.push(rec);
+    }else{
+        const status = prompt("وضعیت را وارد کنید: حاضر، غایب یا تأخیر", rec.status || "حاضر");
+        if(status === null) return;
+        const allowed = ["حاضر","غایب","تأخیر"];
+        if(!allowed.includes(status.trim())){ alert("وضعیت باید حاضر، غایب یا تأخیر باشد."); return; }
+        rec.status = status.trim();
+    }
+    if(rec.status === "حاضر") rec.reason = "";
+    else {
+        const reason = prompt("دلیل غیبت یا تأخیر (در صورت نیاز):", rec.reason || "");
+        if(reason !== null) rec.reason = reason.trim();
+    }
+    saveDatabase();
+    renderAttendance();
+    updateDashboard();
+}
+
 function setAttendance(studentId,status){
 
     const date =
@@ -6543,6 +6586,7 @@ function renderAttendance(){
                         </b>
 
                     </div>
+                    <button class="btn btn-blue btn-small" onclick="editAttendanceRecord('${student.id}')">✏️ ویرایش وضعیت/دلیل</button>
 
                     ${
                         record && (record.status === "غایب" || record.status === "تأخیر")
@@ -10721,9 +10765,9 @@ function dfOpts(id,cur){var o=Array.from((document.getElementById(id)||{options:
 function dfFind(col,id){return(getClassData()[col]||[]).find(function(x){return String(x.id)===String(id)})}
 function dfDate(v){return toPersianNumber(formatPersianDate(v)==='-'?'':formatPersianDate(v))}
 function editStudent(id){var s=getStudent(id);if(!s)return;
- dfEdit('✏️ ویرایش دانش‌آموز',[{label:'نام',val:s.firstName},{label:'نام خانوادگی',val:s.lastName},{label:'پایه',type:'select',val:String(s.grade||''),opts:dfOpts('studentGrade',String(s.grade||''))},{label:'توضیحات',type:'textarea',val:s.notes||''}],function(v){
+ dfEdit('✏️ ویرایش دانش‌آموز',[{label:'نام',val:s.firstName},{label:'نام خانوادگی',val:s.lastName},{label:'پایه',type:'select',val:String(s.grade||''),opts:dfOpts('studentGrade',String(s.grade||''))},{label:'توضیحات',type:'textarea',val:s.notes||''},{label:'شماره تلفن پدر',val:s.fatherPhone||''},{label:'شماره تلفن مادر',val:s.motherPhone||''}],function(v){
   if(!v[0].trim()||!v[1].trim()){alert('نام و نام خانوادگی را وارد کنید.');return false}
-  s.firstName=v[0].trim();s.lastName=v[1].trim();s.grade=v[2];s.notes=v[3].trim();saveDatabase();
+  s.firstName=v[0].trim();s.lastName=v[1].trim();s.grade=v[2];s.notes=v[3].trim();s.fatherPhone=v[4].trim();s.motherPhone=v[5].trim();saveDatabase();
   renderStudents();renderAttendance();renderHomework();try{refreshStudentSelectorsSafely()}catch(e){}updateDashboard();try{renderStudentFile()}catch(e){}});}
 function editEvaluation(id){var x=dfFind('evaluations',id);if(!x)return;
  dfEdit('✏️ ویرایش ارزشیابی',[{label:'درس',val:x.subject},{label:'سطح',type:'select',val:x.level,opts:dfOpts('evaluationLevel',x.level)},{label:'تاریخ',type:'date',val:dfDate(x.date)},{label:'توضیحات',type:'textarea',val:x.notes||''}],function(v){
