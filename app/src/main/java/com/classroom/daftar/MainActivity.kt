@@ -33,6 +33,10 @@ class MainActivity : Activity() {
     private var pendingSpeechAfterPermission = false
     private val audioPermission = 1001
     private val fileRequest = 2001
+    private val exportFileRequest = 2002
+    private var pendingExportFilename: String? = null
+    private var pendingExportMimeType: String? = null
+    private var pendingExportBytes: ByteArray? = null
     private var fileCallback: ValueCallback<Array<Uri>>? = null
     private var pendingWebPermission: PermissionRequest? = null
     private val speechHandler = Handler(Looper.getMainLooper())
@@ -133,6 +137,7 @@ class MainActivity : Activity() {
 
         webView.addJavascriptInterface(AndroidSpeechBridge(), "AndroidSpeech")
         webView.addJavascriptInterface(AndroidAudioBridge(), "AndroidAudio")
+        webView.addJavascriptInterface(AndroidFileBridge(), "AndroidFileBridge")
         setContentView(webView)
         webView.loadUrl("https://appassets.androidplatform.net/assets/index.html")
     }
@@ -147,6 +152,41 @@ class MainActivity : Activity() {
         fun stopRecording() {
             runOnUiThread { stopNativeRecording() }
         }
+    }
+
+    /** پل امن ذخیره فایل‌های خروجی HTML در پوشه‌ای که کاربر انتخاب می‌کند. */
+    inner class AndroidFileBridge {
+        @android.webkit.JavascriptInterface
+        fun saveFile(filename: String, mimeType: String, base64Data: String) {
+            runOnUiThread {
+                try {
+                    pendingExportFilename = filename.substringAfterLast('/').substringAfterLast('\\')
+                    pendingExportMimeType = mimeType.substringBefore(';').ifBlank { "application/octet-stream" }
+                    pendingExportBytes = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT)
+
+                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = pendingExportMimeType ?: "application/octet-stream"
+                        putExtra(Intent.EXTRA_TITLE, pendingExportFilename ?: "export")
+                    }
+                    startActivityForResult(intent, exportFileRequest)
+                } catch (e: Exception) {
+                    clearPendingExport()
+                    notifyNativeFileSaved(false, "باز کردن پنجره ذخیره فایل ممکن نشد.")
+                }
+            }
+        }
+    }
+
+    private fun clearPendingExport() {
+        pendingExportFilename = null
+        pendingExportMimeType = null
+        pendingExportBytes = null
+    }
+
+    private fun notifyNativeFileSaved(success: Boolean, message: String) {
+        val js = "window.onNativeFileSaved && window.onNativeFileSaved($success, ${org.json.JSONObject.quote(message)});"
+        runOnUiThread { if (::webView.isInitialized) webView.evaluateJavascript(js, null) }
     }
 
     private fun startNativeRecording(type: String) {
@@ -405,6 +445,24 @@ class MainActivity : Activity() {
                 WebChromeClient.FileChooserParams.parseResult(resultCode, data) else null
             fileCallback?.onReceiveValue(result)
             fileCallback = null
+        } else if (requestCode == exportFileRequest) {
+            var success = false
+            var message = "ذخیره فایل لغو شد."
+            val uri = if (resultCode == RESULT_OK) data?.data else null
+            val bytes = pendingExportBytes
+            if (uri != null && bytes != null) {
+                try {
+                    val output = contentResolver.openOutputStream(uri)
+                        ?: throw IllegalStateException("Output stream unavailable")
+                    output.use { it.write(bytes) }
+                    success = true
+                    message = "فایل با موفقیت ذخیره شد."
+                } catch (e: Exception) {
+                    message = "ذخیره فایل انجام نشد؛ لطفاً دوباره تلاش کنید."
+                }
+            }
+            clearPendingExport()
+            notifyNativeFileSaved(success, message)
         } else {
             @Suppress("DEPRECATION")
             super.onActivityResult(requestCode, resultCode, data)

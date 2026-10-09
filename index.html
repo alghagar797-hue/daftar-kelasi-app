@@ -1535,6 +1535,47 @@ body{min-height:100dvh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scroll
 @media(max-width:520px){.dashboard-quick{grid-template-columns:repeat(2,minmax(0,1fr))!important}.showcase-actions,.dashboard-capabilities{grid-template-columns:1fr!important}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style>
+<style>
+/* --- دلیل غیبت و چندعکسی --- */
+.absence-reason-box{margin-top:8px}
+.absence-reason-input{width:100%;max-width:440px;padding:9px 12px;border:1px dashed #e0a458;border-radius:10px;background:#fffaf0;font-size:13px}
+.multi-image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:6px}
+.multi-image-item{background:#fff;border:1px solid #dbe7ea;border-radius:14px;padding:8px;box-shadow:0 6px 18px rgba(15,23,42,.08)}
+.multi-image-item img{width:100%;height:auto;max-height:360px;object-fit:contain;border-radius:10px;cursor:zoom-in;display:block;background:#f4f8f8}
+.multi-image-item .btn{width:100%;margin-top:8px}
+.pending-thumb{position:relative;display:inline-block;margin:6px 6px 0 0}
+.pending-thumb img{width:92px;height:92px;object-fit:cover;border-radius:10px;border:1px solid #dbe7ea;display:block}
+.pending-thumb button{position:absolute;top:-6px;left:-6px;width:24px;height:24px;padding:0;border:0;border-radius:50%;background:#e74c3c;color:#fff;font-size:16px;line-height:24px;cursor:pointer}
+.record-image-thumbs{display:flex;flex-wrap:wrap;gap:6px}
+.record-image-thumbs img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #dbe7ea;cursor:zoom-in}
+.multi-photo-row{display:flex;flex-wrap:wrap;gap:8px}
+.multi-photo-row .portfolio-photo-box{flex:0 1 180px;margin:0}
+.multi-photo-row .portfolio-photo-box img{width:100%;cursor:zoom-in}
+</style>
+
+<style id="df-photo-pdf-css">
+/* عکس کوچک دانش‌آموز کنار نام */
+.sn-wrap{display:inline-flex;align-items:center;gap:8px;vertical-align:middle;max-width:100%}
+.sn-av{width:38px;height:38px;border-radius:50%;object-fit:cover;flex:none;border:2px solid #d5eeee;background:#eef8f8;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.sn-ph{display:inline-flex;align-items:center;justify-content:center;font-size:20px;line-height:1}
+.sn-nm{font-weight:700}
+.sn-wrap.sn-lg .sn-av{width:56px;height:56px}
+h3 .sn-wrap{font-size:inherit}
+/* نمایشگر PDF داخل برنامه */
+#dfPdfViewer{position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.72);display:flex;flex-direction:column;font-family:inherit}
+#dfPdfViewer .dfbar{background:#fff;padding:10px 12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+#dfPdfViewer .dfbar b{flex:1;min-width:140px}
+#dfPdfViewer .dfpages{flex:1;overflow:auto;padding:12px;text-align:center;-webkit-overflow-scrolling:touch}
+#dfPdfViewer .dfpages img{width:100%;max-width:820px;margin:0 auto 12px;display:block;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.3)}
+#dfPdfViewer .dfhint{font-size:12px;color:#475569;width:100%}
+#dfPrintArea{display:none}
+@media print{
+  @page{size:A4;margin:0}
+  body.df-printing > *:not(#dfPrintArea){display:none!important}
+  body.df-printing #dfPrintArea{display:block!important}
+  #dfPrintArea img{display:block;width:100%;page-break-after:always;break-after:page}
+}
+</style>
 </head>
 
 
@@ -1553,7 +1594,7 @@ body{min-height:100dvh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scroll
 
 <div id="offlineAuthOverlay">
   <div class="auth-card">
-    <div class="auth-brand"><div class="logo">📚</div><h2>دفتر کلاسی من</h2><p>ورود امن و آماده کار آنلاین و آفلاین</p><div class="design-credit">طراح برنامه: <strong>محمد حسین ممشلی</strong></div></div>
+    <div class="auth-brand"><div class="logo">📚</div><h2>دفتر کلاسی من</h2><p>ورود امن و آماده کار آنلاین و آفلاین</p></div>
     <div class="auth-tabs">
       <button id="authLoginTab" class="auth-tab active" type="button" onclick="showAuthMode('login')">ورود</button>
       <button id="authRegisterTab" class="auth-tab" type="button" onclick="showAuthMode('register')">ساخت حساب</button>
@@ -1566,7 +1607,7 @@ body{min-height:100dvh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scroll
       <button class="auth-secondary" type="button" onclick="showAuthMode('register')">➕ ساخت حساب جدید برای یک معلم</button>
     </div>
     <div id="authRegisterPane" style="display:none">
-      <div class="auth-field"><label>نام کاربری دلخواه</label><input id="authRegisterUsername" autocomplete="username" placeholder="مثلاً teacher_mohammad"></div>
+      <div class="auth-field"><label>نام کاربری دلخواه</label><input id="authRegisterUsername" autocomplete="username" placeholder="مثلاً teacher_ali"></div>
       <div class="auth-field"><label>رمز عبور دلخواه</label><input id="authRegisterPassword" type="password" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر"></div>
       <div class="auth-field"><label>تکرار رمز عبور</label><input id="authRegisterPassword2" type="password" autocomplete="new-password" placeholder="رمز را دوباره وارد کنید"></div>
       <div id="authRegisterMessage" class="auth-message"></div>
@@ -1656,7 +1697,7 @@ onclick="goHome()"
      منوی برنامه
 ===================================================== -->
 
-<header class="smart-header" id="smartHeader"><div class="header-context"><button class="mobile-menu-btn" type="button" onclick="toggleSidebar()" aria-label="باز کردن منو">☰</button><div><div class="eyebrow">پنل مدیریت کلاس</div><h1 id="smartPageTitle">داشبورد</h1></div><span id="syncStatusPill" class="sync-pill offline"><i class="sync-dot"></i><span>آفلاین آماده</span></span></div><div class="header-actions"><div class="global-search"><button type="button" aria-label="جست‌وجو" onclick="focusGlobalSearch()" style="border:0;background:transparent;font-size:21px;cursor:pointer;color:#8b98aa;padding:0">⌕</button><input id="globalSearch" type="search" placeholder="جست‌وجو در بخش‌ها و ابزارها..." autocomplete="off" oninput="handleGlobalSearch(this.value)"><kbd>Ctrl K</kbd><div id="searchResults" class="search-results"></div></div><button class="icon-action notification-btn" type="button" onclick="toggleNotifications()">♢<i id="notificationBadge">0</i></button><button class="profile-chip" type="button" onclick="openHeaderProfile()"><span class="profile-avatar">م</span><span><b id="headerTeacherName">معلم</b><small>پروفایل</small></span></button></div><div id="notificationPanel" class="notification-panel"><div class="notification-head"><strong>اعلان‌ها</strong><button onclick="toggleNotifications()">×</button></div><div id="notificationContent" class="notification-content"></div></div></header><div class="page-workspace"><aside class="app-sidebar" id="appSidebar"><div class="sidebar-brand"><div class="brand-mark" aria-hidden="true">⌘</div><div><strong>دفتر کلاسی من</strong><small>Classroom Pro · Pro Edition</small><small style="margin-top:5px;color:#8ee7dc">طراح: محمد حسین ممشلی</small></div></div><div class="sidebar-nav-scroll"><div class="sidebar-caption">مدیریت کلاس</div><nav class="nav" id="mainNav"><button onclick="showSection('teacherProfile',this)" data-nav-label="👨‍🏫 کارتابل معلم"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🏫 کارتابل معلم</span></button><button class="active" onclick="showSection('dashboard',this)" data-nav-label="🏠 داشبورد"><span class="sb-icon">🏠 </span><span class="sb-label">🏠 داشبورد</span></button><button onclick="showSection('students',this)" data-nav-label="👨‍🎓 دانش‌آموزان"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🎓 دانش‌آموزان</span></button><button onclick="showSection('groups',this)" data-nav-label="👥 گروه‌بندی کلاس"><span class="sb-icon">👥</span><span class="sb-label">👥 گروه‌بندی کلاس</span></button><button onclick="showSection('attendance',this)" data-nav-label="📋 حضور و غیاب"><span class="sb-icon">📋 </span><span class="sb-label">📋 حضور و غیاب</span></button><button onclick="showSection('homework',this)" data-nav-label="📚 تکالیف"><span class="sb-icon">📚 </span><span class="sb-label">📚 تکالیف</span></button><button onclick="showSection('evaluation',this)" data-nav-label="⭐ ارزشیابی"><span class="sb-icon">⭐ </span><span class="sb-label">⭐ ارزشیابی</span></button><button onclick="showSection('feedback',this)" data-nav-label="💬 بازخورد آموزشی"><span class="sb-icon">💬</span><span class="sb-label">💬 بازخورد آموزشی</span></button><button onclick="showSection('grades',this)" data-nav-label="📝 ارزشیابی کیفی"><span class="sb-icon">📝 </span><span class="sb-label">📝 ارزشیابی کیفی</span></button><button onclick="showSection('portfolio',this)" data-nav-label="📁 پوشه‌کار"><span class="sb-icon">📁 </span><span class="sb-label">📁 پوشه‌کار</span></button><button onclick="showSection('experiments',this)" data-nav-label="🔬 آزمایش‌های علوم"><span class="sb-icon">🔬 </span><span class="sb-label">🔬 آزمایش‌های علوم</span></button><button onclick="showSection('monthly',this)" data-nav-label="📅 عملکرد ماهانه"><span class="sb-icon">📅 </span><span class="sb-label">📅 عملکرد ماهانه</span></button><button onclick="showSection('report',this)" data-nav-label="📊 وضعیت تحصیلی"><span class="sb-icon">📊 </span><span class="sb-label">📊 وضعیت تحصیلی</span></button><button onclick="showSection('goals',this)" data-nav-label="🎯 اهداف آموزشی"><span class="sb-icon">🎯 </span><span class="sb-label">🎯 اهداف آموزشی</span></button><button onclick="showSection('parents',this)" data-nav-label="👨‍👩‍👧 اطلاعات والدین"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍👩‍👧 اطلاعات والدین</span></button><button onclick="showSection('interests',this)" data-nav-label="❤️ علاقه‌مندی دانش‌آموز"><span class="sb-icon">❤️</span><span class="sb-label">❤️ علاقه‌مندی دانش‌آموز</span></button><button onclick="showSection('daily',this)" data-nav-label="📖 دفتر روزانه"><span class="sb-icon">📖 </span><span class="sb-label">📖 دفتر روزانه</span></button><button onclick="showSection('weekly',this)" data-nav-label="🗓️ برنامه هفتگی"><span class="sb-icon">🗓️</span><span class="sb-label">🗓️ برنامه هفتگی</span></button><button onclick="showSection('budget',this)" data-nav-label="⏱️ بودجه ساعات تدریس"><span class="sb-icon">📊 </span><span class="sb-label">⏱️ بودجه ساعات تدریس</span></button><button onclick="showSection('bookBudget',this)" data-nav-label="📘 بودجه‌بندی تدریس کتاب"><span class="sb-icon">📘</span><span class="sb-label">📘 بودجه‌بندی تدریس کتاب</span></button><button onclick="showSection('attention',this)" data-nav-label="⚠️ نیازمند توجه"><span class="sb-icon">⚠️</span><span class="sb-label">⚠️ نیازمند توجه</span></button><button onclick="showSection('backup',this)" data-nav-label="💾 پشتیبان"><span class="sb-icon">💾 </span><span class="sb-label">💾 پشتیبان</span></button></nav></div><div class="sidebar-footer"><button class="nav-logout-btn" type="button" onclick="logoutOfflineAccount()"><span class="sb-icon">🚪</span><span class="sb-label">🚪 خروج از حساب</span></button><button class="sidebar-collapse" type="button" onclick="toggleSidebar()"><span class="sb-icon">‹</span><span class="sb-label">جمع‌کردن منو</span></button></div></aside></div>
+<header class="smart-header" id="smartHeader"><div class="header-context"><button class="mobile-menu-btn" type="button" onclick="toggleSidebar()" aria-label="باز کردن منو">☰</button><div><div class="eyebrow">پنل مدیریت کلاس</div><h1 id="smartPageTitle">داشبورد</h1></div><span id="syncStatusPill" class="sync-pill offline"><i class="sync-dot"></i><span>آفلاین آماده</span></span></div><div class="header-actions"><div class="global-search"><button type="button" aria-label="جست‌وجو" onclick="focusGlobalSearch()" style="border:0;background:transparent;font-size:21px;cursor:pointer;color:#8b98aa;padding:0">⌕</button><input id="globalSearch" type="search" placeholder="جست‌وجو در بخش‌ها و ابزارها..." autocomplete="off" oninput="handleGlobalSearch(this.value)"><kbd>Ctrl K</kbd><div id="searchResults" class="search-results"></div></div><button class="icon-action notification-btn" type="button" onclick="toggleNotifications()">♢<i id="notificationBadge">0</i></button><button class="profile-chip" type="button" onclick="openHeaderProfile()"><span class="profile-avatar">م</span><span><b id="headerTeacherName">معلم</b><small>پروفایل</small></span></button></div><div id="notificationPanel" class="notification-panel"><div class="notification-head"><strong>اعلان‌ها</strong><button onclick="toggleNotifications()">×</button></div><div id="notificationContent" class="notification-content"></div></div></header><div class="page-workspace"><aside class="app-sidebar" id="appSidebar"><div class="sidebar-brand"><div class="brand-mark" aria-hidden="true">⌘</div><div><strong>دفتر کلاسی من</strong><small>Classroom Pro · Pro Edition</small></div></div><div class="sidebar-nav-scroll"><div class="sidebar-caption">مدیریت کلاس</div><nav class="nav" id="mainNav"><button onclick="showSection('teacherProfile',this)" data-nav-label="👨‍🏫 کارتابل معلم"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🏫 کارتابل معلم</span></button><button class="active" onclick="showSection('dashboard',this)" data-nav-label="🏠 داشبورد"><span class="sb-icon">🏠 </span><span class="sb-label">🏠 داشبورد</span></button><button onclick="showSection('students',this)" data-nav-label="👨‍🎓 دانش‌آموزان"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🎓 دانش‌آموزان</span></button><button onclick="showSection('studentFile',this)" data-nav-label="🗂️ کارتابل دانش‌آموز"><span class="sb-icon">🗂️</span><span class="sb-label">🗂️ کارتابل دانش‌آموز</span></button><button onclick="showSection('groups',this)" data-nav-label="👥 گروه‌بندی کلاس"><span class="sb-icon">👥</span><span class="sb-label">👥 گروه‌بندی کلاس</span></button><button onclick="showSection('attendance',this)" data-nav-label="📋 حضور و غیاب"><span class="sb-icon">📋 </span><span class="sb-label">📋 حضور و غیاب</span></button><button onclick="showSection('homework',this)" data-nav-label="📚 تکالیف"><span class="sb-icon">📚 </span><span class="sb-label">📚 تکالیف</span></button><button onclick="showSection('evaluation',this)" data-nav-label="⭐ ارزشیابی"><span class="sb-icon">⭐ </span><span class="sb-label">⭐ ارزشیابی</span></button><button onclick="showSection('feedback',this)" data-nav-label="💬 بازخورد آموزشی"><span class="sb-icon">💬</span><span class="sb-label">💬 بازخورد آموزشی</span></button><button onclick="showSection('grades',this)" data-nav-label="📝 ارزشیابی کیفی"><span class="sb-icon">📝 </span><span class="sb-label">📝 ارزشیابی کیفی</span></button><button onclick="showSection('portfolio',this)" data-nav-label="📁 پوشه‌کار"><span class="sb-icon">📁 </span><span class="sb-label">📁 پوشه‌کار</span></button><button onclick="showSection('experiments',this)" data-nav-label="🔬 آزمایش‌های علوم"><span class="sb-icon">🔬 </span><span class="sb-label">🔬 آزمایش‌های علوم</span></button><button onclick="showSection('monthly',this)" data-nav-label="📅 عملکرد ماهانه"><span class="sb-icon">📅 </span><span class="sb-label">📅 عملکرد ماهانه</span></button><button onclick="showSection('report',this)" data-nav-label="📊 وضعیت تحصیلی"><span class="sb-icon">📊 </span><span class="sb-label">📊 وضعیت تحصیلی</span></button><button onclick="showSection('goals',this)" data-nav-label="🎯 اهداف آموزشی"><span class="sb-icon">🎯 </span><span class="sb-label">🎯 اهداف آموزشی</span></button><button onclick="showSection('parents',this)" data-nav-label="👨‍👩‍👧 اطلاعات والدین"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍👩‍👧 اطلاعات والدین</span></button><button onclick="showSection('interests',this)" data-nav-label="❤️ علاقه‌مندی دانش‌آموز"><span class="sb-icon">❤️</span><span class="sb-label">❤️ علاقه‌مندی دانش‌آموز</span></button><button onclick="showSection('daily',this)" data-nav-label="📖 دفتر روزانه"><span class="sb-icon">📖 </span><span class="sb-label">📖 دفتر روزانه</span></button><button onclick="showSection('weekly',this)" data-nav-label="🗓️ برنامه هفتگی"><span class="sb-icon">🗓️</span><span class="sb-label">🗓️ برنامه هفتگی</span></button><button onclick="showSection('budget',this)" data-nav-label="⏱️ بودجه ساعات تدریس"><span class="sb-icon">📊 </span><span class="sb-label">⏱️ بودجه ساعات تدریس</span></button><button onclick="showSection('bookBudget',this)" data-nav-label="📘 بودجه‌بندی تدریس کتاب"><span class="sb-icon">📘</span><span class="sb-label">📘 بودجه‌بندی تدریس کتاب</span></button><button onclick="showSection('attention',this)" data-nav-label="⚠️ نیازمند توجه"><span class="sb-icon">⚠️</span><span class="sb-label">⚠️ نیازمند توجه</span></button><button onclick="showSection('backup',this)" data-nav-label="💾 پشتیبان"><span class="sb-icon">💾 </span><span class="sb-label">💾 پشتیبان</span></button></nav></div><div class="sidebar-footer"><button class="nav-logout-btn" type="button" onclick="logoutOfflineAccount()"><span class="sb-icon">🚪</span><span class="sb-label">🚪 خروج از حساب</span></button><button class="sidebar-collapse" type="button" onclick="toggleSidebar()"><span class="sb-icon">‹</span><span class="sb-label">جمع‌کردن منو</span></button></div></aside></div>
 
 <!-- =====================================================
      کارتابل معلم
@@ -1679,12 +1720,12 @@ onclick="goHome()"
 
             <div class="teacher-field">
                 <label>نام</label>
-                <input id="teacherFirstName" placeholder="مثلاً محمد حسین">
+                <input id="teacherFirstName" placeholder="مثلاً علی">
             </div>
 
             <div class="teacher-field">
                 <label>نام خانوادگی</label>
-                <input id="teacherLastName" placeholder="مثلاً ممشلی">
+                <input id="teacherLastName" placeholder="مثلاً رضایی">
             </div>
 
             <div class="teacher-field">
@@ -1984,6 +2025,15 @@ placeholder="توضیحات اختیاری"
 
 </div>
 
+<div>
+<label>📞 شماره تلفن پدر</label>
+<input id="studentFatherPhone" type="tel" inputmode="tel" placeholder="شماره تماس پدر">
+</div>
+
+<div>
+<label>📞 شماره تلفن مادر</label>
+<input id="studentMotherPhone" type="tel" inputmode="tel" placeholder="شماره تماس مادر">
+</div>
 
 <div>
 
@@ -2038,10 +2088,12 @@ class="table-wrapper"
 <!-- =====================================================
      گروه‌بندی کلاس
 ===================================================== -->
+<section id="studentFile" class="section"><div class="card"><h2>🗂️ کارتابل دانش‌آموز</h2><label>دانش‌آموز</label><select id="studentFileSelect" onchange="renderStudentFileBody()"></select><div id="studentFileBody"></div></div></section>
+
 <section id="groups" class="section">
 <div class="card">
 <h2>👥 تقسیم‌بندی گروه‌های کلاس</h2>
-<p>تعداد گروه‌ها را مشخص کن؛ دانش‌آموزان به صورت تصادفی و متعادل بین گروه‌ها تقسیم می‌شوند.</p>
+<p>تعداد گروه‌ها را مشخص کن؛ دانش‌آموزان به صورت تصادفی و متعادل بین گروه‌ها تقسیم می‌شوند. بعد از تقسیم می‌توانی نام هر گروه را تغییر بدهی، دانش‌آموزان را جابه‌جا کنی، گروه اضافه یا حذف کنی.</p>
 <div class="grid">
 <div><label>تعداد گروه</label><input id="groupCount" type="number" min="1" value="2"></div>
 </div>
@@ -2080,9 +2132,20 @@ id="attendanceTable"
 class="table-wrapper"
 ></div>
 
+<datalist id="absenceReasonList">
+<option value="بیماری"></option>
+<option value="مسافرت"></option>
+<option value="مراسم خانوادگی"></option>
+<option value="مشکل رفت‌وآمد"></option>
+<option value="اطلاع داده نشده"></option>
+<option value="شرکت در برنامه مدرسه"></option>
+</datalist>
+
 <div class="attendance-export-row">
-    <button class="btn btn-blue" onclick="exportAttendanceCSV()">📥 خروجی جداگانه حضور و غیاب</button>
-    <button class="btn btn-gray" onclick="exportAttendanceDateCSV()">📄 خروجی همین تاریخ</button>
+    <button class="btn btn-blue" onclick="exportAttendancePDF('all')">📄 خروجی PDF — همهٔ تاریخ‌ها</button>
+    <button class="btn btn-primary" onclick="exportAttendancePDF('date')">📄 خروجی PDF — همین تاریخ</button>
+    <button class="btn btn-gray" onclick="exportAttendanceCSV()">📊 خروجی CSV (همه)</button>
+    <button class="btn btn-gray" onclick="exportAttendanceDateCSV()">📊 CSV همین تاریخ</button>
 </div>
 
 </div>
@@ -2455,8 +2518,8 @@ class="section"
 </div>
 </div>
 
-<label>📷 عکس نمونه‌کار</label>
-<input id="portfolioPhoto" type="file" accept="image/*" onchange="previewPortfolioPhoto(event)">
+<label>📷 عکس‌های نمونه‌کار (می‌توانی چند عکس انتخاب کنی)</label>
+<input id="portfolioPhoto" type="file" accept="image/*" multiple onchange="previewPortfolioPhoto(event)">
 <div id="portfolioPhotoPreview" class="photo-preview"></div>
 
 <label>توضیحات</label>
@@ -2555,9 +2618,9 @@ id="goalNotes"
 
 <div class="image-upload-box">
     <div style="font-size:34px;">🖼️</div>
-    <h3>افزودن عکس به هدف آموزشی</h3>
+    <h3>افزودن عکس به هدف آموزشی (چند عکس)</h3>
     <label class="image-upload-label" for="goalImageInput">📷 انتخاب عکس</label>
-    <input id="goalImageInput" type="file" accept="image/*" onchange="prepareGoalImage(event)">
+    <input id="goalImageInput" type="file" accept="image/*" multiple onchange="prepareGoalImage(event)">
     <div id="goalImagePreview"></div>
 </div>
 
@@ -2834,9 +2897,9 @@ id="dailyNotes"
 
 <div class="image-upload-box">
     <div style="font-size:34px;">🖼️</div>
-    <h3>افزودن عکس به دفتر روزانه</h3>
+    <h3>افزودن عکس به دفتر روزانه (چند عکس)</h3>
     <label class="image-upload-label" for="dailyImageInput">📷 انتخاب عکس</label>
-    <input id="dailyImageInput" type="file" accept="image/*" onchange="prepareDailyImage(event)">
+    <input id="dailyImageInput" type="file" accept="image/*" multiple onchange="prepareDailyImage(event)">
     <div id="dailyImagePreview"></div>
 </div>
 
@@ -2884,16 +2947,17 @@ class="table-wrapper"
         <div class="image-upload-box">
             <div style="font-size:45px;">🖼️🗓️</div>
             <h3>افزودن تصویر برنامه هفتگی</h3>
-            <p>عکس برنامه هفتگی همین کلاس را انتخاب کن.</p>
+            <p>می‌توانی چند عکس را همزمان انتخاب کنی (مثلاً برنامه هفته‌های مختلف یا صبح و عصر).</p>
 
             <label class="image-upload-label" for="weeklyImageInput">
-                📷 انتخاب تصویر برنامه هفتگی
+                📷 انتخاب یک یا چند تصویر برنامه هفتگی
             </label>
 
             <input
                 id="weeklyImageInput"
                 type="file"
                 accept="image/*"
+                multiple
                 onchange="saveWeeklyImage(event)"
             >
         </div>
@@ -3347,7 +3411,7 @@ onchange="importData(event)"
 
 <div class="footer">
 
-📚 دفتر کلاسی من | نسخه 4.1 حرفه‌ای معلم<br><span style="font-size:11px;opacity:.82">طراح برنامه: <strong>محمد حسین ممشلی</strong></span>
+📚 دفتر کلاسی من | نسخه 4.1 حرفه‌ای معلم
 
 </div>
 
@@ -3400,6 +3464,15 @@ const ACCOUNT_STORE = "accounts";
 let accountDbPromise = null;
 let activeAccountUsername = "";
 let accountSaveQueue = Promise.resolve();
+const LAST_USER_KEY = "دفتر_کلاسی_آخرین_کاربر_v1";
+const LOGGED_OUT_KEY = "دفتر_کلاسی_خروج_صریح_v1";
+function rememberSession(username){
+    try{
+        localStorage.setItem(SESSION_STORAGE_KEY,username);
+        localStorage.setItem(LAST_USER_KEY,username);
+        localStorage.removeItem(LOGGED_OUT_KEY);
+    }catch(e){ console.warn("Session remember failed",e); }
+}
 
 const ACCOUNT_META_STORE = "accountMeta";
 
@@ -3439,9 +3512,8 @@ async function saveAuthAccounts(accounts){
 function openAccountDB(){
     if(accountDbPromise) return accountDbPromise;
     accountDbPromise = new Promise(function(resolve,reject){
-        if(!window.indexedDB){ reject(new Error("IndexedDB پشتیبانی نمی‌شود.")); return; }
-        const req=indexedDB.open(ACCOUNT_DB_NAME,4);
-        req.onupgradeneeded=function(){
+        if(!window.indexedDB){ accountDbPromise=null; reject(new Error("IndexedDB پشتیبانی نمی‌شود.")); return; }
+        function upgrade(req){
             const db=req.result;
             if(!db.objectStoreNames.contains(ACCOUNT_STORE)){
                 db.createObjectStore(ACCOUNT_STORE,{keyPath:"username"});
@@ -3459,9 +3531,37 @@ function openAccountDB(){
                 b.createIndex("username","username",{unique:false});
                 b.createIndex("createdAt","createdAt",{unique:false});
             }
-        };
-        req.onsuccess=function(){resolve(req.result)};
-        req.onerror=function(){reject(req.error||new Error("پایگاه حساب‌ها در دسترس نیست."))};
+            if(!db.objectStoreNames.contains("rosters")){
+                const r=db.createObjectStore("rosters",{keyPath:"key"});
+                r.createIndex("username","username",{unique:false});
+                r.createIndex("classNumber","classNumber",{unique:false});
+            }
+        }
+        /* اگر پایگاه داده روی دستگاه نسخهٔ بالاتری داشته باشد (مثلاً از نسخه‌ای دیگر از برنامه)،
+           به‌جای شکست و نمایش صفحهٔ «ثبت‌نام»، همان نسخهٔ موجود را بدون تغییر باز می‌کنیم. */
+        function attempt(version){
+            let req;
+            try{ req = version ? indexedDB.open(ACCOUNT_DB_NAME,version) : indexedDB.open(ACCOUNT_DB_NAME); }
+            catch(err){ accountDbPromise=null; reject(err); return; }
+            req.onupgradeneeded=function(){ upgrade(req); };
+            req.onsuccess=function(){
+                const db=req.result;
+                db.onversionchange=function(){ try{db.close();}catch(x){} accountDbPromise=null; };
+                resolve(db);
+            };
+            req.onblocked=function(){ console.warn("Account DB open blocked; waiting for other tabs to close"); };
+            req.onerror=function(ev){
+                const err=req.error;
+                if(version && err && err.name==="VersionError"){
+                    try{ ev.preventDefault(); }catch(x){}
+                    attempt(0);
+                    return;
+                }
+                accountDbPromise=null;
+                reject(err||new Error("پایگاه حساب‌ها در دسترس نیست."));
+            };
+        }
+        attempt(5);
     });
     return accountDbPromise;
 }
@@ -3509,56 +3609,6 @@ async function hashAccountPassword(password){
     let h=2166136261; for(let i=0;i<String(password).length;i++){h^=String(password).charCodeAt(i);h=Math.imul(h,16777619);} return "fallback-"+(h>>>0).toString(16);
 }
 function accountDataKey(username){ return ACCOUNT_STORAGE_PREFIX+encodeURIComponent(username); }
-
-/* پشتیبان سبکِ فهرست دانش‌آموزان؛ مستقل از عکس‌ها و رسانه‌ها.
-   هدف: حتی اگر WebView نتواند Snapshot بزرگ را نگه دارد، فهرست دانش‌آموزان
-   پس از خروج و ورود دوباره از بین نرود. */
-const STUDENT_ROSTER_BACKUP_PREFIX = "دفتر_کلاسی_فهرست_دانش_آموزان_";
-function studentRosterBackupKey(username,classNumber){
-    return STUDENT_ROSTER_BACKUP_PREFIX + encodeURIComponent(String(username||"")) + "_" + encodeURIComponent(String(classNumber));
-}
-function makeStudentRosterBackup(students){
-    return (Array.isArray(students)?students:[]).map(function(student){
-        return {
-            id: student && student.id,
-            firstName: student && student.firstName || "",
-            lastName: student && student.lastName || "",
-            grade: student && student.grade || "",
-            notes: student && student.notes || "",
-            photo: (student && typeof student.photo === "string" && student.photo.indexOf("media://")===0) ? student.photo : ""
-        };
-    });
-}
-function saveStudentRosterBackups(username,data){
-    if(!username || !data) return;
-    try{
-        ["1","2","3","4","5","6","multi"].forEach(function(k){
-            const roster=makeStudentRosterBackup(data[k] && data[k].students);
-            localStorage.setItem(studentRosterBackupKey(username,k),JSON.stringify(roster));
-        });
-    }catch(e){
-        console.warn("Student roster backup skipped",e);
-    }
-}
-function restoreStudentRosterBackups(username,data){
-    if(!username || !data) return data;
-    try{
-        ["1","2","3","4","5","6","multi"].forEach(function(k){
-            const raw=localStorage.getItem(studentRosterBackupKey(username,k));
-            if(raw===null) return;
-            let roster=null;
-            try{ roster=JSON.parse(raw); }catch(e){ return; }
-            if(!Array.isArray(roster)) return;
-            if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
-            // این بکاپِ مستقل وضعیت نهایی فهرست است، نه داده‌ای برای merge.
-            // در نتیجه حذف دانش‌آموز با داده قدیمی IndexedDB دوباره برنمی‌گردد.
-            data[k].students=roster.map(function(item){ return cloneForSync(item); });
-        });
-    }catch(e){
-        console.warn("Student roster restore skipped",e);
-    }
-    return data;
-}
 function setAuthMessage(id,text,type){const el=document.getElementById(id);if(!el)return;el.textContent=text||"";el.className="auth-message"+(type?" "+type:"");}
 function showAuthMode(mode){
     const login=mode==="login", lp=document.getElementById("authLoginPane"), rp=document.getElementById("authRegisterPane");
@@ -3580,6 +3630,7 @@ function migrateDatabaseSafely(source){
         if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
         if(!Array.isArray(data[k].students)) data[k].students=[];
         if(!Array.isArray(data[k].groups)) data[k].groups=[];
+        if(!Array.isArray(data[k].groupNames)) data[k].groupNames=[];
     });
     if(!data.teacher || typeof data.teacher!=="object") data.teacher=createTeacherData();
     data.dataSchemaVersion=APP_DATA_SCHEMA_VERSION;
@@ -3648,6 +3699,29 @@ function mergeClassDataSafely(primary,secondary){
     const out=mergeScalarObjects(primary||{},secondary||{});
     const arrayNames=["students","attendance","homework","evaluations","grades","feedback","portfolio","goals","parents","interests","daily","weekly","budget","experiments","monthlyPerformance","attention","exams","schedule","fees","activities","groups","reminders"];
     arrayNames.forEach(function(name){ out[name]=mergeRecordArrays(primary&&primary[name],secondary&&secondary[name],function(item){return recordKey(item,name);}); });
+    /* گروه‌ها قابل‌ویرایش‌اند؛ اگر نسخهٔ اصلی نام‌گروه دارد، همان معتبر است و با نسخهٔ قدیمی ادغام نمی‌شود (تا گروه حذف/تغییرنام‌یافته برنگردد). */
+    if(primary && Array.isArray(primary.groupNames) && Array.isArray(primary.groups)){
+        out.groups=JSON.parse(JSON.stringify(primary.groups));
+        out.groupNames=primary.groupNames.slice();
+    }else if(!Array.isArray(out.groupNames)){
+        out.groupNames=[];
+    }
+    /* شناسهٔ دانش‌آموزان حذف‌شده (سنگ‌قبر): هیچ نسخهٔ قدیمی نمی‌تواند آن‌ها را برگرداند. */
+    const tomb=new Set();
+    [primary,secondary].forEach(function(src){
+        if(src && Array.isArray(src.deletedStudentIds)) src.deletedStudentIds.forEach(function(x){ tomb.add(String(x)); });
+    });
+    out.deletedStudentIds=Array.from(tomb);
+    if(tomb.size){
+        out.students=(out.students||[]).filter(function(s){ return !(s && tomb.has(String(s.id))); });
+        arrayNames.forEach(function(name){
+            if(name==="students" || name==="groups") return;
+            out[name]=(out[name]||[]).filter(function(it){
+                return !(it && typeof it==="object" && it.studentId!==undefined && it.studentId!==null && tomb.has(String(it.studentId)));
+            });
+        });
+        out.groups=(out.groups||[]).map(function(g){ return Array.isArray(g) ? g.filter(function(id){ return !tomb.has(String(id)); }) : g; });
+    }
     return out;
 }
 function mergeDatabasesSafely(primary,secondary){
@@ -3662,7 +3736,186 @@ function mergeDatabasesSafely(primary,secondary){
     out.teacher=mergeScalarObjects(p&&p.teacher,s&&s.teacher);
     return migrateDatabaseSafely(out);
 }
-async function readJsonStorage(key){
+function rosterStoreKey(username,classNumber){
+    return String(username||"")+"::"+String(classNumber||"");
+}
+function compactRosterStudent(student){
+    if(!student || typeof student!=="object") return null;
+    return {
+        id: student.id,
+        firstName: String(student.firstName||""),
+        lastName: String(student.lastName||""),
+        grade: String(student.grade||""),
+        notes: String(student.notes||""),
+        photo: typeof student.photo === "string" ? student.photo : ""
+    };
+}
+function openLegacyRosterDB(dbName){
+    return new Promise(function(resolve,reject){
+        if(!window.indexedDB){resolve(null);return;}
+        let settled=false;
+        try{
+            const req=indexedDB.open(dbName,1);
+            req.onupgradeneeded=function(){
+                // فقط برای تشخیص Store؛ هیچ داده‌ای در DB قدیمی ایجاد یا حذف نمی‌کنیم.
+                const db=req.result;
+                if(!db.objectStoreNames.contains("rosters")){
+                    try{ db.close(); }catch(e){}
+                    try{ indexedDB.deleteDatabase(dbName); }catch(e){}
+                    if(!settled){settled=true;resolve(null);}
+                }
+            };
+            req.onsuccess=function(){
+                if(settled)return;
+                settled=true;
+                const db=req.result;
+                if(!db.objectStoreNames.contains("rosters")){try{db.close()}catch(e){};resolve(null);return;}
+                resolve(db);
+            };
+            req.onerror=function(){if(!settled){settled=true;resolve(null)}};
+        }catch(e){resolve(null)}
+    });
+}
+async function readLegacyRoster(username,classNumber){
+    for(const dbName of ["DaftarKelasiRosterStore_v3","DaftarKelasiRosterStore_v2"]){
+        try{
+            const db=await openLegacyRosterDB(dbName);
+            if(!db) continue;
+            const row=await new Promise(function(resolve,reject){
+                const req=db.transaction("rosters","readonly").objectStore("rosters").get(rosterStoreKey(username,classNumber));
+                req.onsuccess=function(){resolve(req.result||null)};
+                req.onerror=function(){reject(req.error)};
+            });
+            try{db.close()}catch(e){}
+            if(row && Array.isArray(row.students) && row.students.length) return row;
+        }catch(e){}
+    }
+    return null;
+}
+
+const ROSTER_STORAGE_VERSION = 2;
+function rosterLocalStorageKey(username,classNumber){
+    return "DaftarKelasiCanonicalRoster:v2:"+encodeURIComponent(String(username||""))+":"+encodeURIComponent(String(classNumber||""));
+}
+function readRosterLocal(username,classNumber){
+    try{
+        const raw=localStorage.getItem(rosterLocalStorageKey(username,classNumber));
+        if(!raw) return null;
+        const row=JSON.parse(raw);
+        if(!row || !Array.isArray(row.students)) return null;
+        return row;
+    }catch(e){ return null; }
+}
+function writeRosterLocal(username,classNumber,students){
+    if(!username || !classNumber) return false;
+    try{
+        const safe=(Array.isArray(students)?students:[]).map(compactRosterStudent).filter(Boolean);
+        const old=readRosterLocal(username,classNumber);
+        const row={
+            version:ROSTER_STORAGE_VERSION,
+            key:rosterStoreKey(username,classNumber),
+            username:String(username),
+            classNumber:String(classNumber),
+            students:safe,
+            updatedAt:Date.now(),
+            revision:(old&&Number(old.revision)||0)+1
+        };
+        localStorage.setItem(rosterLocalStorageKey(username,classNumber),JSON.stringify(row));
+        return true;
+    }catch(e){ console.warn("Canonical roster local save failed",e); return false; }
+}
+function readRosterStore(username,classNumber){
+    if(!username || !classNumber) return Promise.resolve(null);
+    // LocalStorage is the immediate/authoritative roster cache. An existing empty
+    // roster is meaningful (the teacher may have intentionally deleted all students).
+    const local=readRosterLocal(username,classNumber);
+    if(local) return Promise.resolve(local);
+    return openAccountDB().then(function(db){
+        if(!db.objectStoreNames.contains("rosters")) return null;
+        return new Promise(function(resolve,reject){
+            const req=db.transaction("rosters","readonly").objectStore("rosters").get(rosterStoreKey(username,classNumber));
+            req.onsuccess=function(){
+                const row=req.result||null;
+                if(row && Array.isArray(row.students)) writeRosterLocal(username,classNumber,row.students);
+                resolve(row);
+            };
+            req.onerror=function(){reject(req.error||new Error("خواندن فهرست دانش‌آموزان ناموفق بود."));};
+        });
+    }).catch(function(e){ console.warn("Roster IndexedDB read failed",e); return null; });
+}
+function writeRosterStore(username,classNumber,students){
+    if(!username || !classNumber) return Promise.resolve();
+    const safe=(Array.isArray(students)?students:[]).map(compactRosterStudent).filter(Boolean);
+    // Synchronous write first: the roster survives even if an async IndexedDB
+    // transaction is interrupted or the page is closed immediately afterwards.
+    writeRosterLocal(username,classNumber,safe);
+    return openAccountDB().then(function(db){
+        if(!db.objectStoreNames.contains("rosters")) return;
+        return new Promise(function(resolve){
+            try{
+                const tx=db.transaction("rosters","readwrite");
+                tx.objectStore("rosters").put({
+                    key:rosterStoreKey(username,classNumber),
+                    username:String(username),
+                    classNumber:String(classNumber),
+                    students:safe,
+                    updatedAt:Date.now(),
+                    version:ROSTER_STORAGE_VERSION
+                });
+                tx.oncomplete=function(){resolve();};
+                tx.onerror=function(){console.warn("Roster IndexedDB save failed",tx.error);resolve();};
+                tx.onabort=function(){console.warn("Roster IndexedDB transaction aborted",tx.error);resolve();};
+            }catch(e){ console.warn("Roster IndexedDB save skipped",e); resolve(); }
+        });
+    }).catch(function(e){ console.warn("Roster store save skipped",e); });
+}
+
+async function restoreCanonicalRosters(username,data){
+    if(!username || !data) return data;
+    const classes=["1","2","3","4","5","6","multi"];
+    for(const k of classes){
+        try{
+            if(!data[k] || typeof data[k]!=="object") data[k]=createClassData();
+            let row=await readRosterStore(username,k);
+            if(!row){
+                const legacy=await readLegacyRoster(username,k);
+                if(legacy) row=legacy;
+            }
+            if(row && Array.isArray(row.students)){
+                // A canonical roster exists, including an intentionally empty one.
+                // It wins over stale account snapshots; this prevents an old snapshot
+                // from resurrecting/deleting students during login.
+                // فقط دانش‌آموزانی که در فهرست canonical هستند نگه داشته می‌شوند؛ نسخه‌های قدیمی
+                // فقط برای تکمیل فیلدهای خالی استفاده می‌شوند و دانش‌آموز حذف‌شده را برنمی‌گردانند.
+                const oldStudents=Array.isArray(data[k].students)?data[k].students:[];
+                data[k].students=row.students.map(function(st){
+                    const old=oldStudents.find(function(o){return String(o&&o.id)===String(st&&st.id);});
+                    return old ? mergeScalarObjects(st,old) : st;
+                });
+                const tombIds=new Set((Array.isArray(data[k].deletedStudentIds)?data[k].deletedStudentIds:[]).map(String));
+                if(tombIds.size) data[k].students=data[k].students.filter(function(st){ return !tombIds.has(String(st.id)); });
+                const keepIds=new Set(data[k].students.map(function(st){return String(st.id);}));
+                ["attendance","homework","evaluations","grades","portfolio","parents","interests","attention"].forEach(function(arrayName){
+                    if(Array.isArray(data[k][arrayName])){
+                        data[k][arrayName]=data[k][arrayName].filter(function(item){
+                            return !item || item.studentId===undefined || item.studentId===null || keepIds.has(String(item.studentId));
+                        });
+                    }
+                });
+                // Persist the merged result back to both durable stores.
+                await writeRosterStore(username,k,data[k].students);
+            } else if(Array.isArray(data[k].students) && data[k].students.length){
+                await writeRosterStore(username,k,data[k].students);
+            }
+        }catch(e){ console.warn("Canonical roster restore skipped",k,e); }
+    }
+    return data;
+}
+function persistCanonicalRoster(username,classNumber,students){
+    return writeRosterStore(username,classNumber,students);
+}
+
+function readJsonStorage(key){
     try{
         const raw=localStorage.getItem(key);
         return raw ? JSON.parse(raw) : null;
@@ -3677,34 +3930,27 @@ async function loadDatabaseForAccount(username){
     try{ accountLegacy=await readJsonStorage(accountDataKey(username)); }catch(e){}
     try{ globalLegacy=await readJsonStorage(STORAGE_KEY); }catch(e){}
 
-    // اولویت با نسخه پشتیبان محلیِ همان حساب است؛ اگر وجود نداشت، IndexedDB
-    // منبع اصلی خواهد بود. این ترتیب مانع برگشتن فهرست قدیمی دانش‌آموزان
-    // در زمان باز شدن دوباره برنامه می‌شود.
-    // accountLegacy قبل از IndexedDB به‌صورت همزمان و مستقیم نوشته می‌شود و
-    // بنابراین در این نسخه منبع تازه‌ترِ محلی است. Merge کردن این دو منبع
-    // اشتباه است چون رکورد حذف‌شده می‌تواند از Snapshot قدیمی IndexedDB برگردد.
+    const sources=[accountDb,accountLegacy];
     const accounts=await getAuthAccounts();
-    const sources=[];
-    if(accountLegacy) sources.push(accountLegacy);
-    else if(accountDb) sources.push(accountDb);
-    else if(accounts.length===1 && globalLegacy) sources.push(globalLegacy);
+    if(accounts.length===1 || !accountDb) sources.push(globalLegacy);
 
-    let merged=sources.length ? cloneForSync(sources[0]) : null;
+    let merged=null;
+    sources.filter(Boolean).forEach(function(source){ merged=mergeDatabasesSafely(merged,source); });
 
     const beforeMigration = merged ? cloneForSync(merged) : null;
     const versions=sources.filter(Boolean).map(databaseSchemaVersion);
     const fromSchema=versions.length ? Math.min.apply(Math,versions) : 1;
     database=migrateDatabaseSafely(merged);
-    // پشتیبان سبک فهرست دانش‌آموزان را هم وارد می‌کنیم تا وابستگی به Snapshot بزرگ کمتر شود.
-    database=restoreStudentRosterBackups(username,database);
+    activeAccountUsername=username;
+    // Canonical roster is restored before any full-account write.
+    database=await restoreCanonicalRosters(username,database);
 
     // اگر داده‌ای از localStorage قدیمی یا حساب قدیمی پیدا شد، قبل از ذخیره نسخه جدید یک نسخه پشتیبان نگه می‌داریم.
     if(beforeMigration && (fromSchema < APP_DATA_SCHEMA_VERSION || !!accountLegacy || !!globalLegacy)){
         try{ await writeMigrationBackup(username,beforeMigration,fromSchema); }catch(e){ console.warn("Migration backup skipped",e); }
     }
 
-    activeAccountUsername=username;
-    localStorage.setItem(SESSION_STORAGE_KEY,username);
+    rememberSession(username);
     await saveDatabase();
 
 }
@@ -3768,6 +4014,8 @@ async function registerOfflineAccount(){
     await saveAuthAccounts(accounts);
     await loadDatabaseForAccount(username);
     if(CLOUD_ENDPOINT && cloudAccount) await cloudInitialSync(username);
+    database=await restoreCanonicalRosters(username,database);
+    await saveDatabase();
     setAuthMessage("authRegisterMessage", CLOUD_ENDPOINT ? "✅ حساب آنلاین ساخته شد و همگام‌سازی آماده است." : "✅ حساب ساخته شد.","success");
     enterAuthenticatedApp();
 }
@@ -3792,6 +4040,8 @@ async function loginOfflineAccount(){
     }
     await loadDatabaseForAccount(account.username);
     if(CLOUD_ENDPOINT && cloudToken()) await cloudInitialSync(account.username);
+    database=await restoreCanonicalRosters(account.username,database);
+    await saveDatabase();
     enterAuthenticatedApp();
 }
 function enterAuthenticatedApp(){
@@ -3825,7 +4075,7 @@ async function changeCurrentAccountCredentials(){
     localStorage.removeItem(oldKey); localStorage.removeItem(newKey);
     current.username=newUsername; current.passwordHash=hash; current.updatedAt=Date.now();
     await saveAuthAccounts(accounts);
-    activeAccountUsername=newUsername; localStorage.setItem(SESSION_STORAGE_KEY,newUsername);
+    activeAccountUsername=newUsername; rememberSession(newUsername);
     document.getElementById("accountNewPassword").value="";
     updateAccountSecurityFields();
     const name=teacherFullName(); if(document.getElementById("headerTeacherName"))document.getElementById("headerTeacherName").textContent=name;
@@ -3833,16 +4083,38 @@ async function changeCurrentAccountCredentials(){
 }
 function logoutOfflineAccount(){
     if(!activeAccountUsername)return;
-    activeAccountUsername=""; currentClass=null; localStorage.removeItem(SESSION_STORAGE_KEY); setCloudToken(""); showAuthOverlay(); showAuthMode("login");
+    activeAccountUsername=""; currentClass=null; try{ localStorage.removeItem(SESSION_STORAGE_KEY); localStorage.removeItem(LAST_USER_KEY); localStorage.setItem(LOGGED_OUT_KEY,"1"); }catch(e){} setCloudToken(""); showAuthOverlay(); showAuthMode("login");
     const u=document.getElementById("authLoginUsername"); const pw=document.getElementById("authLoginPassword"); if(u)u.value="";if(pw)pw.value="";
     setAuthMessage("authLoginMessage","از حساب خارج شدید.","success");
 }
 async function initializeOfflineAuth(){
-    const accounts=await getAuthAccounts();
-    const session=localStorage.getItem(SESSION_STORAGE_KEY);
-    if(session && accounts.some(function(a){return a.username===session;})){
-        try{ await loadDatabaseForAccount(session); enterAuthenticatedApp(); return; }
-        catch(e){ console.error(e); }
+    /* درخواست ذخیره‌سازی ماندگار پیش از هر کار دیگر، تا مرورگر/WebView داده‌ها را خودسرانه پاک نکند. */
+    try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){}); }catch(e){}
+    let accounts=[];
+    try{ accounts=await getAuthAccounts(); }catch(e){ console.warn("Accounts read failed",e); }
+    let loggedOut=false, candidate="";
+    try{
+        loggedOut = localStorage.getItem(LOGGED_OUT_KEY)==="1";
+        candidate = localStorage.getItem(SESSION_STORAGE_KEY) || localStorage.getItem(LAST_USER_KEY) || "";
+    }catch(e){}
+    const exists=function(u){ return !!u && accounts.some(function(a){return a.username===u;}); };
+    /* ورود خودکار: فقط اگر کاربر آگاهانه «خروج از حساب» را نزده باشد. */
+    if(!loggedOut){
+        if(!exists(candidate) && accounts.length===1) candidate=accounts[0].username;
+        if(exists(candidate)){
+            for(let attempt=0; attempt<2; attempt++){
+                try{
+                    await loadDatabaseForAccount(candidate);
+                    database=await restoreCanonicalRosters(candidate,database);
+                    await saveDatabase();
+                    enterAuthenticatedApp();
+                    return;
+                }catch(e){
+                    console.error("Auto sign-in attempt failed",attempt,e);
+                    await new Promise(function(r){setTimeout(r,400);});
+                }
+            }
+        }
     }
     showAuthOverlay(); showAuthMode(accounts.length?"login":"register");
 }
@@ -3851,31 +4123,12 @@ async function initializeOfflineAuth(){
    متغیرهای اصلی
 ===================================================== */
 
+const APP_DATA_SCHEMA_VERSION = 5;
 let currentClass = null;
-
-/* ذخیره آخرین کلاس انتخاب‌شده برای هر حساب — بدون وابستگی به IndexedDB */
-const LAST_CLASS_STORAGE_KEY = "دفتر_کلاسی_آخرین_کلاس";
-function getLastClassForAccount(username){
-    try{
-        if(!username) return "";
-        const all = JSON.parse(localStorage.getItem(LAST_CLASS_STORAGE_KEY) || "{}");
-        const value = all && all[username];
-        return ["1","2","3","4","5","6","multi"].includes(String(value)) ? String(value) : "";
-    }catch(e){ return ""; }
-}
-function setLastClassForAccount(username,classNumber){
-    try{
-        if(!username) return;
-        const key=String(classNumber);
-        if(!["1","2","3","4","5","6","multi"].includes(key)) return;
-        const all = JSON.parse(localStorage.getItem(LAST_CLASS_STORAGE_KEY) || "{}");
-        all[username]=key;
-        localStorage.setItem(LAST_CLASS_STORAGE_KEY,JSON.stringify(all));
-    }catch(e){ console.warn("Last class preference could not be saved",e); }
-}
-
 let dailyPendingImage = "";
+let dailyPendingImages = [];
 let goalPendingImage = "";
+let goalPendingImages = [];
 
 const STORAGE_KEY = "دفتر_کلاسی_جدید";
 
@@ -3986,8 +4239,7 @@ async function initializeScalableStorage(){
         await openMediaDB();
         if(database.teacher) database.teacher=await hydrateMedia(database.teacher);
         if(navigator.storage && navigator.storage.persist){ try{ await navigator.storage.persist(); }catch(e){} }
-        // ذخیره کامل و قابل انتظار؛ هنگام ورود، هیچ save معلقی باقی نماند.
-        await saveDatabase();
+        saveDatabase();
     }catch(e){ console.warn("Media storage unavailable",e); }
 }
 
@@ -4051,6 +4303,8 @@ function createClassData(){
 
         weeklyImage: "",
 
+        weeklyImages: [],
+
         budget: [],
 
         budgetHours: null,
@@ -4067,6 +4321,7 @@ function createClassData(){
         fees: [],
         activities: [],
         groups: [],
+        groupNames: [],
         reminders: [],
         settings: { passMark: 10 }
 
@@ -4124,7 +4379,7 @@ else{
         if(!data.interests) data.interests = [];
         if(!data.daily) data.daily = [];
         if(!data.weekly) data.weekly = [];
-        if(typeof data.weeklyImage === "undefined") data.weeklyImage = "";
+        if(typeof data.weeklyImage === "undefined") data.weeklyImage = ""; if(!Array.isArray(data.weeklyImages)) data.weeklyImages = [];
         if(!data.budget) data.budget = [];
         if(typeof data.budgetHours === "undefined") data.budgetHours = null;
         if(typeof data.budgetImage === "undefined") data.budgetImage = "";
@@ -4158,7 +4413,6 @@ else{
    - تا زمانی که endpoint رسمی تنظیم نشده، هیچ داده‌ای به سرویس شخص ثالث ارسال نمی‌شود.
 ===================================================== */
 const SYNC_PROTOCOL_VERSION = 1;
-const APP_DATA_SCHEMA_VERSION = 5;
 const SYNC_RETRY_BASE_MS = 2500;
 const SYNC_MAX_RETRIES = 8;
 const CLOUD_ENDPOINT = (window.DAFTAR_CLOUD_ENDPOINT || window.DAFTAR_SYNC_ENDPOINT || "").trim().replace(/\/$/,"");
@@ -4279,38 +4533,29 @@ function saveDatabase(){
         database=migrateDatabaseSafely(database);
         const jobs=[];
         const snapshot=prepareMediaSnapshot(database,jobs,new Set());
-        // داده اصلی هر معلم در IndexedDB نگهداری می‌شود؛ localStorage فقط برای سازگاری
-        // با نسخه‌های قدیمی و نشست کاربر باقی می‌ماند. این کار از پرشدن Web Storage
-        // با عکس‌ها، پوشه‌کارها و اطلاعات طولانی جلوگیری می‌کند.
         if(!activeAccountUsername){
             try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshot)); }catch(e){ console.warn("Legacy localStorage save skipped",e); }
             return Promise.resolve();
         }
         const username=activeAccountUsername;
-        // ذخیره فوری و مستقل در localStorage: این نسخه به عنوان پشتیبان محلی
-        // همیشه تازه نگه داشته می‌شود تا حتی در صورت تأخیر/مشکل IndexedDB،
-        // اطلاعات دانش‌آموزان بعد از بستن WebView از بین نرود.
-        try{
-            localStorage.setItem(accountDataKey(username),JSON.stringify(snapshot));
-            localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshot));
-        }catch(e){
-            console.warn("Immediate local storage save skipped",e);
-        }
-        // این بکاپ کوچک عمداً عکس‌های base64 را نگه نمی‌دارد؛ بنابراین حتی
-        // در صورت محدودیت WebView Storage، فهرست دانش‌آموزان حفظ می‌شود.
-        saveStudentRosterBackups(username,database);
+        // snapshot همین لحظه immutable است؛ هیچ callback آینده‌ای اجازه ندارد آن را تغییر دهد.
+        const frozenSnapshot=cloneForSync(snapshot);
+        // ذخیره canonical roster را مستقل از صف اصلی حساب انجام می‌دهیم.
+        ["1","2","3","4","5","6","multi"].forEach(function(k){
+            const students=frozenSnapshot[k] && Array.isArray(frozenSnapshot[k].students) ? frozenSnapshot[k].students : [];
+            jobs.push(persistCanonicalRoster(username,k,students));
+        });
+        // یک کپی فوری در localStorage هم نگه می‌داریم تا حتی در صورت خطای IndexedDB، فهرست از بین نرود.
+        try{ localStorage.setItem(accountDataKey(username),JSON.stringify(frozenSnapshot)); }catch(e){ console.warn("Account localStorage snapshot skipped",e); }
         accountSaveQueue=accountSaveQueue
             .catch(function(){})
             .then(function(){ return Promise.all(jobs); })
-            .then(function(){ return writeAccountDatabase(username,snapshot); })
-            .then(function(){ return queueSyncSnapshot(username,snapshot); })
+            .then(function(){ return writeAccountDatabase(username,frozenSnapshot); })
+            .then(function(){ return queueSyncSnapshot(username,frozenSnapshot); })
             .then(function(){ scheduleSyncFlush(); })
             .catch(function(error){
                 console.error("Account save error",error);
-                try{ localStorage.setItem(accountDataKey(username),JSON.stringify(snapshot)); }catch(e){
-                    console.error("Fallback storage failed",e);
-                    alert("فضای ذخیره‌سازی دستگاه کافی نیست. لطفاً از بخش پشتیبان‌گیری نسخه تهیه کنید.");
-                }
+                // canonical roster و localStorage قبلاً تلاش شده‌اند؛ خطای صف اصلی نباید داده را پنهان کند.
             });
         return accountSaveQueue;
     }catch(error){
@@ -4468,27 +4713,13 @@ function updateStudentGradeField(){
 
 async function openClass(classNumber){
 
-    const selectedClass = String(classNumber);
-    if(!["1","2","3","4","5","6","multi"].includes(selectedClass)){
-        console.warn("Invalid class selected:", classNumber);
-        return;
-    }
-
-    if(currentClass && currentClass !== selectedClass){
-        try{ await saveDatabase(); }catch(e){ console.warn("Previous class save failed",e); }
-    }
-    currentClass = selectedClass;
+    currentClass = String(classNumber);
     if(!database) database=createFreshDatabase();
     if(!database[currentClass]) database[currentClass]=createClassData();
-    if(!Array.isArray(database[currentClass].students)) database[currentClass].students=[];
-    if(activeAccountUsername) setLastClassForAccount(activeAccountUsername,currentClass);
-
-    // آماده‌سازی رسانه نباید مانع ورود به کلاس شود.
-    try{
-        await prepareClassMedia(currentClass);
-    }catch(error){
-        console.warn("Class media preparation skipped:",error);
+    if(activeAccountUsername){
+        try{ await restoreCanonicalRosters(activeAccountUsername,database); }catch(e){ console.warn("Roster restore on class open skipped",e); }
     }
+    await prepareClassMedia(currentClass);
 
 
     document
@@ -4524,10 +4755,8 @@ async function openClass(classNumber){
    بازگشت
 ===================================================== */
 
-async function goHome(){
+function goHome(){
 
-    // قبل از خروج از کلاس، آخرین وضعیت را قطعی ذخیره می‌کنیم.
-    try{ await saveDatabase(); }catch(e){ console.warn("Class exit save failed",e); }
     currentClass = null;
 
 
@@ -4619,7 +4848,7 @@ function toggleSidebar(){
 
 function setupProfessionalNavigation(){
  const nav=document.getElementById('mainNav'); if(!nav||nav.dataset.grouped==='1') return;
- const groups={teacherProfile:'معلم و کلاس',dashboard:'معلم و کلاس',students:'معلم و کلاس',groups:'معلم و کلاس',attendance:'مدیریت روزانه',homework:'مدیریت روزانه',evaluation:'ارزشیابی و پرونده',feedback:'ارزشیابی و پرونده',grades:'ارزشیابی و پرونده',portfolio:'ارزشیابی و پرونده',experiments:'ارزشیابی و پرونده',monthly:'ارزشیابی و پرونده',report:'ارزشیابی و پرونده',goals:'ارزشیابی و پرونده',parents:'ارزشیابی و پرونده',interests:'ارزشیابی و پرونده',daily:'برنامه‌ریزی آموزشی',weekly:'برنامه‌ریزی آموزشی',budget:'برنامه‌ریزی آموزشی',bookBudget:'برنامه‌ریزی آموزشی',attention:'ابزارها و پشتیبان',backup:'ابزارها و پشتیبان'};
+ const groups={teacherProfile:'معلم و کلاس',dashboard:'معلم و کلاس',students:'معلم و کلاس',studentFile:'معلم و کلاس',groups:'معلم و کلاس',attendance:'مدیریت روزانه',homework:'مدیریت روزانه',evaluation:'ارزشیابی و پرونده',feedback:'ارزشیابی و پرونده',grades:'ارزشیابی و پرونده',portfolio:'ارزشیابی و پرونده',experiments:'ارزشیابی و پرونده',monthly:'ارزشیابی و پرونده',report:'ارزشیابی و پرونده',goals:'ارزشیابی و پرونده',parents:'ارزشیابی و پرونده',interests:'ارزشیابی و پرونده',daily:'برنامه‌ریزی آموزشی',weekly:'برنامه‌ریزی آموزشی',budget:'برنامه‌ریزی آموزشی',bookBudget:'برنامه‌ریزی آموزشی',attention:'ابزارها و پشتیبان',backup:'ابزارها و پشتیبان'};
  let last=''; Array.from(nav.querySelectorAll('button')).forEach(btn=>{const m=(btn.getAttribute('onclick')||'').match(/showSection\('([^']+)'/);const g=m&&groups[m[1]];if(g&&g!==last){const d=document.createElement('div');d.className='sidebar-group-label';d.textContent=g;nav.insertBefore(d,btn);last=g;}}); nav.dataset.grouped='1';
 }
 function updateMobileQuickbar(sectionId){document.querySelectorAll('#mobileQuickbar button[data-q-section]').forEach(b=>b.classList.toggle('active',b.dataset.qSection===sectionId));}
@@ -4759,6 +4988,17 @@ function getStudentName(id){
 
 }
 
+
+/* نمایش عکس دانش‌آموز کنار نام (برای همهٔ بخش‌ها) */
+function studentWithPhoto(idOrStudent,large){
+    const s = (idOrStudent && typeof idOrStudent === "object") ? idOrStudent : getStudent(idOrStudent);
+    if(!s) return '<span class="sn-nm">-</span>';
+    const name = escapeHTML((s.firstName||"") + " " + (s.lastName||""));
+    const av = (s.photo && /^(data:image|blob:)/.test(String(s.photo)))
+        ? '<img class="sn-av" loading="lazy" src="'+String(s.photo).replace(/"/g,"&quot;")+'" alt="">'
+        : '<span class="sn-av sn-ph">👤</span>';
+    return '<span class="sn-wrap'+(large?' sn-lg':'')+'">'+av+'<span class="sn-nm">'+name+'</span></span>';
+}
 
 function getStudent(id){
 
@@ -5136,7 +5376,7 @@ async function addStudent(){
 
     classData.students.push({
 
-        id: Date.now(),
+        id: String(Date.now()) + "-" + Math.random().toString(36).slice(2,8),
 
         firstName:firstName,
 
@@ -5146,10 +5386,18 @@ async function addStudent(){
 
         notes:notes,
 
+        fatherPhone:(document.getElementById("studentFatherPhone").value || "").trim(),
+
+        motherPhone:(document.getElementById("studentMotherPhone").value || "").trim(),
+
         photo:photo
 
     });
 
+    // مسیر ذخیره مستقل و قطعی فهرست: ابتدا roster canonical، سپس snapshot کامل حساب.
+    if(activeAccountUsername && currentClass){
+        await persistCanonicalRoster(activeAccountUsername,String(currentClass),classData.students);
+    }
     await saveDatabase();
 
     // بلافاصله همه بخش‌های وابسته به فهرست دانش‌آموزان را تازه‌سازی می‌کنیم.
@@ -5170,9 +5418,9 @@ async function addStudent(){
         .value = "";
 
 
-    document
-        .getElementById("studentNotes")
-        .value = "";
+    document.getElementById("studentNotes").value = "";
+    document.getElementById("studentFatherPhone").value = "";
+    document.getElementById("studentMotherPhone").value = "";
 
     updateStudentGradeField();
 
@@ -5246,9 +5494,8 @@ function changeStudentPhoto(id){
 
 
                 student.photo = photo;
-
-
-                saveDatabase();
+                if(activeAccountUsername && currentClass){ await persistCanonicalRoster(activeAccountUsername,String(currentClass),getClassData().students); }
+                await saveDatabase();
 
                 renderStudents();
 
@@ -5279,7 +5526,7 @@ function changeStudentPhoto(id){
    حذف عکس دانش آموز
 ===================================================== */
 
-function removeStudentPhoto(id){
+async function removeStudentPhoto(id){
 
     const student =
         getStudent(id);
@@ -5293,9 +5540,7 @@ function removeStudentPhoto(id){
 
 
     if(
-        !confirm(
-            "عکس این دانش‌آموز حذف شود؟"
-        )
+        !(await appConfirm("عکس این دانش‌آموز حذف شود؟"))
     ){
 
         return;
@@ -5304,8 +5549,7 @@ function removeStudentPhoto(id){
 
 
     student.photo = "";
-
-
+    if(activeAccountUsername && currentClass){ persistCanonicalRoster(activeAccountUsername,String(currentClass),getClassData().students); }
     saveDatabase();
 
     renderStudents();
@@ -5317,74 +5561,81 @@ function removeStudentPhoto(id){
    حذف دانش آموز
 ===================================================== */
 
-function deleteStudent(id){
+/* پنجرهٔ تأیید داخلی؛ confirm() بومی در بسیاری از WebViewهای اندروید همیشه «انصراف» برمی‌گرداند. */
+function appConfirm(message,okText){
+    return new Promise(function(resolve){
+        try{
+            const ov=document.createElement("div");
+            ov.setAttribute("dir","rtl");
+            ov.style.cssText="position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:18px;font-family:inherit";
+            const box=document.createElement("div");
+            box.style.cssText="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:right;line-height:1.9";
+            const p=document.createElement("div");
+            p.style.cssText="font-size:16px;color:#263238;margin-bottom:18px;white-space:pre-line";
+            p.textContent=message;
+            const row=document.createElement("div");
+            row.style.cssText="display:flex;gap:10px";
+            function done(v){ try{ov.remove();}catch(e){} resolve(v); }
+            const yes=document.createElement("button");
+            yes.type="button"; yes.textContent=okText||"بله، حذف شود";
+            yes.style.cssText="flex:1;border:0;border-radius:12px;padding:12px;background:#e53935;color:#fff;font-size:15px;cursor:pointer;font-family:inherit";
+            const no=document.createElement("button");
+            no.type="button"; no.textContent="انصراف";
+            no.style.cssText="flex:1;border:0;border-radius:12px;padding:12px;background:#eceff1;color:#263238;font-size:15px;cursor:pointer;font-family:inherit";
+            yes.onclick=function(){done(true);}; no.onclick=function(){done(false);};
+            ov.onclick=function(ev){ if(ev.target===ov) done(false); };
+            row.appendChild(yes); row.appendChild(no); box.appendChild(p); box.appendChild(row); ov.appendChild(box);
+            document.body.appendChild(ov);
+        }catch(e){ resolve(window.confirm(message)); }
+    });
+}
 
-    if(
-        !confirm(
-            "آیا از حذف این دانش‌آموز مطمئن هستید؟"
-        )
-    ){
+async function deleteStudent(id){
+    const ok = await appConfirm("آیا از حذف این دانش‌آموز مطمئن هستید؟\nسوابق حضور، تکلیف، ارزشیابی و سایر اطلاعات وابسته به او هم حذف می‌شود.");
+    if(!ok) return false;
 
-        return;
+    const data = getClassData();
+    const sid = String(id);
+    const beforeCount = Array.isArray(data.students) ? data.students.length : 0;
+    data.students = (data.students || []).filter(function(student){ return String(student.id) !== sid; });
+    if(data.students.length === beforeCount) return false;
 
-    }
+    /* سنگ‌قبر: این شناسه دیگر هرگز از نسخه‌های قدیمی/پشتیبان برنمی‌گردد. */
+    if(!Array.isArray(data.deletedStudentIds)) data.deletedStudentIds = [];
+    if(data.deletedStudentIds.indexOf(sid) === -1) data.deletedStudentIds.push(sid);
 
-
-    const data =
-        getClassData();
-
-
-    const relatedArrays = [
-
-        "attendance",
-
-        "homework",
-
-        "evaluations",
-
-        "grades",
-
-        "portfolio",
-
-        "parents",
-
-        "interests",
-
-        "attention"
-
-    ];
-
-
-    data.students =
-        data.students.filter(function(student){
-
-            return String(student.id) !== String(id);
-
-        });
-
-
-    relatedArrays.forEach(function(arrayName){
-
-        if(!data[arrayName]){
+    /* همهٔ سوابق وابسته (هر آرایه‌ای که studentId دارد) + عضویت در گروه‌ها */
+    Object.keys(data).forEach(function(key){
+        if(key === "students" || key === "deletedStudentIds" || !Array.isArray(data[key])) return;
+        if(key === "groups"){
+            data.groups = data.groups.map(function(g){ return Array.isArray(g) ? g.filter(function(x){ return String(x) !== sid; }) : g; });
             return;
         }
-
-
-        data[arrayName] =
-            data[arrayName].filter(function(item){
-
-                return String(item.studentId) !== String(id);
-
-            });
-
+        data[key] = data[key].filter(function(item){
+            return !(item && typeof item === "object" && item.studentId !== undefined && item.studentId !== null && String(item.studentId) === sid);
+        });
     });
 
+    /* ۱) اول ذخیرهٔ پایدار (تا خطای احتمالی نمایش، جلوی ذخیره را نگیرد) */
+    let saved = true;
+    try{
+        if(activeAccountUsername && currentClass){
+            await persistCanonicalRoster(activeAccountUsername, String(currentClass), data.students);
+        }
+        await saveDatabase();
+    }catch(error){
+        saved = false;
+        console.error("خطا در ذخیره حذف دانش‌آموز:", error);
+    }
 
-    saveDatabase();
+    /* ۲) سپس به‌روزرسانی رابط؛ هر مرحله مستقل و محافظت‌شده */
+    [renderStudents, refreshStudentSelectorsSafely, updateDashboard, renderTeacherCardSafe].forEach(function(fn){
+        try{ if(typeof fn === "function") fn(); }catch(error){ console.warn("Refresh after student deletion failed:", error); }
+    });
+    try{ refreshAll(); }catch(error){ console.warn("refreshAll after student deletion failed:", error); }
 
-    refreshAll();
-    renderTeacherCardSafe();
-
+    if(!saved) alert("دانش‌آموز از فهرست حذف شد، اما ذخیرهٔ تغییرات با مشکل روبه‌رو شد. لطفاً یک بار دیگر تلاش کنید.");
+    return false;
 }
 
 
@@ -5506,7 +5757,7 @@ function renderStudents(){
 
                     <button
                         class="btn btn-blue btn-small"
-                        onclick="changeStudentPhoto(${student.id})"
+                        onclick="changeStudentPhoto('${student.id}')"
                     >
                         📷 تغییر عکس
                     </button>
@@ -5521,7 +5772,7 @@ function renderStudents(){
 
                         <button
                             class="btn btn-warning btn-small"
-                            onclick="removeStudentPhoto(${student.id})"
+                            onclick="removeStudentPhoto('${student.id}')"
                         >
                             🗑️ حذف عکس
                         </button>
@@ -5535,9 +5786,12 @@ function renderStudents(){
                     }
 
 
-                    <button
+                    <button type="button" class="btn btn-green btn-small" onclick="openStudentFile('${student.id}')">🗂️ کارتابل</button>
+<button type="button" class="btn btn-blue btn-small" onclick="editStudent('${student.id}')">✏️ ویرایش</button>
+<button
+                        type="button"
                         class="btn btn-danger btn-small"
-                        onclick="deleteStudent(${student.id})"
+                        onclick="deleteStudent('${student.id}'); return false;"
                     >
                         🗑️ حذف دانش‌آموز
                     </button>
@@ -5562,16 +5816,123 @@ function renderStudents(){
    حضور و غیاب
 ===================================================== */
 
+function safeFileName(name){
+    return String(name||"file").replace(/[\\\/:*?"<>|]+/g,"-").replace(/\s+/g,"-");
+}
+
+function isWebViewLike(){
+    const ua=navigator.userAgent||"";
+    return /; wv\)|\bwv\b|Android.*Version\/[\d.]+.*Chrome|FBAN|FBAV|Instagram|Line\//i.test(ua) || !!window.AndroidAudio || !!window.AndroidSpeech;
+}
+
+/* پنجرهٔ کمکی: وقتی مرورگر/WebView دانلود خودکار را نمی‌پذیرد، کاربر می‌تواند فایل را با لمس لینک ذخیره یا متن را کپی کند */
+function showFileFallback(filename, blob, textContent){
+    const old=document.getElementById("fileFallbackOverlay"); if(old) old.remove();
+    const url=URL.createObjectURL(blob);
+    const ov=document.createElement("div");
+    ov.id="fileFallbackOverlay"; ov.setAttribute("dir","rtl");
+    ov.style.cssText="position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit";
+    const box=document.createElement("div");
+    box.style.cssText="background:#fff;border-radius:18px;max-width:560px;width:100%;max-height:88vh;overflow:auto;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:right;line-height:1.9";
+    box.innerHTML='<h3 style="margin:0 0 6px">📥 فایل آماده است</h3>'
+        +'<p style="margin:0 0 12px;font-size:14px;color:#475569">اگر دانلود به‌صورت خودکار شروع نشد، یکی از گزینه‌های زیر را بزنید.</p>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>';
+    const row=box.querySelector("div");
+    const a=document.createElement("a");
+    a.href=url; a.download=filename; a.className="btn btn-blue"; a.textContent="⬇️ ذخیره فایل";
+    a.style.cssText="text-decoration:none;display:inline-block";
+    row.appendChild(a);
+    if(typeof textContent==="string"){
+        const copy=document.createElement("button");
+        copy.type="button"; copy.className="btn btn-gray"; copy.textContent="📋 کپی متن";
+        copy.onclick=function(){
+            const ta=box.querySelector("textarea"); ta.focus(); ta.select();
+            let ok=false;
+            try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(textContent); ok=true; } }catch(e){}
+            if(!ok){ try{ ok=document.execCommand("copy"); }catch(e){} }
+            copy.textContent=ok?"✅ کپی شد":"متن انتخاب شد؛ کپی کنید";
+        };
+        row.appendChild(copy);
+    }
+    const close=document.createElement("button");
+    close.type="button"; close.className="btn btn-gray"; close.textContent="بستن";
+    close.onclick=function(){ ov.remove(); setTimeout(function(){URL.revokeObjectURL(url);},500); };
+    row.appendChild(close);
+    if(typeof textContent==="string"){
+        const ta=document.createElement("textarea");
+        ta.readOnly=true; ta.value=textContent; ta.style.cssText="width:100%;min-height:160px;direction:rtl;font-size:13px;border:1px solid #cbd5e1;border-radius:10px;padding:8px";
+        box.appendChild(ta);
+    }
+    ov.appendChild(box); document.body.appendChild(ov);
+}
+
+/* تحویل فایل به کاربر: اشتراک‌گذاری (موبایل) ← دانلود مستقیم ← پنجرهٔ کمکی */
+
+/* ذخیره بومی فایل در APK اندروید؛ در صورت لغو انتخاب محل ذخیره، مسیر جایگزین اجرا می‌شود. */
+async function dfSaveViaAndroid(filename, blob){
+    if(!window.AndroidFileBridge || typeof window.AndroidFileBridge.saveFile !== "function") return false;
+    try{
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        return await new Promise(function(resolve){
+            let settled = false;
+            const previous = window.onNativeFileSaved;
+            window.onNativeFileSaved = function(ok, message){
+                if(settled) return;
+                settled = true;
+                window.onNativeFileSaved = previous;
+                if(ok) alert(message || "فایل با موفقیت ذخیره شد.");
+                resolve(!!ok);
+            };
+            try{
+                window.AndroidFileBridge.saveFile(
+                    safeFileName(filename),
+                    String(blob.type || "application/octet-stream").split(";")[0],
+                    dfBytesToBase64(bytes)
+                );
+            }catch(err){
+                if(!settled){
+                    settled = true;
+                    window.onNativeFileSaved = previous;
+                    resolve(false);
+                }
+            }
+        });
+    }catch(err){
+        console.error("Android file save failed:", err);
+        return false;
+    }
+}
+
+async function deliverFile(filename, blob, textContent){
+    filename=safeFileName(filename);
+    if(await dfSaveViaAndroid(filename, blob)) return true;
+    try{
+        if(window.File && navigator.canShare && navigator.share){
+            const file=new File([blob],filename,{type:blob.type||"application/octet-stream"});
+            if(navigator.canShare({files:[file]})){
+                await navigator.share({files:[file],title:filename});
+                return true;
+            }
+        }
+    }catch(e){
+        if(e && e.name==="AbortError") return false; /* کاربر خودش بستن را زد */
+    }
+    let clicked=false;
+    try{
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement("a");
+        a.href=url; a.download=filename; a.style.display="none";
+        document.body.appendChild(a); a.click(); a.remove();
+        clicked=true;
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 30000);
+    }catch(e){}
+    if(!clicked || isWebViewLike()) showFileFallback(filename, blob, textContent);
+    return clicked;
+}
+
 function downloadTextFile(filename, content, mimeType){
     const blob = new Blob(["\ufeff" + content], {type:mimeType || "text/plain;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 500);
+    return deliverFile(filename, blob, content);
 }
 
 function csvCell(value){
@@ -5584,9 +5945,9 @@ function exportAttendanceCSV(){
         alert("هنوز هیچ سابقه‌ای برای حضور و غیاب ثبت نشده است.");
         return;
     }
-    const rows = [["تاریخ","نام و نام خانوادگی","وضعیت"]];
+    const rows = [["تاریخ","نام و نام خانوادگی","وضعیت","دلیل غیبت/تأخیر"]];
     data.attendance.slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); }).forEach(function(item){
-        rows.push([formatPersianDate(item.date), getStudentName(item.studentId), item.status || ""]);
+        rows.push([formatPersianDate(item.date), getStudentName(item.studentId), item.status || "", item.reason || ""]);
     });
     const csv = rows.map(function(row){ return row.map(csvCell).join(","); }).join("\r\n");
     downloadTextFile("حضور-و-غیاب-" + (getClassTitleForKey(currentClass).replace(/\s+/g,"-")) + ".csv", csv, "text/csv;charset=utf-8");
@@ -5600,10 +5961,484 @@ function exportAttendanceDateCSV(){
         alert("برای تاریخ انتخاب‌شده سابقه‌ای ثبت نشده است.");
         return;
     }
-    const rows = [["تاریخ","نام و نام خانوادگی","وضعیت"]];
-    records.forEach(function(item){ rows.push([formatPersianDate(item.date), getStudentName(item.studentId), item.status || ""]); });
+    const rows = [["تاریخ","نام و نام خانوادگی","وضعیت","دلیل غیبت/تأخیر"]];
+    records.forEach(function(item){ rows.push([formatPersianDate(item.date), getStudentName(item.studentId), item.status || "", item.reason || ""]); });
     const csv = rows.map(function(row){ return row.map(csvCell).join(","); }).join("\r\n");
     downloadTextFile("حضور-و-غیاب-" + date.replace(/\//g,"-") + ".csv", csv, "text/csv;charset=utf-8");
+}
+
+/* =====================================================
+   خروجی PDF (بدون کتابخانهٔ خارجی — کاملاً آفلاین)
+   صفحه‌ها روی canvas رسم می‌شوند (متن فارسی درست نمایش داده می‌شود)
+   و سپس در یک فایل PDF واقعی بسته‌بندی می‌شوند.
+===================================================== */
+const DF_PDF_FONT = '"Vazirmatn","IRANSansX","IRANSans","Noto Naskh Arabic","Noto Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif';
+
+function dfLoadImage(src){
+    return new Promise(function(resolve){
+        if(!src || !/^(data:image|blob:)/.test(String(src))){ resolve(null); return; }
+        const img = new Image();
+        img.onload = function(){ resolve(img); };
+        img.onerror = function(){ resolve(null); };
+        img.src = src;
+    });
+}
+
+function dfCanvasToJpeg(canvas){
+    const b64 = canvas.toDataURL("image/jpeg", 0.9).split(",")[1];
+    const bin = atob(b64);
+    const u = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) u[i] = bin.charCodeAt(i);
+    return u;
+}
+
+function dfBuildPdf(pages){
+    const enc = new TextEncoder();
+    const chunks = [];
+    let offset = 0;
+    const offsets = [];
+    function push(x){
+        const u = (typeof x === "string") ? enc.encode(x) : x;
+        chunks.push(u); offset += u.length;
+    }
+    function obj(n, body){ offsets[n] = offset; push(n + " 0 obj\n" + body + "\nendobj\n"); }
+    const PW = 595.28, PH = 841.89;
+    const total = 2 + pages.length * 3;
+
+    push("%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n");
+    obj(1, "<< /Type /Catalog /Pages 2 0 R >>");
+    const kids = pages.map(function(p,i){ return (3 + i*3) + " 0 R"; }).join(" ");
+    obj(2, "<< /Type /Pages /Kids [" + kids + "] /Count " + pages.length + " >>");
+
+    pages.forEach(function(p,i){
+        const pn = 3 + i*3, im = 4 + i*3, ct = 5 + i*3;
+        obj(pn, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + PW + " " + PH + "] /Resources << /XObject << /Im0 " + im + " 0 R >> >> /Contents " + ct + " 0 R >>");
+        offsets[im] = offset;
+        push(im + " 0 obj\n<< /Type /XObject /Subtype /Image /Width " + p.w + " /Height " + p.h + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + p.bytes.length + " >>\nstream\n");
+        push(p.bytes);
+        push("\nendstream\nendobj\n");
+        const content = "q " + PW + " 0 0 " + PH + " 0 0 cm /Im0 Do Q";
+        obj(ct, "<< /Length " + content.length + " >>\nstream\n" + content + "\nendstream");
+    });
+
+    const xrefPos = offset;
+    let xref = "xref\n0 " + (total + 1) + "\n0000000000 65535 f \n";
+    for(let n=1;n<=total;n++){
+        xref += String(offsets[n]).padStart(10,"0") + " 00000 n \n";
+    }
+    push(xref);
+    push("trailer\n<< /Size " + (total + 1) + " /Root 1 0 R >>\nstartxref\n" + xrefPos + "\n%%EOF");
+
+    const all = new Uint8Array(offset);
+    let pos = 0;
+    chunks.forEach(function(c){ all.set(c,pos); pos += c.length; });
+    return all;
+}
+
+function dfBytesToBase64(bytes){
+    let s = "";
+    const step = 0x8000;
+    for(let i=0;i<bytes.length;i+=step){
+        s += String.fromCharCode.apply(null, bytes.subarray(i,i+step));
+    }
+    return btoa(s);
+}
+
+/* ذخیره در اپ‌های بومی (Capacitor) در صورت وجود */
+async function dfNativeSave(filename, bytes){
+    if(window.AndroidFileBridge && typeof window.AndroidFileBridge.saveFile === "function"){
+        return await dfSaveViaAndroid(filename, new Blob([bytes], {type:"application/pdf"}));
+    }
+    const cap = window.Capacitor;
+    const P = cap && cap.Plugins;
+    if(!P || !P.Filesystem) return false;
+    try{
+        const r = await P.Filesystem.writeFile({ path: filename, data: dfBytesToBase64(bytes), directory: "DOCUMENTS", recursive: true });
+        if(P.Share){ try{ await P.Share.share({ title: filename, url: r.uri, dialogTitle: "ذخیره / ارسال PDF" }); }catch(e){} }
+        else alert("فایل در پوشهٔ Documents ذخیره شد: " + filename);
+        return true;
+    }catch(e){ return false; }
+}
+
+function dfClosePdfViewer(){
+    const v = document.getElementById("dfPdfViewer");
+    if(v){
+        (v._urls || []).forEach(function(u){ try{ URL.revokeObjectURL(u); }catch(e){} });
+        v.remove();
+    }
+}
+
+function dfPrintPages(urls){
+    let area = document.getElementById("dfPrintArea");
+    if(area) area.remove();
+    area = document.createElement("div");
+    area.id = "dfPrintArea";
+    urls.forEach(function(u){ const im = document.createElement("img"); im.src = u; area.appendChild(im); });
+    document.body.appendChild(area);
+    document.body.classList.add("df-printing");
+    const done = function(){
+        document.body.classList.remove("df-printing");
+        const a = document.getElementById("dfPrintArea"); if(a) a.remove();
+        window.removeEventListener("afterprint", done);
+    };
+    window.addEventListener("afterprint", done);
+    setTimeout(function(){ try{ window.print(); }catch(e){ done(); alert("چاپ در این محیط پشتیبانی نمی‌شود."); } }, 250);
+}
+
+/* نمایشگر داخل برنامه: اگر محیط (WebView) دانلود را مسدود کرد، کاربر باز هم به فایل می‌رسد */
+function dfShowPdfViewer(filename, blob, bytes, pageUrls){
+    dfClosePdfViewer();
+    const pdfUrl = URL.createObjectURL(blob);
+    const ov = document.createElement("div");
+    ov.id = "dfPdfViewer"; ov.setAttribute("dir","rtl");
+    ov._urls = pageUrls.concat([pdfUrl]);
+
+    const bar = document.createElement("div"); bar.className = "dfbar";
+    const title = document.createElement("b"); title.textContent = "📄 " + filename; bar.appendChild(title);
+
+    const a1 = document.createElement("a");
+    a1.href = pdfUrl; a1.download = filename; a1.className = "btn btn-blue"; a1.textContent = "⬇️ ذخیرهٔ PDF";
+    a1.style.cssText = "text-decoration:none;display:inline-block"; bar.appendChild(a1);
+
+    const a2 = document.createElement("a");
+    a2.href = "data:application/pdf;base64," + dfBytesToBase64(bytes); a2.download = filename;
+    a2.className = "btn btn-gray"; a2.textContent = "⬇️ ذخیره (روش دوم)";
+    a2.style.cssText = "text-decoration:none;display:inline-block"; bar.appendChild(a2);
+
+    const pr = document.createElement("button"); pr.type = "button"; pr.className = "btn btn-green";
+    pr.textContent = "🖨️ چاپ / ذخیره به‌صورت PDF"; pr.onclick = function(){ dfPrintPages(pageUrls); }; bar.appendChild(pr);
+
+    if(navigator.share){
+        const sh = document.createElement("button"); sh.type = "button"; sh.className = "btn btn-gray"; sh.textContent = "📤 اشتراک‌گذاری";
+        sh.onclick = async function(){
+            try{
+                const f = new File([blob], filename, {type:"application/pdf"});
+                if(navigator.canShare && navigator.canShare({files:[f]})) await navigator.share({files:[f], title:filename});
+                else await navigator.share({title:filename, text:filename});
+            }catch(e){}
+        };
+        bar.appendChild(sh);
+    }
+    const cl = document.createElement("button"); cl.type = "button"; cl.className = "btn btn-danger"; cl.textContent = "✖ بستن";
+    cl.onclick = dfClosePdfViewer; bar.appendChild(cl);
+
+    const hint = document.createElement("div"); hint.className = "dfhint";
+    hint.textContent = "اگر دکمه‌ها دانلود نکردند: روی هر صفحه نگه دارید و «ذخیرهٔ تصویر» را بزنید، یا از دکمهٔ چاپ استفاده کنید.";
+    bar.appendChild(hint);
+
+    const pg = document.createElement("div"); pg.className = "dfpages";
+    pageUrls.forEach(function(u){ const im = document.createElement("img"); im.src = u; im.alt = "صفحهٔ PDF"; pg.appendChild(im); });
+
+    ov.appendChild(bar); ov.appendChild(pg); document.body.appendChild(ov);
+}
+
+async function dfDeliverPdf(filename, pageCanvases){
+    filename = safeFileName(filename);
+    const pages = pageCanvases.map(function(c){ return { bytes: dfCanvasToJpeg(c), w: c.width, h: c.height }; });
+    const bytes = dfBuildPdf(pages);
+    const blob = new Blob([bytes], {type:"application/pdf"});
+
+    /* برای نمایشگر داخلی از JPEG استفاده می‌کنیم (سبک‌تر) */
+    const pageUrls = pages.map(function(p){ return URL.createObjectURL(new Blob([p.bytes], {type:"image/jpeg"})); });
+
+    if(await dfNativeSave(filename, bytes)){ pageUrls.forEach(function(u){ URL.revokeObjectURL(u); }); return true; }
+
+    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+    if(mobile){
+        try{
+            if(window.File && navigator.canShare && navigator.share){
+                const file = new File([blob], filename, {type:"application/pdf"});
+                if(navigator.canShare({files:[file]})){
+                    await navigator.share({files:[file], title:filename});
+                    pageUrls.forEach(function(u){ URL.revokeObjectURL(u); });
+                    return true;
+                }
+            }
+        }catch(e){
+            if(e && e.name === "AbortError"){ pageUrls.forEach(function(u){ URL.revokeObjectURL(u); }); return false; }
+        }
+    }
+
+    let clicked = false;
+    try{
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = filename; a.style.display = "none";
+        document.body.appendChild(a); a.click(); a.remove();
+        clicked = true;
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 30000);
+    }catch(e){}
+
+    /* در WebView اپ‌ها دانلود blob اغلب بی‌صدا شکست می‌خورد؛ پس نمایشگر داخلی را همیشه نشان می‌دهیم */
+    if(!clicked || isWebViewLike() || mobile) dfShowPdfViewer(filename, blob, bytes, pageUrls);
+    else pageUrls.forEach(function(u){ setTimeout(function(){ URL.revokeObjectURL(u); }, 1000); });
+    return clicked;
+}
+
+function dfWrapText(ctx, text, maxWidth, maxLines){
+    const words = String(text||"").split(/\s+/).filter(Boolean);
+    const lines = [];
+    let cur = "";
+    for(let i=0;i<words.length;i++){
+        const test = cur ? cur + " " + words[i] : words[i];
+        if(ctx.measureText(test).width <= maxWidth){ cur = test; }
+        else{
+            if(cur) lines.push(cur);
+            cur = words[i];
+            if(lines.length >= maxLines) break;
+        }
+    }
+    if(cur && lines.length < maxLines) lines.push(cur);
+    if(lines.length > maxLines) lines.length = maxLines;
+    const joined = words.join(" ");
+    if(lines.join(" ").length < joined.length && lines.length){
+        let last = lines[lines.length-1];
+        while(last.length > 1 && ctx.measureText(last + "…").width > maxWidth) last = last.slice(0,-1);
+        lines[lines.length-1] = last + "…";
+    }
+    return lines;
+}
+
+function dfRoundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+    ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+    ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+
+/* ساخت صفحه‌های گزارش حضور و غیاب */
+async function dfRenderAttendancePages(opts){
+    try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+    const W = 1240, H = 1754, M = 70;
+    const showDate = !!opts.showDate;
+    const rows = opts.rows;
+
+    /* عکس‌ها را یک‌بار بارگذاری می‌کنیم */
+    const photoCache = {};
+    for(let i=0;i<rows.length;i++){
+        const s = rows[i].student;
+        if(s && photoCache[s.id] === undefined) photoCache[s.id] = await dfLoadImage(s.photo);
+    }
+
+    const STATUS = {
+        "حاضر":{bg:"#dcfce7",fg:"#15803d"},
+        "غایب":{bg:"#fee2e2",fg:"#b91c1c"},
+        "تأخیر":{bg:"#fef3c7",fg:"#b45309"},
+        "ثبت نشده":{bg:"#e5e7eb",fg:"#475569"}
+    };
+    const cnt = {"حاضر":0,"غایب":0,"تأخیر":0,"ثبت نشده":0};
+    rows.forEach(function(r){ cnt[r.status] = (cnt[r.status]||0) + 1; });
+
+    /* ستون‌ها از راست به چپ */
+    const tableW = W - 2*M;
+    const colIdx = 70, colPhoto = 100, colStatus = 170, colDate = showDate ? 190 : 0;
+    const colName = 330;
+    const colReason = tableW - colIdx - colPhoto - colName - colStatus - colDate;
+    const X0 = W - M; /* لبهٔ راست جدول */
+    const xIdx = X0, xPhoto = xIdx - colIdx, xName = xPhoto - colPhoto;
+    const xDate = xName - colName, xStatus = xDate - colDate, xReason = xStatus - colStatus; /* لبهٔ راست هر ستون */
+
+    const ROW_H = 92, HEAD_H = 62;
+    const pages = [];
+    let canvas, ctx, y, pageNo = 0;
+
+    function newPage(first){
+        canvas = document.createElement("canvas"); canvas.width = W; canvas.height = H;
+        ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(0,0,W,H);
+        ctx.direction = "rtl"; ctx.textBaseline = "middle";
+        pages.push(canvas); pageNo++;
+        if(first){
+            const g = ctx.createLinearGradient(0,0,W,0);
+            g.addColorStop(0,"#3498db"); g.addColorStop(.5,"#16a085"); g.addColorStop(1,"#087f8c");
+            ctx.fillStyle = g; ctx.fillRect(0,0,W,230);
+            ctx.fillStyle = "#fff"; ctx.textAlign = "right";
+            ctx.font = "800 54px " + DF_PDF_FONT; ctx.fillText(opts.title, W-M, 82);
+            ctx.font = "500 28px " + DF_PDF_FONT; ctx.fillText(opts.subtitle, W-M, 140);
+            if(opts.meta){ ctx.font = "400 24px " + DF_PDF_FONT; ctx.globalAlpha = .92; ctx.fillText(opts.meta, W-M, 188); ctx.globalAlpha = 1; }
+            y = 262;
+            /* خلاصه */
+            const chips = [["حاضر",cnt["حاضر"]],["غایب",cnt["غایب"]],["تأخیر",cnt["تأخیر"]]];
+            if(cnt["ثبت نشده"]) chips.push(["ثبت نشده",cnt["ثبت نشده"]]);
+            let cx = W - M;
+            const cw = 210, gap = 18;
+            chips.forEach(function(c){
+                const st = STATUS[c[0]];
+                ctx.fillStyle = st.bg; dfRoundRect(ctx, cx-cw, y, cw, 78, 18); ctx.fill();
+                ctx.fillStyle = st.fg; ctx.textAlign = "center"; ctx.direction = "rtl";
+                ctx.font = "800 32px " + DF_PDF_FONT; ctx.fillText(toPersianNumber(c[1]), cx-cw/2-0, y+26);
+                ctx.font = "500 22px " + DF_PDF_FONT; ctx.fillText(c[0], cx-cw/2, y+56);
+                cx -= cw + gap;
+            });
+            y += 78 + 34;
+        }else{
+            y = M;
+        }
+        drawHeader();
+    }
+
+    function drawHeader(){
+        ctx.fillStyle = "#087f8c"; dfRoundRect(ctx, M, y, tableW, HEAD_H, 14); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.font = "700 25px " + DF_PDF_FONT; ctx.textAlign = "center";
+        ctx.fillText("ردیف", xIdx - colIdx/2, y + HEAD_H/2);
+        ctx.fillText("عکس", xPhoto - colPhoto/2, y + HEAD_H/2);
+        ctx.fillText("نام و نام خانوادگی", xName - colName/2, y + HEAD_H/2);
+        if(showDate) ctx.fillText("تاریخ", xDate - colDate/2, y + HEAD_H/2);
+        ctx.fillText("وضعیت", xStatus - colStatus/2, y + HEAD_H/2);
+        ctx.fillText("دلیل غیبت / تأخیر", xReason - colReason/2, y + HEAD_H/2);
+        y += HEAD_H + 8;
+    }
+
+    function drawFooter(n,total){
+        ctx.fillStyle = "#94a3b8"; ctx.font = "400 21px " + DF_PDF_FONT; ctx.textAlign = "center"; ctx.direction = "rtl";
+        ctx.fillText("دفتر کلاسی من  •  صفحهٔ " + toPersianNumber(n) + " از " + toPersianNumber(total), W/2, H - 38);
+    }
+
+    newPage(true);
+
+    for(let i=0;i<rows.length;i++){
+        if(y + ROW_H > H - 90){ newPage(false); }
+        const r = rows[i];
+        const s = r.student;
+        /* زمینهٔ ردیف */
+        ctx.fillStyle = (i % 2 === 0) ? "#f6fbfb" : "#ffffff";
+        ctx.fillRect(M, y, tableW, ROW_H);
+        ctx.strokeStyle = "#e2eeee"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(M, y+ROW_H); ctx.lineTo(M+tableW, y+ROW_H); ctx.stroke();
+
+        const cy = y + ROW_H/2;
+        ctx.fillStyle = "#475569"; ctx.font = "500 24px " + DF_PDF_FONT; ctx.textAlign = "center";
+        ctx.fillText(toPersianNumber(i+1), xIdx - colIdx/2, cy);
+
+        /* عکس دایره‌ای */
+        const pr = 32, pcx = xPhoto - colPhoto/2;
+        const img = s ? photoCache[s.id] : null;
+        ctx.save();
+        ctx.beginPath(); ctx.arc(pcx, cy, pr, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+        if(img){
+            const side = Math.min(img.naturalWidth, img.naturalHeight);
+            const sx = (img.naturalWidth - side)/2, sy = (img.naturalHeight - side)/2;
+            ctx.drawImage(img, sx, sy, side, side, pcx-pr, cy-pr, pr*2, pr*2);
+        }else{
+            ctx.fillStyle = "#e2f1f1"; ctx.fillRect(pcx-pr, cy-pr, pr*2, pr*2);
+            ctx.fillStyle = "#7aa6a6";
+            ctx.beginPath(); ctx.arc(pcx, cy-9, 11, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(pcx, cy+22, 20, 16, 0, Math.PI, 0); ctx.fill();
+        }
+        ctx.restore();
+        ctx.strokeStyle = "#bfe5e1"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(pcx, cy, pr, 0, Math.PI*2); ctx.stroke();
+
+        /* نام */
+        ctx.fillStyle = "#263238"; ctx.font = "700 27px " + DF_PDF_FONT; ctx.textAlign = "right";
+        const nameLines = dfWrapText(ctx, r.name, colName - 28, 2);
+        const nlh = 34;
+        nameLines.forEach(function(t,k){ ctx.fillText(t, xName - 14, cy + (k - (nameLines.length-1)/2)*nlh); });
+
+        /* تاریخ */
+        if(showDate){
+            ctx.fillStyle = "#475569"; ctx.font = "500 24px " + DF_PDF_FONT; ctx.textAlign = "center";
+            ctx.fillText(toPersianNumber(r.dateText), xDate - colDate/2, cy);
+        }
+
+        /* وضعیت */
+        const st = STATUS[r.status] || STATUS["ثبت نشده"];
+        const bw = 130, bh = 46, bx = xStatus - colStatus/2 - bw/2;
+        ctx.fillStyle = st.bg; dfRoundRect(ctx, bx, cy - bh/2, bw, bh, 23); ctx.fill();
+        ctx.fillStyle = st.fg; ctx.font = "700 24px " + DF_PDF_FONT; ctx.textAlign = "center";
+        ctx.fillText(r.status, bx + bw/2, cy);
+
+        /* دلیل */
+        ctx.fillStyle = "#37474f"; ctx.font = "400 23px " + DF_PDF_FONT; ctx.textAlign = "right";
+        if(r.reason){
+            const rl = dfWrapText(ctx, r.reason, colReason - 28, 2);
+            rl.forEach(function(t,k){ ctx.fillText(t, xReason - 14, cy + (k - (rl.length-1)/2)*30); });
+        }else{
+            ctx.fillStyle = "#b0bec5"; ctx.textAlign = "center"; ctx.fillText("—", xReason - colReason/2, cy);
+        }
+        y += ROW_H;
+    }
+
+    /* شمارهٔ صفحه */
+    const total = pages.length;
+    pages.forEach(function(c,i){
+        ctx = c.getContext("2d"); ctx.direction = "rtl"; ctx.textBaseline = "middle";
+        drawFooter(i+1, total);
+    });
+    return pages;
+}
+
+async function exportAttendancePDF(mode){
+    const data = getClassData();
+    const students = data.students || [];
+    const att = data.attendance || [];
+    const classTitle = getClassTitleForKey(currentClass);
+    let teacherName = "";
+    try{ const t = getTeacherData(); teacherName = [t.firstName, t.lastName].filter(Boolean).join(" ").trim(); }catch(e){}
+    let rows = [], opts, fname;
+
+    if(mode === "date"){
+        const dateEl = document.getElementById("attendanceDate");
+        const date = normalizePersianDate(dateEl ? dateEl.value : "");
+        if(!students.length){ alert("ابتدا دانش‌آموزان را ثبت کنید."); return; }
+        students.forEach(function(s){
+            const rec = att.find(function(it){ return String(it.studentId) === String(s.id) && normalizePersianDate(it.date) === date; });
+            rows.push({ student:s, name:(s.firstName||"")+" "+(s.lastName||""), dateText:formatPersianDate(date),
+                        status: rec ? (rec.status || "ثبت نشده") : "ثبت نشده", reason: rec ? (rec.reason || "") : "" });
+        });
+        opts = { title:"گزارش حضور و غیاب", subtitle: classTitle + "  —  تاریخ: " + toPersianNumber(formatPersianDate(date)),
+                 meta: teacherName ? ("معلم: " + teacherName) : "", rows:rows, showDate:false };
+        fname = "حضور-و-غیاب-" + classTitle.replace(/\s+/g,"-") + "-" + String(date).replace(/\//g,"-") + ".pdf";
+    }else{
+        if(!att.length){ alert("هنوز هیچ سابقه‌ای برای حضور و غیاب ثبت نشده است."); return; }
+        att.slice().sort(function(a,b){ return String(normalizePersianDate(a.date)).localeCompare(String(normalizePersianDate(b.date))); }).forEach(function(it){
+            const s = getStudent(it.studentId);
+            rows.push({ student:s || null, name: s ? ((s.firstName||"")+" "+(s.lastName||"")) : "-", dateText:formatPersianDate(it.date),
+                        status: it.status || "ثبت نشده", reason: it.reason || "" });
+        });
+        opts = { title:"گزارش کامل حضور و غیاب", subtitle: classTitle + "  —  همهٔ تاریخ‌های ثبت‌شده",
+                 meta: teacherName ? ("معلم: " + teacherName) : "", rows:rows, showDate:true };
+        fname = "حضور-و-غیاب-" + classTitle.replace(/\s+/g,"-") + "-کامل.pdf";
+    }
+
+    try{
+        const pages = await dfRenderAttendancePages(opts);
+        await dfDeliverPdf(fname, pages);
+    }catch(err){
+        console.error(err);
+        alert("ساخت PDF با خطا روبه‌رو شد. لطفاً دوباره تلاش کنید.");
+    }
+}
+
+function editAttendanceRecord(studentId){
+    const date = normalizePersianDate(document.getElementById("attendanceDate").value);
+    const data = getClassData();
+    let rec = data.attendance.find(function(item){
+        return String(item.studentId) === String(studentId) && normalizePersianDate(item.date) === date;
+    });
+    if(!rec){
+        const status = prompt("وضعیت را وارد کنید: حاضر، غایب یا تأخیر", "حاضر");
+        if(status === null) return;
+        const allowed = ["حاضر","غایب","تأخیر"];
+        if(!allowed.includes(status.trim())){ alert("وضعیت باید حاضر، غایب یا تأخیر باشد."); return; }
+        rec = {studentId:String(studentId), date:date, status:status.trim(), reason:""};
+        data.attendance.push(rec);
+    }else{
+        const status = prompt("وضعیت را وارد کنید: حاضر، غایب یا تأخیر", rec.status || "حاضر");
+        if(status === null) return;
+        const allowed = ["حاضر","غایب","تأخیر"];
+        if(!allowed.includes(status.trim())){ alert("وضعیت باید حاضر، غایب یا تأخیر باشد."); return; }
+        rec.status = status.trim();
+    }
+    if(rec.status === "حاضر") rec.reason = "";
+    else {
+        const reason = prompt("دلیل غیبت یا تأخیر (در صورت نیاز):", rec.reason || "");
+        if(reason !== null) rec.reason = reason.trim();
+    }
+    saveDatabase();
+    renderAttendance();
+    updateDashboard();
 }
 
 function setAttendance(studentId,status){
@@ -5639,6 +6474,7 @@ function setAttendance(studentId,status){
     if(old){
 
         old.status = status;
+        if(status === "حاضر"){ old.reason = ""; }
 
     }
 
@@ -5665,6 +6501,19 @@ function setAttendance(studentId,status){
     try { ntRefresh(); } catch(err) { console.warn('ntRefresh:', err); }
 
 
+}
+
+
+function setAttendanceReason(studentId,reason){
+    const date = normalizePersianDate(document.getElementById("attendanceDate").value);
+    const data = getClassData();
+    const rec = data.attendance.find(function(item){
+        return String(item.studentId) === String(studentId) &&
+               normalizePersianDate(item.date) === date;
+    });
+    if(!rec) return;
+    rec.reason = String(reason || "").trim();
+    saveDatabase();
 }
 
 
@@ -5734,11 +6583,7 @@ function renderAttendance(){
 
                 <td>
 
-                    ${escapeHTML(
-                        student.firstName +
-                        " " +
-                        student.lastName
-                    )}
+                    ${studentWithPhoto(student)}
 
                 </td>
 
@@ -5746,7 +6591,7 @@ function renderAttendance(){
 
                     <button
                         class="btn btn-primary"
-                        onclick="setAttendance(${student.id},'حاضر')"
+                        onclick="setAttendance('${student.id}','حاضر')"
                     >
                         ✅ حاضر
                     </button>
@@ -5754,7 +6599,7 @@ function renderAttendance(){
 
                     <button
                         class="btn btn-danger"
-                        onclick="setAttendance(${student.id},'غایب')"
+                        onclick="setAttendance('${student.id}','غایب')"
                     >
                         ❌ غایب
                     </button>
@@ -5762,7 +6607,7 @@ function renderAttendance(){
 
                     <button
                         class="btn btn-warning"
-                        onclick="setAttendance(${student.id},'تأخیر')"
+                        onclick="setAttendance('${student.id}','تأخیر')"
                     >
                         ⏰ تأخیر
                     </button>
@@ -5781,18 +6626,25 @@ function renderAttendance(){
                         </b>
 
                     </div>
+                    <button class="btn btn-blue btn-small" onclick="editAttendanceRecord('${student.id}')">✏️ ویرایش وضعیت/دلیل</button>
+
+                    ${
+                        record && (record.status === "غایب" || record.status === "تأخیر")
+                        ? `<div class="absence-reason-box">
+                               <input type="text"
+                                      class="absence-reason-input"
+                                      list="absenceReasonList"
+                                      maxlength="200"
+                                      placeholder="دلیل ${record.status === "غایب" ? "غیبت" : "تأخیر"} را بنویسید (مثلاً بیماری)"
+                                      value="${escapeHTML(record.reason || "")}"
+                                      onchange="setAttendanceReason('${student.id}',this.value)">
+                           </div>`
+                        : ""
+                    }
+
 
                 </td>
 
-                <td>
-                    <textarea
-                        id="homeworkFeedback_${student.id}"
-                        rows="2"
-                        placeholder="توضیح یا بازخورد معلم..."
-                        onblur="saveHomeworkFeedback(${student.id})"
-                        style="width:100%;min-width:180px;box-sizing:border-box;"
-                    >${record ? escapeHTML(record.feedback || "") : ""}</textarea>
-                </td>
 
             </tr>
 
@@ -5958,11 +6810,7 @@ function renderHomework(){
 
                 <td>
 
-                    ${escapeHTML(
-                        student.firstName +
-                        " " +
-                        student.lastName
-                    )}
+                    ${studentWithPhoto(student)}
 
                 </td>
 
@@ -5970,7 +6818,7 @@ function renderHomework(){
 
                     <button
                         class="btn btn-primary"
-                        onclick="setHomework(${student.id},'انجام شد')"
+                        onclick="setHomework('${student.id}','انجام شد')"
                     >
                         ✅ انجام شد
                     </button>
@@ -5978,7 +6826,7 @@ function renderHomework(){
 
                     <button
                         class="btn btn-danger"
-                        onclick="setHomework(${student.id},'انجام نشده')"
+                        onclick="setHomework('${student.id}','انجام نشده')"
                     >
                         ❌ انجام نشده
                     </button>
@@ -5986,7 +6834,7 @@ function renderHomework(){
 
                     <button
                         class="btn btn-warning"
-                        onclick="setHomework(${student.id},'ناقص')"
+                        onclick="setHomework('${student.id}','ناقص')"
                     >
                         🟡 ناقص
                     </button>
@@ -6006,6 +6854,16 @@ function renderHomework(){
 
                     </div>
 
+                </td>
+
+                <td>
+                    <textarea
+                        id="homeworkFeedback_${student.id}"
+                        rows="2"
+                        placeholder="توضیح یا بازخورد معلم..."
+                        onchange="saveHomeworkFeedback('${student.id}')"
+                        style="width:100%;min-width:180px;box-sizing:border-box;"
+                    >${record ? escapeHTML(record.feedback || "") : ""}</textarea>
                 </td>
 
             </tr>
@@ -6072,7 +6930,7 @@ function addEvaluation(){
 
     getClassData().evaluations.push({
         id:Date.now(),
-        studentId:Number(studentId),
+        studentId:String(studentId),
         date:date,
         subject:subject,
         level:level,
@@ -6282,9 +7140,7 @@ function renderEvaluations(){
 
 
                 <td>
-                    ${escapeHTML(
-                        getStudentName(item.studentId)
-                    )}
+                    ${studentWithPhoto(item.studentId)}
                 </td>
 
 
@@ -6331,7 +7187,8 @@ function renderEvaluations(){
                     </button>
 
 
-                    <button
+                    <button class="btn btn-blue btn-small" onclick="editEvaluation(${item.id})">✏️</button>
+<button
                         class="btn btn-danger btn-small"
                         onclick="deleteEvaluation(${item.id})"
                     >
@@ -6373,7 +7230,7 @@ function addGrade(){
 
     getClassData().grades.push({
         id:Date.now(),
-        studentId:Number(studentId),
+        studentId:String(studentId),
         subject:subject,
         level:level,
         date:date,
@@ -6485,9 +7342,7 @@ function renderGrades(){
 
 
                 <td>
-                    ${escapeHTML(
-                        getStudentName(item.studentId)
-                    )}
+                    ${studentWithPhoto(item.studentId)}
                 </td>
 
 
@@ -6518,7 +7373,8 @@ function renderGrades(){
 
                 <td>
 
-                    <button
+                    <button class="btn btn-blue btn-small" onclick="editGrade(${item.id})">✏️ ویرایش</button>
+<button
                         class="btn btn-danger btn-small"
                         onclick="deleteGrade(${item.id})"
                     >
@@ -6547,26 +7403,37 @@ function renderGrades(){
 
 let portfolioPendingPhoto = "";
 
-function previewPortfolioPhoto(event){
-    const file = event.target.files && event.target.files[0];
+let portfolioPendingPhotos = [];
+
+async function previewPortfolioPhoto(event){
+    const files = event.target.files;
+    if(!files || !files.length) return;
+    const imgs = await dfReadImages(files,900,0.78);
+    portfolioPendingPhotos = portfolioPendingPhotos.concat(imgs);
+    renderPortfolioPending();
+    event.target.value = "";
+}
+
+function renderPortfolioPending(){
     const preview = document.getElementById("portfolioPhotoPreview");
-    if(!file){ portfolioPendingPhoto=""; preview.innerHTML=""; return; }
-    if(!file.type.startsWith("image/")){
-        alert("لطفاً فقط فایل تصویری انتخاب کنید.");
-        event.target.value=""; portfolioPendingPhoto=""; preview.innerHTML=""; return;
-    }
-    resizeImage(file,900,0.78).then(function(dataUrl){
-        portfolioPendingPhoto=dataUrl;
-        preview.innerHTML=`<div class="portfolio-photo-preview-box"><img src="${dataUrl}" alt="پیش‌نمایش عکس"><button type="button" class="btn btn-danger btn-small" onclick="clearPortfolioPhoto()">حذف عکس</button></div>`;
-    }).catch(function(){ alert("خواندن عکس انجام نشد. لطفاً یک عکس دیگر انتخاب کنید."); });
+    if(!preview) return;
+    preview.innerHTML = portfolioPendingPhotos.length
+        ? '<div>'+dfPendingThumbs(portfolioPendingPhotos,"removePortfolioPendingPhoto")+'</div>'
+        : "";
+}
+
+function removePortfolioPendingPhoto(i){
+    portfolioPendingPhotos.splice(i,1);
+    renderPortfolioPending();
 }
 
 function clearPortfolioPhoto(){
-    portfolioPendingPhoto="";
-    const input=document.getElementById("portfolioPhoto");
-    const preview=document.getElementById("portfolioPhotoPreview");
-    if(input) input.value="";
-    if(preview) preview.innerHTML="";
+    portfolioPendingPhoto = "";
+    portfolioPendingPhotos = [];
+    const input = document.getElementById("portfolioPhoto");
+    const preview = document.getElementById("portfolioPhotoPreview");
+    if(input) input.value = "";
+    if(preview) preview.innerHTML = "";
 }
 
 function addPortfolio(){
@@ -6579,8 +7446,8 @@ function addPortfolio(){
         alert("دانش‌آموز، نام درس و عنوان نمونه‌کار را وارد کنید."); return;
     }
     getClassData().portfolio.push({
-        id:Date.now(), studentId:Number(studentId), subject:subject, title:title,
-        date:date, notes:notes, photo:portfolioPendingPhoto || "",
+        id:Date.now(), studentId:String(studentId), subject:subject, title:title,
+        date:date, notes:notes, photo:"", photos:portfolioPendingPhotos.slice(),
         sourceType:"manual", sourceId:null
     });
     saveDatabase();
@@ -6613,7 +7480,7 @@ function renderPortfolio(){
         const items=grouped[subject];
         html+=`<div class="portfolio-subject"><div class="portfolio-folder-head"><div><div class="portfolio-folder-icon">📂</div><div><div class="portfolio-subject-title">${escapeHTML(subject)}</div><div class="portfolio-folder-count">${items.length} نمونه‌کار</div></div></div><span class="portfolio-folder-badge">پوشه درس</span></div><div class="portfolio-folder-content">`;
         items.slice().reverse().forEach(function(item){
-            html+=`<div class="portfolio-item"><div class="portfolio-item-title">📄 ${escapeHTML(item.title)}</div><div class="portfolio-meta">📅 ${escapeHTML(formatPersianDate(item.date))} &nbsp; | &nbsp; ${item.sourceType==="evaluation" ? "⭐ ثبت شده از ارزشیابی" : "📝 ثبت دستی"}</div>${item.photo ? `<div class="portfolio-photo-box"><img src="${item.photo}" alt="عکس نمونه‌کار ${escapeHTML(item.title)}" loading="lazy"></div>` : ""}${item.notes ? `<div class="portfolio-note">${escapeHTML(item.notes)}</div>` : ""}<button class="btn btn-danger btn-small" onclick="deletePortfolio(${item.id})">🗑️ حذف از پوشه</button></div>`;
+            html+=`<div class="portfolio-item"><div class="portfolio-item-title">📄 ${escapeHTML(item.title)}</div><div class="portfolio-meta">📅 ${escapeHTML(formatPersianDate(item.date))} &nbsp; | &nbsp; ${item.sourceType==="evaluation" ? "⭐ ثبت شده از ارزشیابی" : "📝 ثبت دستی"}</div>${dfImages(item,"photos","photo").length ? `<div class="multi-photo-row">${dfImages(item,"photos","photo").map(function(src){ return `<div class="portfolio-photo-box"><img src="${src}" alt="عکس نمونه‌کار ${escapeHTML(item.title)}" loading="lazy" onclick="showImageLarge(this.src)"></div>`; }).join("")}</div>` : ""}${item.notes ? `<div class="portfolio-note">${escapeHTML(item.notes)}</div>` : ""}<button class="btn btn-blue btn-small" onclick="editPortfolio(${item.id})">✏️ ویرایش</button><button class="btn btn-danger btn-small" onclick="deletePortfolio(${item.id})">🗑️ حذف از پوشه</button></div>`;
         });
         html+='</div></div>';
     });
@@ -6628,7 +7495,7 @@ function renderPortfolio(){
 function renderReport(){
 
     const studentId =
-        Number(
+        String(
             document
             .getElementById("reportStudent")
             .value
@@ -6641,7 +7508,7 @@ function renderReport(){
         );
 
 
-    if(!studentId){
+    if(!studentId || studentId==='undefined'){
 
         box.innerHTML =
             '<div class="empty-box">یک دانش‌آموز را انتخاب کنید.</div>';
@@ -6660,7 +7527,7 @@ function renderReport(){
         .grades
         .filter(function(item){
 
-            return Number(item.studentId) === studentId;
+            return String(item.studentId) === studentId;
 
         });
 
@@ -6670,7 +7537,7 @@ function renderReport(){
         .evaluations
         .filter(function(item){
 
-            return Number(item.studentId) === studentId;
+            return String(item.studentId) === studentId;
 
         });
 
@@ -6680,7 +7547,7 @@ function renderReport(){
         .portfolio
         .filter(function(item){
 
-            return Number(item.studentId) === studentId;
+            return String(item.studentId) === studentId;
 
         });
 
@@ -6723,9 +7590,7 @@ function renderReport(){
 
                     👨‍🎓
 
-                    ${escapeHTML(
-                        getStudentName(studentId)
-                    )}
+                    ${escapeHTML(getStudentName(studentId))}
 
                 </h3>
 
@@ -6858,21 +7723,31 @@ function renderReport(){
 ===================================================== */
 
 async function prepareGoalImage(event){
-    const file = event.target.files[0];
-    if(!file) return;
+    const files = event.target.files;
+    if(!files || !files.length) return;
     try{
-        goalPendingImage = await resizeImage(file,1100,0.82);
-        const box = document.getElementById("goalImagePreview");
-        if(box) box.innerHTML = `<img class="image-preview-small" src="${goalPendingImage}" alt="پیش‌نمایش عکس هدف آموزشی">`;
+        const imgs = await dfReadImages(files,1100,0.82);
+        goalPendingImages = goalPendingImages.concat(imgs);
+        renderGoalPending();
     }catch(error){
-        goalPendingImage = "";
-        alert("در آماده‌سازی تصویر مشکلی پیش آمد.");
+        alert("در آماده‌سازی تصاویر مشکلی پیش آمد.");
     }
     event.target.value = "";
 }
 
+function renderGoalPending(){
+    const box = document.getElementById("goalImagePreview");
+    if(box) box.innerHTML = goalPendingImages.length ? '<div>'+dfPendingThumbs(goalPendingImages,"removeGoalPendingImage")+'</div>' : "";
+}
+
+function removeGoalPendingImage(i){
+    goalPendingImages.splice(i,1);
+    renderGoalPending();
+}
+
 function clearGoalPendingImage(){
     goalPendingImage = "";
+    goalPendingImages = [];
     const box=document.getElementById("goalImagePreview");
     if(box) box.innerHTML="";
 }
@@ -6923,7 +7798,7 @@ function addGoal(){
 
             notes:notes,
 
-            image:goalPendingImage || ""
+            image:"", images:goalPendingImages.slice()
 
         });
 
@@ -7012,7 +7887,7 @@ function renderGoals(){
                 </td>
 
                 <td>
-                    ${item.image ? `<img class="record-image-thumb" src="${item.image}" alt="تصویر هدف آموزشی">` : "—"}
+                    ${dfThumbsHTML(dfImages(item,"images","image"),"تصویر هدف آموزشی")}
                 </td>
 
             </tr>
@@ -7099,7 +7974,7 @@ function saveParent(){
 
         data.parents.push({
 
-            studentId:Number(studentId),
+            studentId:String(studentId),
 
             name:name,
 
@@ -7182,9 +8057,7 @@ function renderParents(){
             <tr>
 
                 <td>
-                    ${escapeHTML(
-                        getStudentName(item.studentId)
-                    )}
+                    ${studentWithPhoto(item.studentId)}
                 </td>
 
                 <td>
@@ -7265,7 +8138,7 @@ function saveInterest(){
 
         data.interests.push({
 
-            studentId:Number(studentId),
+            studentId:String(studentId),
 
             text:text
 
@@ -7330,9 +8203,7 @@ function renderInterests(){
             <tr>
 
                 <td>
-                    ${escapeHTML(
-                        getStudentName(item.studentId)
-                    )}
+                    ${studentWithPhoto(item.studentId)}
                 </td>
 
                 <td>
@@ -7358,21 +8229,31 @@ function renderInterests(){
 ===================================================== */
 
 async function prepareDailyImage(event){
-    const file = event.target.files[0];
-    if(!file) return;
+    const files = event.target.files;
+    if(!files || !files.length) return;
     try{
-        dailyPendingImage = await resizeImage(file,1100,0.82);
-        const box = document.getElementById("dailyImagePreview");
-        if(box) box.innerHTML = `<img class="image-preview-small" src="${dailyPendingImage}" alt="پیش‌نمایش عکس دفتر روزانه">`;
+        const imgs = await dfReadImages(files,1100,0.82);
+        dailyPendingImages = dailyPendingImages.concat(imgs);
+        renderDailyPending();
     }catch(error){
-        dailyPendingImage = "";
-        alert("در آماده‌سازی تصویر مشکلی پیش آمد.");
+        alert("در آماده‌سازی تصاویر مشکلی پیش آمد.");
     }
     event.target.value = "";
 }
 
+function renderDailyPending(){
+    const box = document.getElementById("dailyImagePreview");
+    if(box) box.innerHTML = dailyPendingImages.length ? '<div>'+dfPendingThumbs(dailyPendingImages,"removeDailyPendingImage")+'</div>' : "";
+}
+
+function removeDailyPendingImage(i){
+    dailyPendingImages.splice(i,1);
+    renderDailyPending();
+}
+
 function clearDailyPendingImage(){
     dailyPendingImage = "";
+    dailyPendingImages = [];
     const box=document.getElementById("dailyImagePreview");
     if(box) box.innerHTML="";
 }
@@ -7444,7 +8325,7 @@ function addDaily(){
 
             voiceId:voiceDrafts.daily || "",
 
-            image:dailyPendingImage || ""
+            image:"", images:dailyPendingImages.slice()
 
         });
 
@@ -7562,7 +8443,7 @@ function renderDaily(){
                 </td>
 
                 <td>
-                    ${item.image ? `<img class="record-image-thumb" src="${item.image}" alt="تصویر دفتر روزانه">` : "—"}
+                    ${dfThumbsHTML(dfImages(item,"images","image"),"تصویر دفتر روزانه")}
                 </td>
 
             </tr>
@@ -7583,30 +8464,46 @@ function renderDaily(){
    برنامه هفتگی تصویری
 ===================================================== */
 
+function getWeeklyImagesOf(data){
+    if(!data) return [];
+    if(!Array.isArray(data.weeklyImages)) data.weeklyImages = [];
+    if(typeof data.weeklyImage === "string" && data.weeklyImage){
+        if(data.weeklyImages.indexOf(data.weeklyImage) < 0) data.weeklyImages.unshift(data.weeklyImage);
+        data.weeklyImage = "";
+    }
+    return data.weeklyImages;
+}
+
 async function saveWeeklyImage(event){
 
-    const file = event.target.files[0];
+    const files = event.target.files;
 
-    if(!file){
+    if(!files || !files.length){
         return;
     }
 
     try{
 
-        const image = await resizeImage(file,1400,0.85);
+        const images = await dfReadImages(files,1400,0.85);
 
-        getClassData().weeklyImage = image;
+        if(!images.length){
+            event.target.value = "";
+            return;
+        }
+
+        const list = getWeeklyImagesOf(getClassData());
+        images.forEach(function(img){ list.push(img); });
 
         saveDatabase();
         renderWeekly();
         updateDashboard();
 
-        alert("تصویر برنامه هفتگی با موفقیت ذخیره شد.");
+        alert(images.length + " تصویر به برنامه هفتگی اضافه شد.");
 
     }
     catch(error){
 
-        alert("در ذخیره تصویر برنامه هفتگی مشکلی پیش آمد.");
+        alert("در ذخیره تصاویر برنامه هفتگی مشکلی پیش آمد.");
 
     }
 
@@ -7614,13 +8511,14 @@ async function saveWeeklyImage(event){
 }
 
 
-function deleteWeeklyImage(){
+function deleteWeeklyImage(index){
 
-    if(!confirm("تصویر برنامه هفتگی حذف شود؟")){
+    if(!confirm("این تصویر از برنامه هفتگی حذف شود؟")){
         return;
     }
 
-    getClassData().weeklyImage = "";
+    const list = getWeeklyImagesOf(getClassData());
+    list.splice(index,1);
 
     saveDatabase();
     renderWeekly();
@@ -7636,34 +8534,25 @@ function renderWeekly(){
         return;
     }
 
-    const image = getClassData().weeklyImage || "";
+    const images = getWeeklyImagesOf(getClassData());
 
-    if(!image){
+    if(!images.length){
         box.innerHTML = `
             <div class="image-empty">
                 🗓️
                 <h3>هنوز تصویر برنامه هفتگی ثبت نشده است.</h3>
-                <p>از قسمت بالا یک تصویر برای برنامه هفتگی انتخاب کن.</p>
+                <p>از قسمت بالا یک یا چند تصویر برای برنامه هفتگی انتخاب کن.</p>
             </div>
         `;
+        return;
     }
-    else{
-        box.innerHTML = `
-            <div>
-                <img
-                    src="${image}"
-                    class="image-preview-large"
-                    alt="برنامه هفتگی"
-                    onclick="showImageLarge(this.src)"
-                >
-                <div class="image-actions">
-                    <button class="btn btn-danger" onclick="deleteWeeklyImage()">
-                        🗑️ حذف تصویر
-                    </button>
-                </div>
-            </div>
-        `;
-    }
+
+    box.innerHTML = '<div class="multi-image-grid">' + images.map(function(src,i){
+        return '<div class="multi-image-item">' +
+            '<img src="'+src+'" alt="برنامه هفتگی '+(i+1)+'" loading="lazy" onclick="showImageLarge(this.src)">' +
+            '<button class="btn btn-danger" type="button" onclick="deleteWeeklyImage('+i+')">🗑️ حذف این تصویر</button>' +
+            '</div>';
+    }).join("") + '</div>';
 
 }
 
@@ -7973,7 +8862,7 @@ function addAttention(){
 
             id:Date.now(),
 
-            studentId:Number(studentId),
+            studentId:String(studentId),
 
             reason:reason,
 
@@ -8069,9 +8958,7 @@ function renderAttention(){
             <tr>
 
                 <td>
-                    ${escapeHTML(
-                        getStudentName(item.studentId)
-                    )}
+                    ${studentWithPhoto(item.studentId)}
                 </td>
 
                 <td>
@@ -8221,7 +9108,7 @@ function updateDashboard(){
     if(weeklyStatus){
 
         weeklyStatus.innerHTML =
-            data.weeklyImage
+            getWeeklyImagesOf(data).length > 0
             ?
             '🟢 برنامه هفتگی: تصویر ثبت شده است.'
             :
@@ -8278,9 +9165,7 @@ function updateDashboard(){
                             return `
                                 <li>
                                     ⭐
-                                    ${escapeHTML(
-                                        getStudentName(item.studentId)
-                                    )}
+                                    ${studentWithPhoto(item.studentId)}
                                     —
                                     ${escapeHTML(item.subject)}
                                     <br>
@@ -8365,9 +9250,7 @@ function updateDashboard(){
                                 <li>
                                     <span class="status-dot dot-orange"></span>
                                     <b>
-                                        ${escapeHTML(
-                                            getStudentName(item.studentId)
-                                        )}
+                                        ${studentWithPhoto(item.studentId)}
                                     </b>
                                     <br>
                                     ${escapeHTML(item.reason)}
@@ -8555,18 +9438,72 @@ async function saveHeaderImage(event,which){
         saveDatabase(); renderHeaderImages(); alert("تصویر با موفقیت ذخیره شد.");
     }catch(e){alert("در ذخیره تصویر مشکلی پیش آمد.");} event.target.value="";
 }
+function ensureGroupData(){
+    const d=getClassData();
+    if(!Array.isArray(d.groups)) d.groups=[];
+    if(!Array.isArray(d.groupNames)) d.groupNames=[];
+    /* حذف شناسه‌های دانش‌آموزانی که دیگر وجود ندارند و جلوگیری از تکرار */
+    const valid=new Set((d.students||[]).map(function(x){return String(x.id);})), seen=new Set();
+    d.groups=d.groups.map(function(g){
+        return (Array.isArray(g)?g:[]).filter(function(id){ id=String(id); if(!valid.has(id)||seen.has(id)) return false; seen.add(id); return true; });
+    });
+    while(d.groupNames.length<d.groups.length) d.groupNames.push("");
+    d.groupNames.length=d.groups.length;
+    return d;
+}
+function groupTitle(d,i){ return (d.groupNames[i]&&String(d.groupNames[i]).trim()) || ("گروه "+(i+1)); }
+
 function makeClassGroups(){
     const d=getClassData(), students=d.students||[], n=Math.max(1,Number(document.getElementById('groupCount').value)||1);
     if(!students.length){alert('ابتدا دانش‌آموزان را ثبت کنید.');return;}
     const shuffled=students.slice().sort(()=>Math.random()-0.5), groups=Array.from({length:Math.min(n,students.length)},()=>[]);
-    shuffled.forEach((s,i)=>groups[i%groups.length].push(s.id)); d.groups=groups; saveDatabase(); renderGroups();
+    shuffled.forEach((s,i)=>groups[i%groups.length].push(s.id)); d.groups=groups; d.groupNames=groups.map(function(){return "";}); saveDatabase(); renderGroups();
 }
 function renderGroups(){
-    const box=document.getElementById('groupsTable'); if(!box)return; const d=getClassData(); const groups=d.groups||[];
-    if(!groups.length){box.innerHTML='<div class="empty-box">هنوز گروهی تشکیل نشده است.</div>';return;}
-    box.innerHTML=groups.map((g,i)=>'<div class="card" style="margin:10px 0;padding:14px"><h3>👥 گروه '+(i+1)+'</h3><div>'+g.map(id=>escapeHTML(getStudentName(id))).join('، ')+'</div></div>').join('');
+    const box=document.getElementById('groupsTable'); if(!box)return;
+    const d=ensureGroupData(), groups=d.groups, students=d.students||[];
+    const assigned=new Set(); groups.forEach(function(g){g.forEach(function(id){assigned.add(String(id));});});
+    const free=students.filter(function(s){return !assigned.has(String(s.id));});
+    const groupOptions=function(skip){ return groups.map(function(g,i){ return i===skip?'':'<option value="'+i+'">'+escapeHTML(groupTitle(d,i))+'</option>'; }).join(''); };
+    let html='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px"><button class="btn btn-blue btn-small" onclick="addEmptyGroup()">➕ افزودن گروه جدید</button></div>';
+    if(!groups.length) html+='<div class="empty-box">هنوز گروهی تشکیل نشده است. می‌توانید تقسیم تصادفی انجام دهید یا «افزودن گروه جدید» را بزنید.</div>';
+    html+=groups.map(function(g,i){
+        const members=g.map(function(id){
+            return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed #e2e8f0">'
+                +'<span style="flex:1;min-width:110px">'+studentWithPhoto(id)+'</span>'
+                +'<select onchange="moveGroupStudent(\''+String(id).replace(/'/g,"\\'")+'\',this.value);this.value=\'\'" style="max-width:150px;padding:4px"><option value="">انتقال به…</option>'+groupOptions(i)+'<option value="free">بدون گروه</option></select>'
+                +'<button class="btn btn-danger btn-small" title="خارج کردن از گروه" onclick="moveGroupStudent(\''+String(id).replace(/'/g,"\\'")+'\',\'free\')">×</button></div>';
+        }).join('') || '<div class="empty-box" style="padding:10px">این گروه خالی است.</div>';
+        return '<div class="card" style="margin:10px 0;padding:14px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+            +'<span>👥</span><input type="text" value="'+escapeHTML(d.groupNames[i]||'')+'" placeholder="گروه '+(i+1)+'" onchange="renameGroup('+i+',this.value)" style="flex:1;min-width:140px;font-weight:700">'
+            +'<span style="font-size:12px;color:#64748b">'+g.length+' نفر</span>'
+            +'<button class="btn btn-danger btn-small" onclick="deleteGroup('+i+')">🗑️ حذف گروه</button></div>'+members+'</div>';
+    }).join('');
+    if(groups.length && free.length){
+        html+='<div class="card" style="margin:10px 0;padding:14px;border:2px dashed #cbd5e1"><h3 style="margin:0 0 8px">🧍 بدون گروه ('+free.length+' نفر)</h3>'
+            +free.map(function(s){
+                return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed #e2e8f0"><span style="flex:1;min-width:110px">'+studentWithPhoto(s)+'</span>'
+                    +'<select onchange="moveGroupStudent(\''+String(s.id).replace(/'/g,"\\'")+'\',this.value);this.value=\'\'" style="max-width:150px;padding:4px"><option value="">افزودن به گروه…</option>'+groupOptions(-1)+'</select></div>';
+            }).join('')+'</div>';
+    }
+    box.innerHTML=html;
 }
-function clearClassGroups(){getClassData().groups=[];saveDatabase();renderGroups();}
+function addEmptyGroup(){ const d=ensureGroupData(); d.groups.push([]); d.groupNames.push(""); saveDatabase(); renderGroups(); }
+function renameGroup(i,name){ const d=ensureGroupData(); if(i<0||i>=d.groups.length) return; d.groupNames[i]=String(name||"").trim(); saveDatabase(); renderGroups(); }
+function moveGroupStudent(id,target){
+    if(target===""||target==null) return;
+    const d=ensureGroupData(), sid=String(id);
+    d.groups=d.groups.map(function(g){ return g.filter(function(x){return String(x)!==sid;}); });
+    if(target!=="free"){ const t=Number(target), st=(d.students||[]).find(function(x){return String(x.id)===sid;}); if(d.groups[t]&&st) d.groups[t].push(st.id); }
+    saveDatabase(); renderGroups();
+}
+async function deleteGroup(i){
+    const d=ensureGroupData(); if(!d.groups[i]) return;
+    const ok=await appConfirm('«'+groupTitle(d,i)+'» حذف شود؟ دانش‌آموزان آن بدون گروه می‌شوند (حذف نمی‌شوند).','حذف گروه');
+    if(!ok) return;
+    d.groups.splice(i,1); d.groupNames.splice(i,1); saveDatabase(); renderGroups();
+}
+function clearClassGroups(){const d=getClassData();d.groups=[];d.groupNames=[];saveDatabase();renderGroups();}
 
 function getTeacherData(){
     if(!database.teacher){
@@ -9267,7 +10204,7 @@ function saveFeedback(){
     const notes=cleanPersianText(document.getElementById("feedbackNotes").value);
     if(!studentId || !notes){alert("دانش‌آموز و متن بازخورد را وارد کنید.");return;}
     getClassData().feedback.push({
-        id:Date.now(),studentId:Number(studentId),date:date,subject:subject,notes:notes,voiceId:voiceDrafts.feedback||""
+        id:Date.now(),studentId:String(studentId),date:date,subject:subject,notes:notes,voiceId:voiceDrafts.feedback||""
     });
     saveDatabase();
     document.getElementById("feedbackSubject").value="";
@@ -9302,7 +10239,7 @@ function renderFeedback(){
     if(!records.length){box.innerHTML='<div class="empty-box">هنوز بازخوردی ثبت نشده است.</div>';return;}
     box.innerHTML='<table><tr><th>تاریخ</th><th>دانش‌آموز</th><th>درس/موضوع</th><th>بازخورد</th><th>صوت</th><th>عملیات</th></tr>'+
       records.slice().reverse().map(function(item){
-        return '<tr><td>'+escapeHTML(formatPersianDate(item.date))+'</td><td>'+escapeHTML(getStudentName(item.studentId))+
+        return '<tr><td>'+escapeHTML(formatPersianDate(item.date))+'</td><td>'+studentWithPhoto(item.studentId)+
         '</td><td>'+escapeHTML(item.subject||"—")+'</td><td style="text-align:right;min-width:280px">'+escapeHTML(item.notes||"—")+
         '</td><td>'+(item.voiceId?voiceButton(item.voiceId):"—")+'</td><td><button class="btn btn-blue btn-small" onclick="editFeedback('+item.id+')">✏️ ویرایش</button><button class="btn btn-danger btn-small" onclick="deleteFeedback('+item.id+')">🗑️ حذف</button></td></tr>';
       }).join("")+'</table>';
@@ -9313,7 +10250,7 @@ function saveMonthlyPerformance(){
     const month=document.getElementById("monthlyMonth").value;
     if(!studentId){alert("ابتدا دانش‌آموز را انتخاب کنید.");return;}
     const record={
-        id:Date.now(),studentId:Number(studentId),month:month,
+        id:Date.now(),studentId:String(studentId),month:month,
         academic:document.getElementById("monthlyAcademic").value,
         classActivity:document.getElementById("monthlyClassActivity").value,
         homework:document.getElementById("monthlyHomework").value,
@@ -9369,7 +10306,7 @@ function renderMonthlyPerformance(){
     if(!records.length){box.innerHTML='<div class="empty-box">هنوز عملکرد ماهانه‌ای ثبت نشده است.</div>';return;}
     box.innerHTML='<table><tr><th>ماه</th><th>دانش‌آموز</th><th>وضعیت درسی</th><th>فعالیت کلاسی</th><th>تکالیف</th><th>مشارکت</th><th>جمع‌بندی</th><th>صوت</th><th>عملیات</th></tr>'+
       records.slice().reverse().map(function(item){
-        return '<tr><td>'+escapeHTML(item.month)+'</td><td>'+escapeHTML(getStudentName(item.studentId))+
+        return '<tr><td>'+escapeHTML(item.month)+'</td><td>'+studentWithPhoto(item.studentId)+
         '</td><td>'+escapeHTML(item.academic||"—")+'</td><td>'+escapeHTML(item.classActivity||"—")+
         '</td><td>'+escapeHTML(item.homework||"—")+'</td><td>'+escapeHTML(item.participation||"—")+
         '</td><td style="text-align:right;min-width:260px">'+escapeHTML(item.notes||"—")+
@@ -9423,11 +10360,7 @@ async function exportData(){
     }catch(e){}
     const data=JSON.stringify(backup,null,2);
     const blob=new Blob([data],{type:"application/json"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url; a.download="پشتیبان-دفتر-کلاسی.json";
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function(){URL.revokeObjectURL(url)},500);
+    await deliverFile("پشتیبان-دفتر-کلاسی.json", blob);
     alert("پشتیبان اطلاعات تهیه شد. صوت‌های ثبت‌شده نیز در صورت پشتیبانی دستگاه داخل فایل قرار گرفتند.");
 }
 
@@ -9468,11 +10401,12 @@ function importData(event){
                 }
 
 
+                const importedVoiceClips = Array.isArray(imported.voiceClips) ? imported.voiceClips : [];
                 database =
                     imported;
 
 
-                ["1","2","3","4","5","6"].forEach(function(classNumber){
+                ["1","2","3","4","5","6","multi"].forEach(function(classNumber){
                     if(!database[classNumber]) database[classNumber] = createClassData();
                     const data = database[classNumber];
                     if(!data.portfolio) data.portfolio = [];
@@ -9484,7 +10418,7 @@ function importData(event){
                     if(!data.interests) data.interests = [];
                     if(!data.daily) data.daily = [];
                     if(!data.weekly) data.weekly = [];
-                    if(typeof data.weeklyImage === "undefined") data.weeklyImage = "";
+                    if(typeof data.weeklyImage === "undefined") data.weeklyImage = ""; if(!Array.isArray(data.weeklyImages)) data.weeklyImages = [];
                     if(!data.budget) data.budget = [];
                     if(typeof data.budgetHours === "undefined") data.budgetHours = null;
                     if(typeof data.budgetImage === "undefined") data.budgetImage = "";
@@ -9563,12 +10497,12 @@ function refreshAll(activeSectionId){
     setDefaultDates();
     refreshStudentSelectorsSafely();
     if(!activeSectionId){
-        [renderStudents,renderGroups,renderAttendance,renderHomework,renderEvaluations,renderGrades,renderFeedback,renderPortfolio,renderReport,renderGoals,renderParents,renderInterests,renderDaily,renderWeekly,renderBudget,renderExperiments,renderMonthlyPerformance,renderAttention,updateDashboard].forEach(function(fn){try{fn();}catch(e){}});
+        ['renderStudents','renderGroups','renderAttendance','renderHomework','renderEvaluations','renderGrades','renderFeedback','renderPortfolio','renderReport','renderGoals','renderParents','renderInterests','renderDaily','renderWeekly','renderBudget','renderExperiments','renderMonthlyPerformance','renderAttention','updateDashboard'].forEach(function(name){try{if(typeof window[name]==='function') window[name]();}catch(e){console.warn('render failed:',name,e);}});
         return;
     }
-    const renderers={students:renderStudents,groups:renderGroups,attendance:renderAttendance,homework:renderHomework,evaluation:renderEvaluations,evaluations:renderEvaluations,grades:renderGrades,feedback:renderFeedback,portfolio:renderPortfolio,report:renderReport,goals:renderGoals,parents:renderParents,interests:renderInterests,daily:renderDaily,weekly:renderWeekly,budget:renderBudget,experiments:renderExperiments,monthly:renderMonthlyPerformance,attention:renderAttention,dashboard:updateDashboard,bookBudget:renderBookBudget,teacherProfile:renderTeacherProfile};
-    const fn=renderers[activeSectionId];
-    if(fn){try{fn();}catch(e){console.warn('section render:',activeSectionId,e);}}
+    const renderers={students:'renderStudents',groups:'renderGroups',attendance:'renderAttendance',homework:'renderHomework',evaluation:'renderEvaluations',evaluations:'renderEvaluations',grades:'renderGrades',feedback:'renderFeedback',portfolio:'renderPortfolio',report:'renderReport',goals:'renderGoals',parents:'renderParents',interests:'renderInterests',daily:'renderDaily',weekly:'renderWeekly',budget:'renderBudget',experiments:'renderExperiments',monthly:'renderMonthlyPerformance',attention:'renderAttention',dashboard:'updateDashboard',bookBudget:'renderBookBudget',teacherProfile:'renderTeacherProfile',studentFile:'renderStudentFile'};
+    const fnName=renderers[activeSectionId];
+    if(fnName && typeof window[fnName]==='function'){try{window[fnName]();}catch(e){console.warn('section render:',activeSectionId,e);}}
 }
 
 function addPersianSpeechButtonsToTextFields(){
@@ -9619,6 +10553,149 @@ function enableAutomaticPersianSpeechFields(){
     speechFieldObserver.observe(document.body,{childList:true,subtree:true});
 }
 
+
+/* =====================================================
+   آزمایش‌های علوم + نمایش بزرگ تصویر
+===================================================== */
+let experimentPendingImages = [];
+
+function ntRefresh(){ /* نگه‌داشته‌شده برای سازگاری */ }
+
+/* ---------- کمکی: چند عکس ---------- */
+function dfImages(item,arrKey,singleKey){
+    const out = (item && Array.isArray(item[arrKey])) ? item[arrKey].filter(Boolean) : [];
+    if(item && singleKey && typeof item[singleKey] === "string" && item[singleKey] && out.indexOf(item[singleKey]) < 0){
+        out.unshift(item[singleKey]);
+    }
+    return out;
+}
+
+async function dfReadImages(fileList,maxSize,quality){
+    const files = Array.from(fileList || []);
+    const out = [];
+    let bad = 0;
+    for(let i=0;i<files.length;i++){
+        try{
+            const img = await resizeImage(files[i],maxSize,quality);
+            if(img) out.push(img);
+        }catch(e){ bad++; }
+    }
+    if(bad) alert(bad + " فایل، تصویر نبود یا خوانده نشد و نادیده گرفته شد.");
+    return out;
+}
+
+function dfPendingThumbs(list,removeFn){
+    return list.map(function(src,i){
+        return '<span class="pending-thumb"><img src="'+src+'" alt="پیش‌نمایش"><button type="button" aria-label="حذف عکس" onclick="'+removeFn+'('+i+')">×</button></span>';
+    }).join("");
+}
+
+function dfThumbsHTML(list,alt){
+    if(!list.length) return "—";
+    return '<div class="record-image-thumbs">'+list.map(function(src){
+        return '<img src="'+src+'" alt="'+alt+'" loading="lazy" onclick="showImageLarge(this.src)">';
+    }).join("")+'</div>';
+}
+
+function showImageLarge(src){
+    if(!src) return;
+    const old=document.getElementById("imageLightbox"); if(old) old.remove();
+    const box=document.createElement("div");
+    box.id="imageLightbox";
+    box.style.cssText="position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out";
+    const img=document.createElement("img");
+    img.src=src; img.style.cssText="max-width:100%;max-height:100%;border-radius:12px;background:#fff";
+    box.appendChild(img);
+    box.onclick=function(){ box.remove(); };
+    document.body.appendChild(box);
+}
+
+async function previewExperimentImages(event){
+    const files=Array.from(event.target.files||[]);
+    const box=document.getElementById("experimentImagePreview");
+    if(!files.length) return;
+    for(const file of files){
+        try{
+            const img=await resizeImage(file,1100,0.82);
+            if(img) experimentPendingImages.push(img);
+        }catch(e){ console.warn("experiment image skipped",e); }
+    }
+    if(box){
+        box.innerHTML=experimentPendingImages.map(function(src){
+            return '<img class="image-preview-small" src="'+src+'" alt="پیش‌نمایش عکس آزمایش">';
+        }).join("");
+    }
+    event.target.value="";
+}
+
+function clearExperimentPendingImages(){
+    experimentPendingImages=[];
+    const box=document.getElementById("experimentImagePreview");
+    if(box) box.innerHTML="";
+}
+
+function addExperiment(){
+    const val=function(id){ const el=document.getElementById(id); return el ? el.value.trim() : ""; };
+    const title=val("experimentTitle");
+    if(!title){ alert("عنوان آزمایش را وارد کنید."); return; }
+    const data=getClassData();
+    if(!Array.isArray(data.experiments)) data.experiments=[];
+    data.experiments.push({
+        id:Date.now(),
+        title:title,
+        page:val("experimentPage"),
+        date:normalizePersianDate(val("experimentDate")),
+        goal:val("experimentGoal"),
+        materials:val("experimentMaterials"),
+        method:val("experimentMethod"),
+        result:val("experimentResult"),
+        notes:val("experimentNotes"),
+        images:experimentPendingImages.slice()
+    });
+    saveDatabase();
+    ["experimentTitle","experimentPage","experimentGoal","experimentMaterials","experimentMethod","experimentResult","experimentNotes"].forEach(function(id){
+        const el=document.getElementById(id); if(el) el.value="";
+    });
+    clearExperimentPendingImages();
+    renderExperiments();
+    updateDashboard();
+    alert("آزمایش با موفقیت ثبت شد.");
+}
+
+function deleteExperiment(id){
+    if(!confirm("این آزمایش حذف شود؟")) return;
+    const data=getClassData();
+    data.experiments=(data.experiments||[]).filter(function(x){ return String(x.id)!==String(id); });
+    saveDatabase();
+    renderExperiments();
+    updateDashboard();
+}
+
+function renderExperiments(){
+    const box=document.getElementById("experimentsTable");
+    if(!box || !currentClass) return;
+    const records=getClassData().experiments||[];
+    if(!records.length){
+        box.innerHTML='<div class="empty-box">هنوز آزمایشی ثبت نشده است.</div>';
+        return;
+    }
+    box.innerHTML=records.slice().reverse().map(function(item){
+        const detail=function(label,value){
+            return value ? '<div class="experiment-detail"><strong>'+label+'</strong>'+escapeHTML(value)+'</div>' : '';
+        };
+        const gallery=(item.images||[]).map(function(src){
+            return '<img class="image-preview-small" loading="lazy" src="'+src+'" alt="عکس آزمایش" onclick="showImageLarge(this.src)">';
+        }).join("");
+        return '<div class="experiment-card">'+
+            '<div class="experiment-head"><div><div class="experiment-title">🔬 '+escapeHTML(item.title)+'</div>'+
+            '<div class="experiment-meta">📅 '+escapeHTML(formatPersianDate(item.date))+(item.page?' &nbsp;|&nbsp; 📖 '+escapeHTML(item.page):'')+'</div></div>'+
+            '<button class="btn btn-blue btn-small" onclick="editExperiment('+item.id+')">✏️ ویرایش</button>'+'<button class="btn btn-danger btn-small" onclick="deleteExperiment('+item.id+')">🗑️ حذف</button></div>'+
+            '<div class="experiment-details">'+
+              detail('🎯 هدف',item.goal)+detail('🧰 وسایل',item.materials)+detail('🧪 روش',item.method)+detail('💡 نتیجه',item.result)+detail('📝 توضیحات',item.notes)+
+            '</div>'+(gallery?'<div class="experiment-gallery">'+gallery+'</div>':'')+'</div>';
+    }).join("");
+}
+
 /* =====================================================
    اجرای اولیه
 ===================================================== */
@@ -9641,7 +10718,7 @@ document.addEventListener(
 // لایه پایدار رابط حرفه‌ای: آیکون‌های برداری و وضعیت اتصال بدون وابستگی به اینترنت
 (function(){
   const ICONS={
-    "کارتابل معلم":"👤","داشبورد":"⌂","دانش‌آموزان":"♟","گروه‌بندی کلاس":"♣","حضور و غیاب":"✓","تکالیف":"▤","ارزشیابی":"★","بازخورد آموزشی":"◌","ارزشیابی کیفی":"▣","پوشه‌کار":"▱","آزمایش‌های علوم":"⚗","عملکرد ماهانه":"◷","وضعیت تحصیلی":"▥","اهداف آموزشی":"◎","اطلاعات والدین":"♧","علاقه‌مندی دانش‌آموز":"♡","دفتر روزانه":"▥","برنامه هفتگی":"▦","بودجه ساعات تدریس":"◫","بودجه‌بندی تدریس کتاب":"▤","نیازمند توجه":"!","پشتیبان":"↥","خروج از حساب":"↪"
+    "کارتابل معلم":"👤","کارتابل دانش‌آموز":"▣","داشبورد":"⌂","دانش‌آموزان":"♟","گروه‌بندی کلاس":"♣","حضور و غیاب":"✓","تکالیف":"▤","ارزشیابی":"★","بازخورد آموزشی":"◌","ارزشیابی کیفی":"▣","پوشه‌کار":"▱","آزمایش‌های علوم":"⚗","عملکرد ماهانه":"◷","وضعیت تحصیلی":"▥","اهداف آموزشی":"◎","اطلاعات والدین":"♧","علاقه‌مندی دانش‌آموز":"♡","دفتر روزانه":"▥","برنامه هفتگی":"▦","بودجه ساعات تدریس":"◫","بودجه‌بندی تدریس کتاب":"▤","نیازمند توجه":"!","پشتیبان":"↥","خروج از حساب":"↪"
   };
   function setIcon(el,key){ if(!el) return; el.textContent=ICONS[key]||"•"; el.setAttribute("aria-hidden","true"); }
   function refreshIcons(){
@@ -9677,5 +10754,448 @@ document.addEventListener(
 <button type="button" data-q-menu="1" onclick="toggleSidebar();event.stopPropagation()"><span>☰</span>همه</button>
 </div>
 <script>window.addEventListener('load',function(){try{setupProfessionalNavigation();updateMobileQuickbar(document.querySelector('#app .section.active')?.id||'dashboard')}catch(e){console.warn('professional navigation:',e)}});</script>
+<style>
+/* ===== لایه ظاهر جدید (افزودنی؛ بدون حذف استایل‌های قبلی) ===== */
+.card{border-radius:18px;border:1px solid #e3ecee;box-shadow:0 1px 3px rgba(16,42,67,.06),0 10px 28px rgba(16,42,67,.05)}
+.card h2{font-size:20px}
+.btn{border-radius:10px;font-size:13px;padding:9px 14px}
+.btn-blue.btn-small,.btn-danger.btn-small,.btn-warning.btn-small{margin:2px}
+.table-wrapper{overflow-x:auto;border-radius:14px;border:1px solid #e6eef0}
+.table-wrapper table{border-collapse:separate;border-spacing:0;width:100%}
+.table-wrapper th{position:sticky;top:0;background:#eef7f7;color:#0b6b73;font-size:13px}
+.table-wrapper tr:nth-child(even) td{background:#fafdfd}
+.btn.is-current{outline:3px solid rgba(15,139,141,.4);outline-offset:1px;transform:scale(1.05)}
+textarea.saved-flash{border-color:#27ae60!important;box-shadow:0 0 0 3px rgba(39,174,96,.18)!important}
+.df-overlay{position:fixed;inset:0;z-index:100000;background:rgba(15,30,45,.55);display:flex;align-items:center;justify-content:center;padding:14px}
+.df-box{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:520px;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.df-box h3{margin:0 0 12px;color:#087f8c}.df-fields{display:grid;gap:10px}.df-actions{margin-top:14px;display:flex;gap:6px}
+.jc-box{background:#fff;border-radius:20px;padding:14px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.jc-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}
+.jc-head b{font-size:15px;color:#087f8c}.jc-head button{border:0;background:#eaf7f5;color:#087f8c;border-radius:10px;width:36px;height:36px;font-size:18px;cursor:pointer}
+.jc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.jc-grid span{font-size:11px;color:#78909c;padding:4px 0}
+.jc-grid button{border:0;background:#f5f9fa;border-radius:10px;height:38px;font-family:inherit;font-size:14px;cursor:pointer;color:#263238}
+.jc-grid button.sel{background:#16a085;color:#fff;font-weight:bold}.jc-grid button.today{outline:2px solid #3498db}.jc-grid button.fri{color:#e74c3c}
+.jc-foot{display:flex;gap:6px;margin-top:10px}.jc-foot button{flex:1}
+.sf-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}.sf-top img,.sf-ph{width:72px;height:72px;border-radius:50%;object-fit:cover;background:#eaf7f5;display:flex;align-items:center;justify-content:center;font-size:32px}
+.sf-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:12px}
+.sf-chip{background:#f3fafa;border:1px solid #dcefee;border-radius:14px;padding:10px;text-align:center}.sf-chip b{display:block;font-size:20px;color:#087f8c}.sf-chip small{color:#607d8b}
+.sf-sec{border:1px solid #e3ecee;border-radius:14px;margin-bottom:8px;background:#fff}.sf-sec summary{cursor:pointer;padding:12px 14px;font-weight:bold;color:#087f8c;list-style:none}
+.sf-sec summary i{font-style:normal;color:#78909c;font-weight:normal;font-size:12px;margin-right:6px}
+.sf-row{padding:9px 14px;border-top:1px solid #eef3f4;font-size:14px}.sf-row small{color:#78909c;display:block}
+@media(max-width:700px){.btn{padding:9px 11px}.card{padding:16px}}
+</style>
+<script>
+/* ===== ویرایش (مودال عمومی) ===== */
+function dfEdit(title,fields,save){
+ var old=document.getElementById('dfModal');if(old)old.remove();
+ var m=document.createElement('div');m.id='dfModal';m.className='df-overlay';
+ m.innerHTML='<div class="df-box" dir="rtl"><h3>'+escapeHTML(title)+'</h3><div class="df-fields">'+fields.map(function(f,i){
+  var v=escapeHTML(f.val==null?'':String(f.val)),c;
+  if(f.type==='textarea')c='<textarea id="dfF'+i+'">'+v+'</textarea>';
+  else if(f.type==='select')c='<select id="dfF'+i+'">'+f.opts.map(function(o){return '<option value="'+escapeHTML(o.v)+'"'+(o.v===String(f.val)?' selected':'')+'>'+escapeHTML(o.t)+'</option>'}).join('')+'</select>';
+  else c='<input id="dfF'+i+'" type="text" value="'+v+'"'+(f.type==='date'?' class="df-date"':'')+'>';
+  return '<div><label>'+f.label+'</label>'+c+'</div>'}).join('')+'</div><div class="df-actions"><button class="btn btn-primary" id="dfSave" type="button">💾 ذخیره تغییرات</button><button class="btn btn-gray" id="dfCancel" type="button">انصراف</button></div></div>';
+ document.body.appendChild(m);
+ m.querySelector('#dfCancel').onclick=function(){m.remove()};
+ m.onclick=function(e){if(e.target===m)m.remove()};
+ m.querySelector('#dfSave').onclick=function(){var vals=fields.map(function(f,i){return document.getElementById('dfF'+i).value});if(save(vals)!==false)m.remove()};
+}
+function dfOpts(id,cur){var o=Array.from((document.getElementById(id)||{options:[]}).options).map(function(x){return{v:x.value,t:x.textContent}});if(cur&&!o.some(function(x){return x.v===cur}))o.push({v:cur,t:cur});return o}
+function dfFind(col,id){return(getClassData()[col]||[]).find(function(x){return String(x.id)===String(id)})}
+function dfDate(v){return toPersianNumber(formatPersianDate(v)==='-'?'':formatPersianDate(v))}
+function editStudent(id){var s=getStudent(id);if(!s)return;
+ dfEdit('✏️ ویرایش دانش‌آموز',[{label:'نام',val:s.firstName},{label:'نام خانوادگی',val:s.lastName},{label:'پایه',type:'select',val:String(s.grade||''),opts:dfOpts('studentGrade',String(s.grade||''))},{label:'توضیحات',type:'textarea',val:s.notes||''},{label:'شماره تلفن پدر',val:s.fatherPhone||''},{label:'شماره تلفن مادر',val:s.motherPhone||''}],function(v){
+  if(!v[0].trim()||!v[1].trim()){alert('نام و نام خانوادگی را وارد کنید.');return false}
+  s.firstName=v[0].trim();s.lastName=v[1].trim();s.grade=v[2];s.notes=v[3].trim();s.fatherPhone=v[4].trim();s.motherPhone=v[5].trim();saveDatabase();
+  renderStudents();renderAttendance();renderHomework();try{refreshStudentSelectorsSafely()}catch(e){}updateDashboard();try{renderStudentFile()}catch(e){}});}
+function editEvaluation(id){var x=dfFind('evaluations',id);if(!x)return;
+ dfEdit('✏️ ویرایش ارزشیابی',[{label:'درس',val:x.subject},{label:'سطح',type:'select',val:x.level,opts:dfOpts('evaluationLevel',x.level)},{label:'تاریخ',type:'date',val:dfDate(x.date)},{label:'توضیحات',type:'textarea',val:x.notes||''}],function(v){
+  x.subject=v[0].trim();x.level=v[1];x.date=normalizePersianDate(v[2]);x.notes=cleanPersianText(v[3]);saveDatabase();renderEvaluations();updateDashboard()});}
+function editGrade(id){var x=dfFind('grades',id);if(!x)return;
+ dfEdit('✏️ ویرایش ارزشیابی کیفی',[{label:'درس',val:x.subject},{label:'سطح',type:'select',val:x.level,opts:dfOpts('gradeLevel',x.level)},{label:'تاریخ',type:'date',val:dfDate(x.date)},{label:'توضیحات',type:'textarea',val:x.notes||''}],function(v){
+  x.subject=v[0].trim();x.level=v[1];x.date=normalizePersianDate(v[2]);x.notes=cleanPersianText(v[3]);saveDatabase();renderGrades();updateDashboard()});}
+function editExperiment(id){var x=dfFind('experiments',id);if(!x)return;
+ dfEdit('✏️ ویرایش آزمایش',[{label:'عنوان',val:x.title},{label:'صفحه',val:x.page||''},{label:'تاریخ',type:'date',val:dfDate(x.date)},{label:'هدف',type:'textarea',val:x.goal||''},{label:'وسایل',type:'textarea',val:x.materials||''},{label:'روش',type:'textarea',val:x.method||''},{label:'نتیجه',type:'textarea',val:x.result||''},{label:'توضیحات',type:'textarea',val:x.notes||''}],function(v){
+  if(!v[0].trim()){alert('عنوان آزمایش را وارد کنید.');return false}
+  x.title=v[0].trim();x.page=v[1].trim();x.date=normalizePersianDate(v[2]);x.goal=v[3];x.materials=v[4];x.method=v[5];x.result=v[6];x.notes=v[7];saveDatabase();renderExperiments();updateDashboard()});}
+function editPortfolio(id){var x=dfFind('portfolio',id);if(!x)return;
+ dfEdit('✏️ ویرایش نمونه‌کار',[{label:'عنوان',val:x.title},{label:'تاریخ',type:'date',val:dfDate(x.date)},{label:'توضیحات',type:'textarea',val:x.notes||''}],function(v){
+  x.title=v[0].trim();x.date=normalizePersianDate(v[1]);x.notes=v[2];saveDatabase();renderPortfolio()});}
+function editFeedback(id){var x=dfFind('feedback',id);if(!x)return;
+ dfEdit('✏️ ویرایش بازخورد',[{label:'تاریخ',type:'date',val:dfDate(x.date)},{label:'درس / موضوع',val:x.subject||''},{label:'متن بازخورد',type:'textarea',val:x.notes||''}],function(v){
+  if(!v[2].trim()){alert('متن بازخورد را وارد کنید.');return false}
+  x.date=normalizePersianDate(v[0]);x.subject=v[1].trim();x.notes=cleanPersianText(v[2]);saveDatabase();renderFeedback()});}
+
+/* ===== بازخورد تکالیف: برجسته‌سازی وضعیت و تأیید ذخیره ===== */
+(function(){
+ var rh=renderHomework;renderHomework=function(){rh.apply(this,arguments);
+  document.querySelectorAll('#homeworkTable tr').forEach(function(tr){var b=tr.querySelector('b');if(!b)return;var st=b.textContent.trim();
+   tr.querySelectorAll('button').forEach(function(btn){if(btn.textContent.replace(/[^\u0600-\u06FF ]/g,'').trim()===st)btn.classList.add('is-current')})})};
+ var sf=saveHomeworkFeedback;saveHomeworkFeedback=function(id){sf.apply(this,arguments);var t=document.getElementById('homeworkFeedback_'+id);if(t){t.classList.add('saved-flash');setTimeout(function(){t.classList.remove('saved-flash')},1200)}};
+})();
+
+/* ===== تقویم شمسی ===== */
+(function(){
+ function div(a,b){return Math.trunc(a/b)}function mod(a,b){return a-div(a,b)*b}
+ function jalCal(jy){var br=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178],gy=jy+621,leapJ=-14,jp=br[0],jm,jump,leap,leapG,march,n,i;
+  for(i=1;i<br.length;i++){jm=br[i];jump=jm-jp;if(jy<jm)break;leapJ+=div(jump,33)*8+div(mod(jump,33),4);jp=jm}
+  n=jy-jp;leapJ+=div(n,33)*8+div(mod(n,33)+3,4);if(mod(jump,33)===4&&jump-n===4)leapJ++;
+  leapG=div(gy,4)-div((div(gy,100)+1)*3,4)-150;march=20+leapJ-leapG;if(jump-n<6)n=n-jump+div(jump+4,33)*33;
+  leap=mod(mod(n+1,33)-1,4);if(leap===-1)leap=4;return{leap:leap,gy:gy,march:march}}
+ function g2d(gy,gm,gd){var d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*mod(gm+9,12)+2,5)+gd-34840408;return d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752}
+ function d2g(j){var a=4*j+139361631;a+=div(div(4*j+183187720,146097)*3,4)*4-3908;var i=div(mod(a,1461),4)*5+308,gd=div(mod(i,153),5)+1,gm=mod(div(i,153),12)+1;return{gy:div(a,1461)-100100+div(8-gm,6),gm:gm,gd:gd}}
+ function j2d(jy,jm,jd){var r=jalCal(jy);return g2d(r.gy,3,r.march)+(jm-1)*31-div(jm,7)*(jm-7)+jd-1}
+ function d2j(j){var gy=d2g(j).gy,jy=gy-621,r=jalCal(jy),k=j-g2d(gy,3,r.march),jm,jd;
+  if(k>=0){if(k<=185){return{jy:jy,jm:1+div(k,31),jd:mod(k,31)+1}}k-=186}else{jy--;k+=179;if(r.leap===1)k++}
+  return{jy:jy,jm:7+div(k,30),jd:mod(k,30)+1}}
+ var MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+ function mlen(y,m){return m<=6?31:m<=11?30:(jalCal(y).leap===0?30:29)}
+ function p2(n){return String(n).padStart(2,'0')}
+ function today(){var d=new Date();return d2j(g2d(d.getFullYear(),d.getMonth()+1,d.getDate()))}
+ function parse(v){var s=String(v||'').replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/-/g,'/').split('/');
+  if(s.length===3&&+s[0]>1200&&+s[1]>=1&&+s[1]<=12&&+s[2]>=1)return{jy:+s[0],jm:+s[1],jd:+s[2]};return null}
+ function open(input){
+  var cur=parse(input.value),t=today(),y=(cur||t).jy,m=(cur||t).jm;
+  var ov=document.createElement('div');ov.className='df-overlay';ov.style.zIndex=100001;document.body.appendChild(ov);
+  function draw(){var first=(j2d(y,m,1)+2)%7,n=mlen(y,m),h='';
+   h+='<div class="jc-box" dir="rtl"><div class="jc-head"><button type="button" data-a="py">«</button><button type="button" data-a="pm">›</button><b>'+MN[m-1]+' '+toPersianNumber(y)+'</b><button type="button" data-a="nm">‹</button><button type="button" data-a="ny">»</button></div><div class="jc-grid">';
+   ['ش','ی','د','س','چ','پ','ج'].forEach(function(d){h+='<span>'+d+'</span>'});
+   for(var i=0;i<first;i++)h+='<span></span>';
+   for(var d=1;d<=n;d++){var c=[];if(cur&&cur.jy===y&&cur.jm===m&&cur.jd===d)c.push('sel');if(t.jy===y&&t.jm===m&&t.jd===d)c.push('today');if((first+d-1)%7===6)c.push('fri');
+    h+='<button type="button" data-d="'+d+'" class="'+c.join(' ')+'">'+toPersianNumber(d)+'</button>'}
+   h+='</div><div class="jc-foot"><button type="button" class="btn btn-blue" data-a="today">امروز</button><button type="button" class="btn btn-gray" data-a="close">بستن</button></div></div>';
+   ov.innerHTML=h}
+  function pick(Y,M,D){input.value=toPersianNumber(Y+'/'+p2(M)+'/'+p2(D));['input','change'].forEach(function(e){input.dispatchEvent(new Event(e,{bubbles:true}))});ov.remove()}
+  ov.onclick=function(e){var b=e.target.closest('button');if(e.target===ov){ov.remove();return}if(!b)return;
+   var a=b.dataset.a;if(b.dataset.d){pick(y,m,+b.dataset.d);return}
+   if(a==='close')ov.remove();else if(a==='today')pick(t.jy,t.jm,t.jd);
+   else{if(a==='pm'){m--;if(m<1){m=12;y--}}if(a==='nm'){m++;if(m>12){m=1;y++}}if(a==='py')y--;if(a==='ny')y++;draw()}};
+  draw();input.blur()}
+ function isDate(el){return el&&el.tagName==='INPUT'&&el.type==='text'&&(/Date$/.test(el.id)||el.classList.contains('df-date'))}
+ document.addEventListener('click',function(e){if(isDate(e.target)&&!document.querySelector('.jc-box'))open(e.target)});
+ document.addEventListener('focusin',function(e){if(isDate(e.target)){e.target.setAttribute('inputmode','none');if(!document.querySelector('.jc-box'))open(e.target)}});
+ window.openJalaliCalendar=open;
+})();
+
+/* ===== کارتابل دانش‌آموز ===== */
+function renderStudentFile(){var s=document.getElementById('studentFileSelect');if(!s)return;fillStudentSelect('studentFileSelect');renderStudentFileBody()}
+function openStudentFile(id){showSection('studentFile');var s=document.getElementById('studentFileSelect');if(s){s.value=String(id);renderStudentFileBody()}}
+function renderStudentFileBody(){
+ var box=document.getElementById('studentFileBody'),sel=document.getElementById('studentFileSelect');if(!box||!sel)return;
+ var st=getStudent(sel.value);if(!st){box.innerHTML='<div class="empty-box">یک دانش‌آموز را انتخاب کنید.</div>';return}
+ var d=getClassData(),id=String(st.id);
+ function mine(c){return(d[c]||[]).filter(function(x){return String(x.studentId)===id}).slice().reverse()}
+ function cnt(c,k,v){return mine(c).filter(function(x){return x[k]===v}).length}
+ var E=mine('evaluations'),F=mine('feedback'),H=mine('homework'),G=mine('grades'),M=mine('monthlyPerformance'),P=mine('portfolio'),PA=mine('parents'),IN=mine('interests');
+ function sec(t,arr,fn,open){return '<details class="sf-sec"'+(open?' open':'')+'><summary>'+t+' <i>'+toPersianNumber(arr.length)+' مورد</i></summary>'+(arr.length?arr.slice(0,10).map(function(x){return '<div class="sf-row">'+fn(x)+'</div>'}).join(''):'<div class="sf-row"><small>موردی ثبت نشده است.</small></div>')+'</details>'}
+ function dt(x){return '<small>'+escapeHTML(formatPersianDate(x.date))+'</small>'}
+ function chip(n,l){return '<div class="sf-chip"><b>'+toPersianNumber(n)+'</b><small>'+l+'</small></div>'}
+ box.innerHTML='<div class="sf-top">'+(st.photo?'<img src="'+st.photo+'" alt="">':'<div class="sf-ph">👤</div>')+'<div><b style="font-size:18px">'+escapeHTML(st.firstName+' '+st.lastName)+'</b><div style="color:#607d8b">'+escapeHTML(getStudentGradeLabel(st.grade))+(st.notes?' · '+escapeHTML(st.notes):'')+'</div></div><button class="btn btn-blue btn-small" type="button" onclick="editStudent(\''+id+'\')">✏️ ویرایش اطلاعات</button></div>'+
+ '<div class="sf-chips">'+chip(cnt('attendance','status','حاضر'),'حاضر')+chip(cnt('attendance','status','غایب'),'غایب')+chip(cnt('attendance','status','تأخیر'),'تأخیر')+chip(cnt('homework','status','انجام شد'),'تکلیف انجام‌شده')+chip(cnt('homework','status','ناقص')+cnt('homework','status','انجام نشده'),'تکلیف ناقص/نشده')+chip(P.length,'نمونه‌کار')+'</div>'+
+ sec('📚 تکالیف',H,function(x){return dt(x)+escapeHTML(x.status||'')+(x.feedback?' — '+escapeHTML(x.feedback):'')},true)+
+ sec('⭐ ارزشیابی',E,function(x){return dt(x)+'<b>'+escapeHTML(x.subject||'')+'</b> · '+escapeHTML(x.level||'')+(x.notes?'<br>'+escapeHTML(x.notes):'')})+
+ sec('💬 بازخورد آموزشی',F,function(x){return dt(x)+(x.subject?'<b>'+escapeHTML(x.subject)+'</b> · ':'')+escapeHTML(x.notes||'')})+
+ sec('📝 ارزشیابی کیفی',G,function(x){return dt(x)+'<b>'+escapeHTML(x.subject||'')+'</b> · '+escapeHTML(x.level||'')+(x.notes?'<br>'+escapeHTML(x.notes):'')})+
+ sec('📅 عملکرد ماهانه',M,function(x){return '<small>'+escapeHTML(x.month||'')+'</small>'+escapeHTML([x.academic,x.notes].filter(Boolean).join(' · '))})+
+ sec('👨‍👩‍👧 والدین',PA,function(x){return '<b>'+escapeHTML(x.name||'')+'</b> · '+escapeHTML(x.relation||'')+' · '+escapeHTML(x.phone||'')})+
+ sec('❤️ علاقه‌مندی‌ها',IN,function(x){return escapeHTML(x.text||'')});
+}
+</script>
+
+
+<style id="ui-refresh-v9">
+/* =====================================================================
+   لایهٔ ظاهر جدید — فقط ظاهر. هیچ‌یک از داده‌ها، کلیدهای ذخیره‌سازی
+   و منطق برنامه تغییر نکرده است.
+   ===================================================================== */
+:root{
+  --rf-p:#4f46e5; --rf-p2:#7c3aed; --rf-a:#06b6d4; --rf-ok:#10b981; --rf-warn:#f59e0b; --rf-bad:#ef4444;
+  --rf-ink:#0f172a; --rf-ink2:#334155; --rf-mute:#64748b; --rf-line:#e5e7f2; --rf-bg:#f4f5fb;
+  --rf-sh:0 1px 2px rgba(15,23,42,.04),0 10px 28px rgba(79,70,229,.07);
+  --rf-sh2:0 2px 6px rgba(15,23,42,.06),0 22px 46px rgba(79,70,229,.16);
+  --pro-accent:#4f46e5; --pro-ink:#0f172a; --pro-line:#e5e7f2; --ui-ink:#0f172a;
+}
+
+/* ---------- پایه ---------- */
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html body,html body button,html body input,html body select,html body textarea,
+html body table th,html body table td,html body h1,html body h2,html body h3,
+html body .nav button,html body .card{
+  font-family:"Vazirmatn","IRANSansX","IRANSans","Segoe UI",Tahoma,system-ui,-apple-system,sans-serif!important;
+}
+html body{
+  background:
+    radial-gradient(900px 520px at 100% -8%,rgba(124,58,237,.13),transparent 60%),
+    radial-gradient(800px 520px at 0% 0%,rgba(6,182,212,.11),transparent 55%),
+    radial-gradient(700px 500px at 50% 110%,rgba(79,70,229,.08),transparent 60%),
+    var(--rf-bg)!important;
+  background-attachment:fixed!important;
+  color:var(--rf-ink)!important;
+  line-height:1.8;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(99,102,241,.22)}
+*{-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid rgba(99,102,241,.45);outline-offset:2px;border-radius:8px}
+html body ::-webkit-scrollbar{width:10px;height:10px}
+html body ::-webkit-scrollbar-thumb{background:#c7cbe6;border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+html body ::-webkit-scrollbar-thumb:hover{background:#a5aadb;background-clip:padding-box;border:2px solid transparent}
+html body ::-webkit-scrollbar-track{background:transparent}
+
+@keyframes rfRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes rfFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+html body #app > .section.active,html body #home{animation:rfRise .38s cubic-bezier(.2,.7,.2,1) both}
+
+/* ---------- سربرگ صفحهٔ اصلی ---------- */
+html body .header{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#1e1b4b 0%,#3730a3 38%,#6d28d9 72%,#0891b2 125%)!important;
+  border-radius:0 0 40px 40px!important;
+  padding:46px 20px 56px!important;
+  box-shadow:0 24px 60px rgba(55,48,163,.30)!important;
+}
+html body .header:before{width:340px;height:340px;top:-170px;right:-90px;background:rgba(255,255,255,.07)!important}
+html body .header:after{width:260px;height:260px;bottom:-150px;left:-70px;background:rgba(6,182,212,.20)!important}
+html body .header h1{font-size:clamp(26px,5.2vw,42px)!important;font-weight:900;letter-spacing:-.4px;text-shadow:0 4px 20px rgba(0,0,0,.25);position:relative}
+html body .header p{position:relative;font-size:clamp(13px,2.4vw,16px);opacity:.92}
+
+html body .container{max-width:1400px;padding:26px 20px 40px}
+@media(max-width:600px){html body .container{padding:18px 12px 30px}}
+
+/* ---------- کارت‌ها ---------- */
+html body .card{
+  background:#fff!important;
+  border:1px solid var(--rf-line)!important;
+  border-radius:22px!important;
+  box-shadow:var(--rf-sh)!important;
+  padding:24px;
+  backdrop-filter:none!important;
+}
+html body .card h2{color:var(--rf-ink)!important;font-weight:800;font-size:19px;letter-spacing:-.2px}
+html body .card h3{color:#3730a3!important;font-weight:800}
+html body .card p{color:var(--rf-ink2)}
+html body .info-box{background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px solid #e0e4ff;border-right:5px solid var(--rf-p);border-radius:14px;color:#312e81}
+html body .success-box{border-radius:14px}
+html body .warning-box{border-radius:14px}
+html body .empty-box{background:#f8f9fe;border:2px dashed #dfe3f5;border-radius:16px;color:var(--rf-mute)}
+html body .teacher-note{border-radius:14px}
+@media(max-width:600px){html body .card{padding:16px;border-radius:18px!important}}
+
+/* ---------- کارت‌های انتخاب کلاس ---------- */
+html body .class-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+html body .class-card{
+  position:relative;overflow:hidden;border:0!important;color:#fff!important;text-align:right!important;
+  border-radius:24px!important;padding:26px 24px!important;min-height:128px;
+  box-shadow:0 12px 30px rgba(15,23,42,.16)!important;
+  transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s!important;
+}
+html body .class-card:after{inset:auto auto -70px -50px!important;width:190px!important;height:190px!important;background:rgba(255,255,255,.14)!important}
+html body .class-card:before{content:"";position:absolute;top:-40px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.10)}
+html body .class-card:hover{transform:translateY(-6px) scale(1.012)!important;box-shadow:0 22px 44px rgba(15,23,42,.24)!important}
+html body .class-card:active{transform:scale(.985)!important}
+html body .class-third{background:linear-gradient(135deg,#047857,#10b981 62%,#6ee7b7)!important}
+html body .class-fourth{background:linear-gradient(135deg,#1e40af,#4f46e5 62%,#a5b4fc)!important}
+html body .class-multi{background:linear-gradient(135deg,#6d28d9,#c026d3 62%,#f9a8d4)!important;grid-column:1/-1}
+html body .class-card h2{color:#fff!important;margin:0 0 6px;font-size:21px;font-weight:900;position:relative;z-index:1}
+html body .class-card p{margin:0;color:rgba(255,255,255,.9)!important;font-size:13px;position:relative;z-index:1}
+html body .teacher-home-card{background:linear-gradient(135deg,#fff,#f5f3ff)!important;border-color:#e4e0ff!important}
+
+/* ---------- دکمه‌ها ---------- */
+html body .btn{
+  border:1px solid transparent!important;border-radius:12px!important;
+  padding:10px 17px!important;font-size:13px!important;font-weight:700!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.10),0 4px 10px rgba(15,23,42,.06)!important;
+  transition:transform .15s ease,box-shadow .2s ease,filter .2s ease!important;
+}
+html body .btn:hover{transform:translateY(-2px)!important;box-shadow:0 10px 22px rgba(15,23,42,.16)!important;filter:brightness(1.05)}
+html body .btn:active{transform:translateY(0) scale(.97)!important}
+html body .btn-primary{background:linear-gradient(135deg,#4f46e5,#7c3aed)!important;color:#fff!important}
+html body .btn-blue{background:linear-gradient(135deg,#0ea5e9,#2563eb)!important;color:#fff!important}
+html body .btn-green{background:linear-gradient(135deg,#10b981,#059669)!important;color:#fff!important}
+html body .btn-danger,html body .danger-btn{background:linear-gradient(135deg,#f43f5e,#dc2626)!important;color:#fff!important}
+html body .btn-warning{background:linear-gradient(135deg,#fcd34d,#f59e0b)!important;color:#422006!important}
+html body .btn-purple{background:linear-gradient(135deg,#a855f7,#7c3aed)!important;color:#fff!important}
+html body .btn-gray,html body .btn-secondary{background:#eef0f8!important;color:#334155!important;border-color:#e0e3f0!important;box-shadow:none!important}
+html body .btn-small{padding:6px 11px!important;font-size:12px!important;border-radius:10px!important}
+html body .btn.is-current{outline:3px solid rgba(99,102,241,.45)!important}
+html body .btn:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
+
+/* ---------- فیلدها ---------- */
+html body label{color:var(--rf-ink2);font-weight:700;font-size:13px}
+body input:not([type]),body input[type=text],body input[type=search],body input[type=tel],body input[type=email],
+body input[type=number],body input[type=password],body input[type=date],body input[type=time],body input[type=url],
+body select,body textarea{
+  background:#f8f9fd;border:1.5px solid #e1e5f1;border-radius:12px;color:var(--rf-ink);
+  transition:border-color .2s,box-shadow .2s,background .2s;
+}
+body input:not([type]):hover,body input[type=text]:hover,body input[type=number]:hover,body input[type=password]:hover,
+body input[type=tel]:hover,body input[type=date]:hover,body select:hover,body textarea:hover{border-color:#c7cdf0}
+body input:not([type]):focus,body input[type=text]:focus,body input[type=search]:focus,body input[type=tel]:focus,
+body input[type=email]:focus,body input[type=number]:focus,body input[type=password]:focus,body input[type=date]:focus,
+body input[type=time]:focus,body select:focus,body textarea:focus{
+  background:#fff;border-color:#6366f1;box-shadow:0 0 0 4px rgba(99,102,241,.15);
+}
+body input::placeholder,body textarea::placeholder{color:#a0a8c0}
+body input[type=checkbox],body input[type=radio]{accent-color:#4f46e5}
+html body .teacher-field label{font-size:12px;color:var(--rf-mute)}
+
+/* ---------- جدول‌ها ---------- */
+html body .table-wrapper{background:#fff;border:1px solid var(--rf-line)!important;border-radius:16px!important}
+html body th{background:linear-gradient(180deg,#eef0ff,#e7e9fd)!important;color:#3730a3!important;font-weight:800;font-size:12.5px;border-color:#dde0f6!important}
+html body td{border-color:#eceef8!important}
+html body .table-wrapper tr:nth-child(even) td{background:#fafbff}
+html body .table-wrapper tr:hover td{background:#f1f3ff!important}
+html body .tag{background:#eef0ff;color:#3730a3;font-weight:700}
+
+/* ---------- ورود به برنامه ---------- */
+html body #offlineAuthOverlay{
+  background:
+    radial-gradient(700px 500px at 85% 10%,rgba(124,58,237,.35),transparent 60%),
+    radial-gradient(700px 500px at 10% 90%,rgba(6,182,212,.30),transparent 60%),
+    linear-gradient(135deg,#1e1b4b,#312e81 55%,#0f172a)!important;
+}
+html body .auth-card{
+  background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.6);border-radius:28px;
+  box-shadow:0 30px 80px rgba(0,0,0,.40);padding:32px;
+}
+html body .auth-brand .logo{
+  width:72px;height:72px;margin:0 auto 6px;display:grid;place-items:center;font-size:36px;border-radius:22px;
+  background:linear-gradient(135deg,#4f46e5,#7c3aed);box-shadow:0 14px 30px rgba(79,70,229,.40);animation:rfFloat 4s ease-in-out infinite;
+}
+html body .auth-brand h2{color:var(--rf-ink);font-size:26px;font-weight:900;margin:10px 0 4px}
+html body .auth-brand p{color:var(--rf-mute)}
+html body .auth-tabs{background:#f1f2fa;padding:5px;border-radius:15px;gap:4px}
+html body .auth-tab{border:0;background:transparent;color:var(--rf-mute);border-radius:11px}
+html body .auth-tab.active{background:#fff;color:#4338ca;box-shadow:0 4px 12px rgba(79,70,229,.15)}
+html body .auth-field label{color:var(--rf-ink2)}
+html body .auth-field input{background:#f8f9fd;border:1.5px solid #e1e5f1;border-radius:13px}
+html body .auth-field input:focus{border-color:#6366f1;background:#fff;box-shadow:0 0 0 4px rgba(99,102,241,.15)}
+html body .auth-main-btn{background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:14px;box-shadow:0 12px 26px rgba(79,70,229,.35);transition:transform .15s,box-shadow .2s}
+html body .auth-main-btn:hover{transform:translateY(-2px);box-shadow:0 16px 32px rgba(79,70,229,.42)}
+html body .auth-secondary{border-radius:14px;background:#f5f6fc;color:#4338ca;border-color:#e0e3f5}
+html body .design-credit{display:none!important}
+
+/* ---------- منوی کناری ---------- */
+html body .app-sidebar{
+  background:
+    radial-gradient(260px 200px at 100% 0%,rgba(124,58,237,.35),transparent 70%),
+    linear-gradient(180deg,#14163a 0%,#1a1d4f 55%,#0f1233 100%)!important;
+  border:1px solid rgba(255,255,255,.07);border-radius:26px!important;
+  box-shadow:0 28px 70px rgba(20,22,58,.38)!important;
+}
+html body .sidebar-brand{border-bottom:1px solid rgba(255,255,255,.08)}
+html body .brand-mark{background:linear-gradient(135deg,#6366f1,#a855f7 60%,#06b6d4)!important;box-shadow:0 10px 24px rgba(99,102,241,.45)}
+html body .sidebar-brand strong{font-size:16px;font-weight:900;color:#fff}
+html body .sidebar-brand small{color:#a5acd6}
+html body .sidebar-caption,html body .sidebar-group-label{color:#7b83b8;letter-spacing:.3px}
+html body .nav button{color:#c3c8e8!important;border-radius:14px!important;transition:background .2s,color .2s,transform .15s!important}
+html body .nav button:hover{background:rgba(255,255,255,.08)!important;color:#fff!important;transform:translateX(-3px)}
+html body .nav button.active{
+  background:linear-gradient(90deg,rgba(99,102,241,.55),rgba(168,85,247,.38))!important;color:#fff!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 8px 20px rgba(79,70,229,.30)!important;
+}
+html body .sb-icon{background:rgba(255,255,255,.08)!important}
+html body .nav button.active .sb-icon{background:rgba(255,255,255,.20)!important}
+html body .sidebar-collapse{background:rgba(255,255,255,.06);color:#b9bfe4;transition:background .2s}
+html body .sidebar-collapse:hover{background:rgba(255,255,255,.12)}
+html body .sidebar-nav-scroll{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+
+/* ---------- نوار بالایی ---------- */
+html body .smart-header{
+  background:rgba(255,255,255,.80)!important;backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border:1px solid rgba(255,255,255,.95)!important;border-radius:22px!important;box-shadow:0 14px 44px rgba(55,48,163,.10)!important;
+}
+html body .smart-header h1{font-size:20px;font-weight:900;color:var(--rf-ink)}
+html body .eyebrow{color:var(--rf-p)!important;letter-spacing:.2px}
+html body .global-search{background:#f3f4fc;border:1.5px solid #e4e7f6;border-radius:14px;transition:border-color .2s,box-shadow .2s,background .2s}
+html body .global-search:focus-within{background:#fff;border-color:#6366f1;box-shadow:0 0 0 4px rgba(99,102,241,.14)}
+html body .global-search input#globalSearch{background:transparent!important;border:0!important;box-shadow:none!important}
+html body .global-search kbd{border-radius:7px;background:#fff;color:#7b83a8}
+html body .icon-action,html body .profile-chip{border-color:#e4e7f6;border-radius:14px;transition:transform .15s,box-shadow .2s,border-color .2s}
+html body .icon-action:hover,html body .profile-chip:hover{transform:translateY(-1px);border-color:#c7cdf0;box-shadow:0 8px 18px rgba(79,70,229,.12)}
+html body .profile-avatar{background:linear-gradient(135deg,#6366f1,#a855f7)!important;color:#fff!important;border-radius:11px}
+html body .sync-pill{background:#ecfdf5;color:#047857;border-color:#c9f2de}
+html body .sync-pill.offline{background:#fff7ed;color:#b45309;border-color:#fde5c4}
+html body .search-results,html body .notification-panel{border-radius:18px;border-color:#e4e7f6;box-shadow:0 24px 60px rgba(55,48,163,.18)}
+html body .search-result:hover{background:#f1f3ff}
+html body .notice-item{background:#f6f7ff}
+
+/* ---------- داشبورد ---------- */
+html body .dashboard-hero{
+  background:linear-gradient(135deg,#312e81 0%,#4f46e5 48%,#7c3aed 80%,#0891b2 130%)!important;
+  border-radius:26px!important;box-shadow:0 20px 46px rgba(79,70,229,.32)!important;
+}
+html body .dashboard-hero h2{color:#fff!important}
+html body .dashboard-mini{
+  border:1px solid var(--rf-line)!important;border-radius:20px!important;box-shadow:var(--rf-sh)!important;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+html body .dashboard-mini:hover{transform:translateY(-4px);box-shadow:var(--rf-sh2)!important}
+html body .dashboard-mini span{color:#3730a3}
+html body .stat{border-top:5px solid var(--rf-p);border-radius:20px;box-shadow:var(--rf-sh)}
+html body .stat:nth-child(2){border-top-color:#06b6d4}
+html body .stat:nth-child(3){border-top-color:#10b981}
+html body .stat:nth-child(4){border-top-color:#f59e0b}
+html body .stat-number{color:#4338ca}
+html body .capability-card{
+  border:1px solid var(--rf-line)!important;border-radius:20px!important;background:#fff!important;
+  box-shadow:var(--rf-sh);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease!important;
+}
+html body .capability-card:hover{transform:translateY(-4px)!important;border-color:#c7cdf5!important;box-shadow:var(--rf-sh2)!important}
+html body .capability-card:active{transform:scale(.98)!important}
+html body .capability-icon{background:linear-gradient(135deg,#eef0ff,#f3e8ff)!important;border-radius:14px!important}
+html body .capability-card:hover .capability-icon{background:linear-gradient(135deg,#6366f1,#a855f7)!important}
+html body .capability-arrow{color:var(--rf-p)}
+html body .dashboard-showcase-main{background:linear-gradient(145deg,#fff,#f6f5ff)!important}
+html body .showcase-actions button{border:1px solid var(--rf-line);border-radius:18px;box-shadow:var(--rf-sh);transition:transform .2s,box-shadow .2s,border-color .2s}
+html body .showcase-actions button:hover{transform:translateY(-3px);border-color:#c7cdf5;box-shadow:var(--rf-sh2)}
+html body .showcase-actions button.featured{background:linear-gradient(145deg,#f5f3ff,#fff)}
+html body .showcase-link{color:var(--rf-p)}
+html body .dashboard-list li{border-color:#eceef8}
+html body .bar{background:#eceefb;border-radius:999px}
+html body .bar i{background:linear-gradient(90deg,#6366f1,#a855f7);border-radius:999px}
+
+/* بودجه‌بندی‌ها: هماهنگ با رنگ تازه */
+html body #budget .budget-hero,html body #bookBudget .book-budget-hero,html body .book-budget-hero{
+  background:linear-gradient(135deg,#3730a3,#4f46e5 55%,#7c3aed)!important;box-shadow:0 14px 34px rgba(79,70,229,.25)!important;border-radius:22px!important;
+}
+html body .teacher-card-head{background:linear-gradient(135deg,#3730a3,#6d28d9,#0891b2)}
+
+/* ---------- پنجره‌های گفتگو و تقویم ---------- */
+html body .df-overlay{background:rgba(15,18,51,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+html body .df-box,html body .jc-box{border-radius:26px;box-shadow:0 34px 80px rgba(15,18,51,.45);animation:rfRise .28s cubic-bezier(.2,.7,.2,1) both}
+html body .df-box h3,html body .jc-head b{color:#3730a3}
+html body .jc-head button{background:#eef0ff;color:#4338ca}
+html body .jc-grid button{background:#f6f7fd;border-radius:11px}
+html body .jc-grid button:hover{background:#e7e9ff}
+html body .jc-grid button.sel{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff}
+html body .jc-grid button.today{outline-color:#06b6d4}
+html body .sf-chip{background:#f5f6ff;border-color:#e2e5fb;border-radius:16px}
+html body .sf-chip b{color:#4338ca}
+html body .sf-sec{border-color:var(--rf-line);border-radius:16px}
+html body .sf-sec summary{color:#3730a3}
+
+/* ---------- نوار پایین موبایل ---------- */
+html body .mobile-quickbar{
+  background:rgba(20,22,58,.94)!important;border:1px solid rgba(255,255,255,.08);border-radius:22px!important;
+  box-shadow:0 18px 44px rgba(20,22,58,.42)!important;
+}
+html body .mobile-quickbar button{color:#aeb4dc!important;border-radius:15px!important;transition:background .2s,color .2s}
+html body .mobile-quickbar button.active{background:linear-gradient(135deg,rgba(99,102,241,.55),rgba(168,85,247,.40))!important;color:#fff!important}
+
+/* ---------- پایین صفحه ---------- */
+html body .footer{color:#8a91b4;font-size:12.5px;padding:26px 10px 40px}
+
+/* ---------- جزئیات ریز ---------- */
+html body .image-upload-label{border-radius:14px}
+html body .experiment-card,html body .portfolio-folder-head{border-radius:18px}
+html body .photo-preview img,html body .student-photo{border-radius:16px}
+
+@media(prefers-reduced-motion:reduce){
+  html body *,html body *:before,html body *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+
+</style>
 </body>
 </html>

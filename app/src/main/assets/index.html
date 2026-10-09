@@ -5867,8 +5867,45 @@ function showFileFallback(filename, blob, textContent){
 }
 
 /* تحویل فایل به کاربر: اشتراک‌گذاری (موبایل) ← دانلود مستقیم ← پنجرهٔ کمکی */
+
+/* ذخیره بومی فایل در APK اندروید؛ در صورت لغو انتخاب محل ذخیره، مسیر جایگزین اجرا می‌شود. */
+async function dfSaveViaAndroid(filename, blob){
+    if(!window.AndroidFileBridge || typeof window.AndroidFileBridge.saveFile !== "function") return false;
+    try{
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        return await new Promise(function(resolve){
+            let settled = false;
+            const previous = window.onNativeFileSaved;
+            window.onNativeFileSaved = function(ok, message){
+                if(settled) return;
+                settled = true;
+                window.onNativeFileSaved = previous;
+                if(ok) alert(message || "فایل با موفقیت ذخیره شد.");
+                resolve(!!ok);
+            };
+            try{
+                window.AndroidFileBridge.saveFile(
+                    safeFileName(filename),
+                    String(blob.type || "application/octet-stream").split(";")[0],
+                    dfBytesToBase64(bytes)
+                );
+            }catch(err){
+                if(!settled){
+                    settled = true;
+                    window.onNativeFileSaved = previous;
+                    resolve(false);
+                }
+            }
+        });
+    }catch(err){
+        console.error("Android file save failed:", err);
+        return false;
+    }
+}
+
 async function deliverFile(filename, blob, textContent){
     filename=safeFileName(filename);
+    if(await dfSaveViaAndroid(filename, blob)) return true;
     try{
         if(window.File && navigator.canShare && navigator.share){
             const file=new File([blob],filename,{type:blob.type||"application/octet-stream"});
@@ -6009,6 +6046,9 @@ function dfBytesToBase64(bytes){
 
 /* ذخیره در اپ‌های بومی (Capacitor) در صورت وجود */
 async function dfNativeSave(filename, bytes){
+    if(window.AndroidFileBridge && typeof window.AndroidFileBridge.saveFile === "function"){
+        return await dfSaveViaAndroid(filename, new Blob([bytes], {type:"application/pdf"}));
+    }
     const cap = window.Capacitor;
     const P = cap && cap.Plugins;
     if(!P || !P.Filesystem) return false;
