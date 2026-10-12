@@ -3,6 +3,8 @@ package com.classroom.daftar
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.ContentValues
+import android.provider.MediaStore
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.net.Uri
@@ -156,6 +158,39 @@ class MainActivity : Activity() {
 
     /** پل امن ذخیره فایل‌های خروجی HTML در پوشه‌ای که کاربر انتخاب می‌کند. */
     inner class AndroidFileBridge {
+        /** Writes a daily JSON backup to public Downloads on Android 10+; no storage permission is needed. */
+        @android.webkit.JavascriptInterface
+        fun saveDailyBackup(filename: String, mimeType: String, base64Data: String): Boolean {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return false
+            return try {
+                val cleanName = filename.substringAfterLast('/').substringAfterLast('\\')
+                    .replace(Regex("[^A-Za-z0-9._-]"), "_")
+                    .ifBlank { "DaftarKelasi-AutoBackup.json" }
+                val values = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, cleanName)
+                    put(MediaStore.MediaColumns.MIME_TYPE, mimeType.ifBlank { "application/json" })
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/DaftarKelasiBackups")
+                    put(MediaStore.MediaColumns.IS_PENDING, 1)
+                }
+                val resolver = contentResolver
+                val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return false
+                try {
+                    val bytes = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT)
+                    resolver.openOutputStream(uri, "w")?.use { it.write(bytes); it.flush() }
+                        ?: throw IllegalStateException("Could not open backup output stream")
+                    val done = ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }
+                    resolver.update(uri, done, null, null)
+                    true
+                } catch (e: Exception) {
+                    try { resolver.delete(uri, null, null) } catch (_: Exception) {}
+                    throw e
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("DaftarKelasiBackup", "Daily backup write failed", e)
+                false
+            }
+        }
+
         @android.webkit.JavascriptInterface
         fun saveFile(filename: String, mimeType: String, base64Data: String) {
             runOnUiThread {

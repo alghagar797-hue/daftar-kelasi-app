@@ -1697,7 +1697,7 @@ onclick="goHome()"
      منوی برنامه
 ===================================================== -->
 
-<header class="smart-header" id="smartHeader"><div class="header-context"><button class="mobile-menu-btn" type="button" onclick="toggleSidebar()" aria-label="باز کردن منو">☰</button><div><div class="eyebrow">پنل مدیریت کلاس</div><h1 id="smartPageTitle">داشبورد</h1></div><span id="syncStatusPill" class="sync-pill offline"><i class="sync-dot"></i><span>آفلاین آماده</span></span></div><div class="header-actions"><div class="global-search"><button type="button" aria-label="جست‌وجو" onclick="focusGlobalSearch()" style="border:0;background:transparent;font-size:21px;cursor:pointer;color:#8b98aa;padding:0">⌕</button><input id="globalSearch" type="search" placeholder="جست‌وجو در بخش‌ها و ابزارها..." autocomplete="off" oninput="handleGlobalSearch(this.value)"><kbd>Ctrl K</kbd><div id="searchResults" class="search-results"></div></div><button class="icon-action notification-btn" type="button" onclick="toggleNotifications()">♢<i id="notificationBadge">0</i></button><button class="profile-chip" type="button" onclick="openHeaderProfile()"><span class="profile-avatar">م</span><span><b id="headerTeacherName">معلم</b><small>پروفایل</small></span></button></div><div id="notificationPanel" class="notification-panel"><div class="notification-head"><strong>اعلان‌ها</strong><button onclick="toggleNotifications()">×</button></div><div id="notificationContent" class="notification-content"></div></div></header><div class="page-workspace"><aside class="app-sidebar" id="appSidebar"><div class="sidebar-brand"><div class="brand-mark" aria-hidden="true">⌘</div><div><strong>دفتر کلاسی من</strong><small>Classroom Pro · Pro Edition</small></div></div><div class="sidebar-nav-scroll"><div class="sidebar-caption">مدیریت کلاس</div><nav class="nav" id="mainNav"><button onclick="showSection('teacherProfile',this)" data-nav-label="👨‍🏫 کارتابل معلم"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🏫 کارتابل معلم</span></button><button class="active" onclick="showSection('dashboard',this)" data-nav-label="🏠 داشبورد"><span class="sb-icon">🏠 </span><span class="sb-label">🏠 داشبورد</span></button><button onclick="showSection('students',this)" data-nav-label="👨‍🎓 دانش‌آموزان"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🎓 دانش‌آموزان</span></button><button onclick="showSection('studentFile',this)" data-nav-label="🗂️ کارتابل دانش‌آموز"><span class="sb-icon">🗂️</span><span class="sb-label">🗂️ کارتابل دانش‌آموز</span></button><button onclick="showSection('groups',this)" data-nav-label="👥 گروه‌بندی کلاس"><span class="sb-icon">👥</span><span class="sb-label">👥 گروه‌بندی کلاس</span></button><button onclick="showSection('attendance',this)" data-nav-label="📋 حضور و غیاب"><span class="sb-icon">📋 </span><span class="sb-label">📋 حضور و غیاب</span></button><button onclick="showSection('homework',this)" data-nav-label="📚 تکالیف"><span class="sb-icon">📚 </span><span class="sb-label">📚 تکالیف</span></button><button onclick="showSection('evaluation',this)" data-nav-label="⭐ ارزشیابی"><span class="sb-icon">⭐ </span><span class="sb-label">⭐ ارزشیابی</span></button><button onclick="showSection('feedback',this)" data-nav-label="💬 بازخورد آموزشی"><span class="sb-icon">💬</span><span class="sb-label">💬 بازخورد آموزشی</span></button><button onclick="showSection('grades',this)" data-nav-label="📝 ارزشیابی کیفی"><span class="sb-icon">📝 </span><span class="sb-label">📝 ارزشیابی کیفی</span></button><button onclick="showSection('portfolio',this)" data-nav-label="📁 پوشه‌کار"><span class="sb-icon">📁 </span><span class="sb-label">📁 پوشه‌کار</span></button><button onclick="showSection('experiments',this)" data-nav-label="🔬 آزمایش‌های علوم"><span class="sb-icon">🔬 </span><span class="sb-label">🔬 آزمایش‌های علوم</span></button><button onclick="showSection('monthly',this)" data-nav-label="📅 عملکرد ماهانه"><span class="sb-icon">📅 </span><span class="sb-label">📅 عملکرد ماهانه</span></button><button onclick="showSection('report',this)" data-nav-label="📊 وضعیت تحصیلی"><span class="sb-icon">📊 </span><span class="sb-label">📊 وضعیت تحصیلی</span></button><button onclick="showSection('goals',this)" data-nav-label="🎯 اهداف آموزشی"><span class="sb-icon">🎯 </span><span class="sb-label">🎯 اهداف آموزشی</span></button><button onclick="showSection('parents',this)" data-nav-label="👨‍👩‍👧 اطلاعات والدین"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍👩‍👧 اطلاعات والدین</span></button><button onclick="showSection('interests',this)" data-nav-label="❤️ علاقه‌مندی دانش‌آموز"><span class="sb-icon">❤️</span><span class="sb-label">❤️ علاقه‌مندی دانش‌آموز</span></button><button onclick="showSection('daily',this)" data-nav-label="📖 دفتر روزانه"><span class="sb-icon">📖 </span><span class="sb-label">📖 دفتر روزانه</span></button><button onclick="showSection('weekly',this)" data-nav-label="🗓️ برنامه هفتگی"><span class="sb-icon">🗓️</span><span class="sb-label">🗓️ برنامه هفتگی</span></button><button onclick="showSection('budget',this)" data-nav-label="⏱️ بودجه ساعات تدریس"><span class="sb-icon">📊 </span><span class="sb-label">⏱️ بودجه ساعات تدریس</span></button><button onclick="showSection('bookBudget',this)" data-nav-label="📘 بودجه‌بندی تدریس کتاب"><span class="sb-icon">📘</span><span class="sb-label">📘 بودجه‌بندی تدریس کتاب</span></button><button onclick="showSection('attention',this)" data-nav-label="⚠️ نیازمند توجه"><span class="sb-icon">⚠️</span><span class="sb-label">⚠️ نیازمند توجه</span></button><button onclick="showSection('backup',this)" data-nav-label="💾 پشتیبان"><span class="sb-icon">💾 </span><span class="sb-label">💾 پشتیبان</span></button></nav></div><div class="sidebar-footer"><button class="nav-logout-btn" type="button" onclick="logoutOfflineAccount()"><span class="sb-icon">🚪</span><span class="sb-label">🚪 خروج از حساب</span></button><button class="sidebar-collapse" type="button" onclick="toggleSidebar()"><span class="sb-icon">‹</span><span class="sb-label">جمع‌کردن منو</span></button></div></aside></div>
+<header class="smart-header" id="smartHeader"><div class="header-context"><button class="mobile-menu-btn" type="button" onclick="toggleSidebar()" aria-label="باز کردن منو">☰</button><div><div class="eyebrow">پنل مدیریت کلاس</div><h1 id="smartPageTitle">داشبورد</h1></div><span id="syncStatusPill" class="sync-pill offline"><i class="sync-dot"></i><span>آفلاین آماده</span></span></div><div class="header-actions"><div class="global-search"><button type="button" aria-label="جست‌وجو" onclick="focusGlobalSearch()" style="border:0;background:transparent;font-size:21px;cursor:pointer;color:#8b98aa;padding:0">⌕</button><input id="globalSearch" type="search" placeholder="جست‌وجو در بخش‌ها و ابزارها..." autocomplete="off" oninput="handleGlobalSearch(this.value)"><kbd>Ctrl K</kbd><div id="searchResults" class="search-results"></div></div><button class="icon-action notification-btn" type="button" onclick="toggleNotifications()">♢<i id="notificationBadge">0</i></button><button class="profile-chip" type="button" onclick="openHeaderProfile()"><span class="profile-avatar">م</span><span><b id="headerTeacherName">معلم</b><small>پروفایل</small></span></button></div><div id="notificationPanel" class="notification-panel"><div class="notification-head"><strong>اعلان‌ها</strong><button onclick="toggleNotifications()">×</button></div><div id="notificationContent" class="notification-content"></div></div></header><div class="page-workspace"><aside class="app-sidebar" id="appSidebar"><div class="sidebar-brand"><div class="brand-mark" aria-hidden="true">⌘</div><div><strong>دفتر کلاسی من</strong><small>Classroom Pro · Pro Edition</small></div></div><div class="sidebar-nav-scroll"><div class="sidebar-caption">مدیریت کلاس</div><nav class="nav" id="mainNav"><button onclick="showSection('teacherProfile',this)" data-nav-label="👨‍🏫 کارتابل معلم"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🏫 کارتابل معلم</span></button><button class="active" onclick="showSection('dashboard',this)" data-nav-label="🏠 داشبورد"><span class="sb-icon">🏠 </span><span class="sb-label">🏠 داشبورد</span></button><button onclick="showSection('students',this)" data-nav-label="👨‍🎓 دانش‌آموزان"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🎓 دانش‌آموزان</span></button><button onclick="showSection('studentFile',this)" data-nav-label="🗂️ کارتابل دانش‌آموز"><span class="sb-icon">🗂️</span><span class="sb-label">🗂️ کارتابل دانش‌آموز</span></button><button onclick="showSection('groups',this)" data-nav-label="👥 گروه‌بندی کلاس"><span class="sb-icon">👥</span><span class="sb-label">👥 گروه‌بندی کلاس</span></button><button onclick="showSection('attendance',this)" data-nav-label="📋 حضور و غیاب"><span class="sb-icon">📋 </span><span class="sb-label">📋 حضور و غیاب</span></button><button onclick="showSection('homework',this)" data-nav-label="📚 تکالیف"><span class="sb-icon">📚 </span><span class="sb-label">📚 تکالیف</span></button><button onclick="showSection('evaluation',this)" data-nav-label="⭐ ارزشیابی"><span class="sb-icon">⭐ </span><span class="sb-label">⭐ ارزشیابی</span></button><button onclick="showSection('feedback',this)" data-nav-label="💬 بازخورد آموزشی"><span class="sb-icon">💬</span><span class="sb-label">💬 بازخورد آموزشی</span></button><button onclick="showSection('grades',this)" data-nav-label="📝 ارزشیابی کیفی"><span class="sb-icon">📝 </span><span class="sb-label">📝 ارزشیابی کیفی</span></button><button onclick="showSection('portfolio',this)" data-nav-label="📁 پوشه‌کار"><span class="sb-icon">📁 </span><span class="sb-label">📁 پوشه‌کار</span></button><button onclick="showSection('experiments',this)" data-nav-label="🔬 آزمایش‌های علوم"><span class="sb-icon">🔬 </span><span class="sb-label">🔬 آزمایش‌های علوم</span></button><button onclick="showSection('monthly',this)" data-nav-label="📅 عملکرد ماهانه"><span class="sb-icon">📅 </span><span class="sb-label">📅 عملکرد ماهانه</span></button><button onclick="showSection('report',this)" data-nav-label="📊 وضعیت تحصیلی"><span class="sb-icon">📊 </span><span class="sb-label">📊 وضعیت تحصیلی</span></button><button onclick="showSection('goals',this)" data-nav-label="🎯 اهداف آموزشی"><span class="sb-icon">🎯 </span><span class="sb-label">🎯 اهداف آموزشی</span></button><button onclick="showSection('parents',this)" data-nav-label="👨‍👩‍👧 اطلاعات والدین"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍👩‍👧 اطلاعات والدین</span></button><button onclick="showSection('interests',this)" data-nav-label="❤️ علاقه‌مندی دانش‌آموز"><span class="sb-icon">❤️</span><span class="sb-label">❤️ علاقه‌مندی دانش‌آموز</span></button><button onclick="showSection('daily',this)" data-nav-label="📖 دفتر روزانه"><span class="sb-icon">📖 </span><span class="sb-label">📖 دفتر روزانه</span></button><button onclick="showSection('weekly',this)" data-nav-label="🗓️ برنامه هفتگی"><span class="sb-icon">🗓️</span><span class="sb-label">🗓️ برنامه هفتگی</span></button><button onclick="showSection('budget',this)" data-nav-label="⏱️ بودجه ساعات تدریس"><span class="sb-icon">📊 </span><span class="sb-label">⏱️ بودجه ساعات تدریس</span></button><button onclick="showSection('bookBudget',this)" data-nav-label="📘 بودجه‌بندی تدریس کتاب"><span class="sb-icon">📘</span><span class="sb-label">📘 بودجه‌بندی تدریس کتاب</span></button><button onclick="showSection('attention',this)" data-nav-label="⚠️ نیازمند توجه"><span class="sb-icon">⚠️</span><span class="sb-label">⚠️ نیازمند توجه</span></button><button onclick="showSection('backup',this)" data-nav-label="💾 پشتیبان"><span class="sb-icon">💾 </span><span class="sb-label">💾 پشتیبان</span></button><button onclick="showSection('designers',this)" data-nav-label="👨‍💻 طراحان برنامه"><span class="sb-icon">👨‍💻</span><span class="sb-label">👨‍💻 طراحان برنامه</span></button></nav></div><div class="sidebar-footer"><button class="nav-logout-btn" type="button" onclick="logoutOfflineAccount()"><span class="sb-icon">🚪</span><span class="sb-label">🚪 خروج از حساب</span></button><button class="sidebar-collapse" type="button" onclick="toggleSidebar()"><span class="sb-icon">‹</span><span class="sb-label">جمع‌کردن منو</span></button></div></aside></div>
 
 <!-- =====================================================
      کارتابل معلم
@@ -2126,6 +2126,10 @@ id="attendanceDate"
 placeholder="مثلاً ۱۴۰۵/۰۶/۲۳"
 onchange="renderAttendance()"
 >
+<div class="attendance-date-tools" style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
+<button class="btn btn-primary" type="button" onclick="moveAttendanceDate()">✏️ اصلاح تاریخ ثبت‌شده</button>
+<button class="btn btn-gray" type="button" onclick="deleteAttendanceDate()">🗑️ حذف حضور و غیاب این تاریخ</button>
+</div>
 
 <div
 id="attendanceTable"
@@ -3372,10 +3376,11 @@ class="section"
 
 <div class="success-box">
 
-پیشنهاد می‌کنم هر چند وقت یک‌بار فایل پشتیبان بگیری
-تا اطلاعات دانش‌آموزان، عکس‌ها، ارزشیابی‌ها و پوشه‌کارها محفوظ بماند.
+فایل پشتیبان شامل اطلاعات کلاس‌ها، عکس‌ها و صوت‌های قابل بازیابی است.
+در نسخه اندروید، برنامه پس از ورود و در اولین اجرای هر روز تلاش می‌کند یک نسخه خودکار در پوشه Download/DaftarKelasiBackups ذخیره کند.
 
 </div>
+<div id="autoBackupStatus" class="info-box" role="status" style="margin:12px 0">وضعیت پشتیبان خودکار پس از ورود نمایش داده می‌شود. برای اطمینان، فایل‌های موجود در پوشه پشتیبان را گاهی در فضای ابری شخصی یا رایانه کپی کنید.</div>
 
 
 <br>
@@ -3409,9 +3414,21 @@ onchange="importData(event)"
 
 
 
+<section id="designers" class="section">
+<div class="card" style="text-align:center">
+<h2>👨‍💻 طراحان برنامه</h2>
+<div style="max-width:520px;margin:18px auto;display:grid;gap:12px">
+<div style="padding:18px;border-radius:14px;background:linear-gradient(135deg,#087f8c,#16a085);color:#fff;font-size:20px;font-weight:bold">۱. محمد حسین ممشلی</div>
+<div style="padding:16px;border-radius:14px;background:#eef7f8;color:#24545a;font-size:18px;font-weight:bold">۲. مهدی کاغذلو</div>
+<div style="padding:16px;border-radius:14px;background:#f1f5fb;color:#304b70;font-size:18px;font-weight:bold">۳. نوید دیبایی</div>
+</div>
+<p>با سپاس از همراهی شما در توسعهٔ دفتر کلاسی من 🌷</p>
+</div>
+</section>
+
 <div class="footer">
 
-📚 دفتر کلاسی من | نسخه 4.1 حرفه‌ای معلم
+📚 دفتر کلاسی من | نسخه 5.4.0
 
 </div>
 
@@ -4049,7 +4066,7 @@ function enterAuthenticatedApp(){
     const home=document.getElementById("home"), app=document.getElementById("app");
     if(home)home.classList.remove("hidden"); if(app)app.classList.add("hidden");
     currentClass=null;
-    initializeScalableStorage().then(function(){refreshAll();renderHeaderImages();}).catch(function(){refreshAll();renderHeaderImages();});
+    initializeScalableStorage().then(function(){refreshAll();renderHeaderImages();setTimeout(runDailyAutoBackup,2500);}).catch(function(){refreshAll();renderHeaderImages();setTimeout(runDailyAutoBackup,4000);});
     updateAccountSecurityFields();
 }
 function updateAccountSecurityFields(){
@@ -6409,6 +6426,41 @@ async function exportAttendancePDF(mode){
         console.error(err);
         alert("ساخت PDF با خطا روبه‌رو شد. لطفاً دوباره تلاش کنید.");
     }
+}
+
+function moveAttendanceDate(){
+    const oldDate = normalizePersianDate(document.getElementById("attendanceDate").value);
+    if(!oldDate){ alert("ابتدا تاریخ فعلی ثبت حضور و غیاب را وارد کنید."); return; }
+    const newRaw = prompt("تاریخ صحیح را وارد کنید (مثلاً ۱۴۰۵/۰۶/۲۳):", oldDate);
+    if(newRaw === null) return;
+    const newDate = normalizePersianDate(newRaw);
+    if(!newDate || newDate === oldDate){ alert(newDate === oldDate ? "تاریخ جدید با تاریخ فعلی یکسان است." : "تاریخ واردشده معتبر نیست."); return; }
+    const data = getClassData();
+    const records = data.attendance.filter(item => normalizePersianDate(item.date) === oldDate);
+    if(!records.length){ alert("برای این تاریخ رکوردی ثبت نشده است."); return; }
+    const collisions = records.some(rec => data.attendance.some(other =>
+        other !== rec && String(other.studentId) === String(rec.studentId) &&
+        normalizePersianDate(other.date) === newDate));
+    if(collisions && !confirm("برای تاریخ جدید بعضی دانش‌آموزان رکورد دارند. ادامه باعث جایگزینی رکوردهای هم‌دانش‌آموز در تاریخ جدید می‌شود. ادامه می‌دهید؟")) return;
+    records.forEach(rec => {
+        data.attendance = data.attendance.filter(other => !(other !== rec &&
+            String(other.studentId) === String(rec.studentId) &&
+            normalizePersianDate(other.date) === newDate));
+        rec.date = newDate;
+    });
+    document.getElementById("attendanceDate").value = newDate;
+    Promise.resolve(saveDatabase()).then(() => { renderAttendance(); updateDashboard(); alert("تاریخ حضور و غیاب اصلاح شد."); });
+}
+
+function deleteAttendanceDate(){
+    const date = normalizePersianDate(document.getElementById("attendanceDate").value);
+    if(!date){ alert("ابتدا تاریخ را وارد کنید."); return; }
+    const data = getClassData();
+    const count = data.attendance.filter(item => normalizePersianDate(item.date) === date).length;
+    if(!count){ alert("برای این تاریخ رکوردی ثبت نشده است."); return; }
+    if(!confirm("تمام "+count+" رکورد حضور و غیاب تاریخ "+date+" حذف شود؟ این کار قابل بازگشت نیست.")) return;
+    data.attendance = data.attendance.filter(item => normalizePersianDate(item.date) !== date);
+    Promise.resolve(saveDatabase()).then(() => { renderAttendance(); updateDashboard(); alert("رکوردهای این تاریخ حذف شدند."); });
 }
 
 function editAttendanceRecord(studentId){
@@ -10362,6 +10414,59 @@ async function exportData(){
     const blob=new Blob([data],{type:"application/json"});
     await deliverFile("پشتیبان-دفتر-کلاسی.json", blob);
     alert("پشتیبان اطلاعات تهیه شد. صوت‌های ثبت‌شده نیز در صورت پشتیبانی دستگاه داخل فایل قرار گرفتند.");
+}
+
+
+/* پشتیبان خودکار روزانه: فقط روی اندروید و در زمان باز بودن برنامه اجرا می‌شود. */
+function localGregorianDayKey(){
+    const d=new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function setAutoBackupStatus(message){
+    const el=document.getElementById("autoBackupStatus");
+    if(el) el.textContent=message;
+}
+async function createCompleteBackupObject(){
+    const backup=JSON.parse(JSON.stringify(database||{}));
+    await hydrateMedia(backup);
+    backup.voiceClips=[];
+    const ids=await collectAllVoiceIds();
+    for(const id of ids){
+        try{ const blob=await getVoiceBlob(id); if(blob) backup.voiceClips.push({id:id,data:await blobToDataURL(blob)}); }catch(e){}
+    }
+    backup.backupMetadata={format:"daftar-kelasi-backup",version:1,createdAt:new Date().toISOString(),username:activeAccountUsername||""};
+    return backup;
+}
+async function runDailyAutoBackup(){
+    if(!activeAccountUsername || !database) return;
+    const bridge=window.AndroidFileBridge;
+    if(!bridge || typeof bridge.saveDailyBackup!=="function"){
+        setAutoBackupStatus("پشتیبان خودکار مستقیم فقط در نسخه اندروید پشتیبانی می‌شود؛ از دکمه دریافت فایل پشتیبان استفاده کنید.");
+        return;
+    }
+    const day=localGregorianDayKey();
+    try{ if(localStorage.getItem("daftar_auto_backup_day_v1")===day){setAutoBackupStatus("پشتیبان خودکار امروز قبلاً ذخیره شده است. پوشه Download/DaftarKelasiBackups را بررسی کنید.");return;} }catch(e){}
+    const hasData=["1","2","3","4","5","6","multi"].some(function(c){
+        const d=database[c]; return d && ((d.students||[]).length || (d.attendance||[]).length || (d.homework||[]).length || (d.portfolio||[]).length || (d.evaluations||[]).length);
+    });
+    if(!hasData){setAutoBackupStatus("هنوز داده‌ای برای پشتیبان‌گیری خودکار پیدا نشد.");return;}
+    setAutoBackupStatus("در حال تهیه پشتیبان خودکار روزانه...");
+    try{
+        const backup=await createCompleteBackupObject();
+        const bytes=new TextEncoder().encode(JSON.stringify(backup));
+        const base64=dfBytesToBase64(bytes);
+        const filename="DaftarKelasi-AutoBackup-"+day+".json";
+        const ok=bridge.saveDailyBackup(filename,"application/json",base64);
+        if(ok){
+            try{localStorage.setItem("daftar_auto_backup_day_v1",day);}catch(e){}
+            setAutoBackupStatus("پشتیبان خودکار امروز ذخیره شد: Download/DaftarKelasiBackups/"+filename+". این فایل را در فضای ابری شخصی یا رایانه نیز کپی کنید.");
+        }else{
+            setAutoBackupStatus("ذخیره خودکار انجام نشد. از «دریافت فایل پشتیبان» استفاده کنید و فایل را در پوشه Downloads ذخیره کنید.");
+        }
+    }catch(e){
+        console.error("Daily backup failed",e);
+        setAutoBackupStatus("تهیه پشتیبان خودکار ناموفق بود؛ لطفاً از دکمه دریافت فایل پشتیبان استفاده کنید.");
+    }
 }
 
 
