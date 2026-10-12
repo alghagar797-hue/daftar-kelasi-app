@@ -3377,6 +3377,7 @@ class="section"
 <div class="success-box">
 
 فایل پشتیبان شامل اطلاعات کلاس‌ها، عکس‌ها و صوت‌های قابل بازیابی است.
+پس از نصب دوباره، ابتدا با اکانت قبلی وارد شوید یا اکانت تازه بسازید و سپس همین فایل را انتخاب کنید؛ اطلاعات فایل به اکانت فعلی وارد می‌شود. این کار بدون سرور اختصاصی هم انجام می‌شود.
 در نسخه اندروید، برنامه پس از ورود و در اولین اجرای هر روز تلاش می‌کند یک نسخه خودکار در پوشه Download/DaftarKelasiBackups ذخیره کند.
 
 </div>
@@ -3400,6 +3401,7 @@ onclick="exportData()"
 <h3>
 📤 بازیابی اطلاعات
 </h3>
+<p class="muted">هشدار: بازیابی، اطلاعات فعلی اکانت واردشده را با اطلاعات فایل جایگزین می‌کند. برای انتقال به اکانت دیگر، ابتدا وارد همان اکانت مقصد شوید.</p>
 
 
 <input
@@ -3428,7 +3430,7 @@ onchange="importData(event)"
 
 <div class="footer">
 
-📚 دفتر کلاسی من | نسخه 5.4.0
+📚 دفتر کلاسی من | نسخه 5.4.1
 
 </div>
 
@@ -3777,8 +3779,9 @@ function openLegacyRosterDB(dbName){
                 // فقط برای تشخیص Store؛ هیچ داده‌ای در DB قدیمی ایجاد یا حذف نمی‌کنیم.
                 const db=req.result;
                 if(!db.objectStoreNames.contains("rosters")){
+                    // هرگز پایگاه دادهٔ قدیمی را برای تشخیص ساختار حذف نکن؛ ممکن است
+                    // اطلاعات دیگری در آن باشد. فقط آن را نادیده می‌گیریم.
                     try{ db.close(); }catch(e){}
-                    try{ indexedDB.deleteDatabase(dbName); }catch(e){}
                     if(!settled){settled=true;resolve(null);}
                 }
             };
@@ -4098,11 +4101,36 @@ async function changeCurrentAccountCredentials(){
     const name=teacherFullName(); if(document.getElementById("headerTeacherName"))document.getElementById("headerTeacherName").textContent=name;
     setAuthMessage("accountSecurityMessage","✅ نام کاربری/رمز با موفقیت تغییر کرد.","success");
 }
-function logoutOfflineAccount(){
+async function logoutOfflineAccount(){
     if(!activeAccountUsername)return;
-    activeAccountUsername=""; currentClass=null; try{ localStorage.removeItem(SESSION_STORAGE_KEY); localStorage.removeItem(LAST_USER_KEY); localStorage.setItem(LOGGED_OUT_KEY,"1"); }catch(e){} setCloudToken(""); showAuthOverlay(); showAuthMode("login");
-    const u=document.getElementById("authLoginUsername"); const pw=document.getElementById("authLoginPassword"); if(u)u.value="";if(pw)pw.value="";
-    setAuthMessage("authLoginMessage","از حساب خارج شدید.","success");
+    const usernameBeforeLogout=activeAccountUsername;
+    // ذخیرهٔ نهایی پیش از پاک‌کردن وضعیت نشست؛ خروج نباید ذخیره‌های در صف را جا بگذارد.
+    try{
+        await saveDatabase();
+        await accountSaveQueue;
+        if(database){
+            const snapshot=prepareMediaSnapshot(cloneForSync(database),[],new Set());
+            try{ localStorage.setItem(accountDataKey(usernameBeforeLogout),JSON.stringify(snapshot)); }
+            catch(storageError){ console.warn("Final local account snapshot could not be written",storageError); }
+        }
+    }catch(saveError){
+        console.error("Final save before logout failed",saveError);
+    }
+    activeAccountUsername="";
+    currentClass=null;
+    try{
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+        localStorage.removeItem(LAST_USER_KEY);
+        localStorage.setItem(LOGGED_OUT_KEY,"1");
+    }catch(e){}
+    setCloudToken("");
+    showAuthOverlay();
+    showAuthMode("login");
+    const u=document.getElementById("authLoginUsername");
+    const pw=document.getElementById("authLoginPassword");
+    if(u)u.value="";
+    if(pw)pw.value="";
+    setAuthMessage("authLoginMessage","از حساب خارج شدید. اطلاعات این حساب حذف نشده است.","success");
 }
 async function initializeOfflineAuth(){
     /* درخواست ذخیره‌سازی ماندگار پیش از هر کار دیگر، تا مرورگر/WebView داده‌ها را خودسرانه پاک نکند. */
@@ -10372,7 +10400,7 @@ function renderMonthlyPerformance(){
 
 async function collectAllVoiceIds(){
     const ids=new Set();
-    ["1","2","3","4","5","6"].forEach(function(c){
+    ["1","2","3","4","5","6","multi"].forEach(function(c){
         const d=database[c]; if(!d) return;
         ["evaluations","grades","feedback","monthlyPerformance"].forEach(function(key){
             (d[key]||[]).forEach(function(item){if(item.voiceId) ids.add(item.voiceId);});
@@ -10470,118 +10498,80 @@ async function runDailyAutoBackup(){
 }
 
 
-function importData(event){
-
-    const file =
-        event.target.files[0];
-
-
-    if(!file){
-
+async function importData(event){
+    const input=event && event.target;
+    const file=input && input.files && input.files[0];
+    if(!file) return;
+    if(!activeAccountUsername){
+        alert("ابتدا با اکانت قبلی وارد شوید یا یک اکانت تازه بسازید؛ سپس فایل پشتیبان را بازیابی کنید.");
+        if(input) input.value="";
         return;
-
     }
-
-
-    const reader =
-        new FileReader();
-
-
-    reader.onload =
-        function(e){
-
+    const confirmed=confirm(
+        "فایل پشتیبان برای اکانت «"+activeAccountUsername+"» بازیابی می‌شود. اطلاعات فعلی این اکانت با اطلاعات فایل جایگزین خواهد شد.\n\n"+
+        "اگر اطلاعات فعلی مهم است، ابتدا از آن پشتیبان بگیرید. ادامه می‌دهید؟"
+    );
+    if(!confirmed){ if(input) input.value=""; return; }
+    try{
+        const text=await file.text();
+        let imported=JSON.parse(text);
+        // پشتیبانی از فایل مستقیم و فایل‌هایی که اطلاعات را داخل data قرار داده‌اند.
+        if(imported && imported.data && typeof imported.data==="object" && !imported["1"] && !imported["2"] && !imported["3"] && !imported["4"] && !imported["5"] && !imported["6"]){
+            imported=imported.data;
+        }
+        if(!imported || typeof imported!=="object" || Array.isArray(imported) ||
+           !["1","2","3","4","5","6","multi"].some(function(k){return imported[k] && typeof imported[k]==="object";})){
+            throw new Error("این فایل ساختار پشتیبان دفتر کلاسی را ندارد.");
+        }
+        const importedVoiceClips=Array.isArray(imported.voiceClips)?imported.voiceClips:[];
+        // داده را با ساختار نسخه جاری مهاجرت می‌دهیم؛ کلیدهای کلاس و رکوردهای موجود حفظ می‌شوند.
+        delete imported.voiceClips;
+        delete imported.backupMetadata;
+        database=migrateDatabaseSafely(imported);
+        ["1","2","3","4","5","6","multi"].forEach(function(classNumber){
+            const data=database[classNumber];
+            ["portfolio","grades","evaluations","feedback","goals","parents","interests","daily","weekly","budget","experiments","monthlyPerformance","attention","attendance","homework","students","groups","groupNames"].forEach(function(key){
+                if(!Array.isArray(data[key])) data[key]=[];
+            });
+            if(typeof data.weeklyImage==="undefined") data.weeklyImage="";
+            if(!Array.isArray(data.weeklyImages)) data.weeklyImages=[];
+            if(typeof data.budgetHours==="undefined") data.budgetHours=null;
+            if(typeof data.budgetImage==="undefined") data.budgetImage="";
+            data.students.forEach(function(student){if(typeof student.photo==="undefined") student.photo="";});
+        });
+        // ابتدا داده کلاس‌ها را ذخیره می‌کنیم؛ سپس شناسه‌های صوتی را برای همین اکانت تازه/قدیمی بازسازی می‌کنیم.
+        await saveDatabase();
+        let restoredVoices=0, failedVoices=0;
+        const voiceIdMap={};
+        for(const item of importedVoiceClips){
+            if(!item || !item.id || !item.data) continue;
             try{
-
-                const imported =
-                    JSON.parse(
-                        e.target.result
-                    );
-
-
-                if(
-                    !imported["1"] && !imported["2"] && !imported["3"] &&
-                    !imported["4"] && !imported["5"] && !imported["6"]
-                ){
-                    throw new Error();
-                }
-
-
-                const importedVoiceClips = Array.isArray(imported.voiceClips) ? imported.voiceClips : [];
-                database =
-                    imported;
-
-
-                ["1","2","3","4","5","6","multi"].forEach(function(classNumber){
-                    if(!database[classNumber]) database[classNumber] = createClassData();
-                    const data = database[classNumber];
-                    if(!data.portfolio) data.portfolio = [];
-                    if(!data.grades) data.grades = [];
-                    if(!data.evaluations) data.evaluations = [];
-                    if(!data.feedback) data.feedback = [];
-                    if(!data.goals) data.goals = [];
-                    if(!data.parents) data.parents = [];
-                    if(!data.interests) data.interests = [];
-                    if(!data.daily) data.daily = [];
-                    if(!data.weekly) data.weekly = [];
-                    if(typeof data.weeklyImage === "undefined") data.weeklyImage = ""; if(!Array.isArray(data.weeklyImages)) data.weeklyImages = [];
-                    if(!data.budget) data.budget = [];
-                    if(typeof data.budgetHours === "undefined") data.budgetHours = null;
-                    if(typeof data.budgetImage === "undefined") data.budgetImage = "";
-                    if(!data.experiments) data.experiments = [];
-                    if(!data.monthlyPerformance) data.monthlyPerformance = [];
-                    if(!data.attention) data.attention = [];
-                    if(!data.attendance) data.attendance = [];
-                    if(!data.homework) data.homework = [];
-                    if(!data.students) data.students = [];
-                    data.students.forEach(function(student){
-                        if(typeof student.photo === "undefined") student.photo = "";
-                    });
+                const newId=await putVoiceBlob(dataURLToBlob(item.data));
+                voiceIdMap[item.id]=newId;
+                restoredVoices++;
+            }catch(err){ failedVoices++; console.warn("Voice restore failed",err); }
+        }
+        if(Object.keys(voiceIdMap).length){
+            ["1","2","3","4","5","6","multi"].forEach(function(c){
+                const d=database[c]; if(!d) return;
+                ["evaluations","grades","feedback","monthlyPerformance"].forEach(function(key){
+                    (d[key]||[]).forEach(function(record){if(record.voiceId && voiceIdMap[record.voiceId]) record.voiceId=voiceIdMap[record.voiceId];});
                 });
-
-                saveDatabase();
-
-                Promise.all((importedVoiceClips||[]).map(function(item){
-                    if(!item || !item.id || !item.data) return Promise.resolve();
-                    return putVoiceBlob(dataURLToBlob(item.data)).then(function(newId){
-                        ["1","2","3","4","5","6"].forEach(function(c){
-                            const d=database[c]; if(!d) return;
-                            ["evaluations","grades","feedback","monthlyPerformance"].forEach(function(key){
-                                (d[key]||[]).forEach(function(r){ if(r.voiceId===item.id) r.voiceId=newId; });
-                            });
-                        });
-                    }).catch(function(){});
-                })).then(function(){ saveDatabase(); });
-
-
-                if(currentClass){
-
-                    refreshAll();
-    renderTeacherCardSafe();
-
-                }
-
-
-                alert(
-                    "اطلاعات و عکس‌های دانش‌آموزان با موفقیت بازیابی شد."
-                );
-
-            }
-
-            catch(error){
-
-                alert(
-                    "فایل پشتیبان معتبر نیست."
-                );
-
-            }
-
-        };
-
-
-    reader.readAsText(file);
-
+            });
+        }
+        await saveDatabase();
+        if(currentClass) refreshAll();
+        try{ renderTeacherCardSafe(); }catch(e){}
+        if(input) input.value="";
+        alert("بازیابی اطلاعات با موفقیت انجام شد.\nاکانت مقصد: "+activeAccountUsername+"\nاطلاعات کلاس‌ها، عکس‌ها و سوابق موجود در فایل به این اکانت وارد شد."+
+              (restoredVoices?"\nتعداد فایل‌های صوتی بازیابی‌شده: "+restoredVoices:"\nدر فایل، صوت قابل بازیابی وجود نداشت.")+
+              (failedVoices?"\nتعداد صوت‌های ناموفق: "+failedVoices:""));
+    }catch(error){
+        console.error("Backup import failed",error);
+        if(input) input.value="";
+        alert("بازیابی انجام نشد. فایل پشتیبان معتبر نیست یا ذخیره اطلاعات با خطا روبه‌رو شد.\n"+(error && error.message?error.message:"لطفاً فایل دیگری را بررسی کنید."));
+    }
 }
-
 
 /* =====================================================
    به‌روزرسانی همه بخش‌ها
