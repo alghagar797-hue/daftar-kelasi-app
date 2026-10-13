@@ -3062,7 +3062,7 @@ class="table-wrapper"
     <div class="book-budget-image-card">
       <div class="book-budget-image-head"><div><b>🖼️ تصویر بودجه‌بندی</b><small>در صورت داشتن جدول یا بخشنامه بودجه‌بندی، می‌توانی عکس آن را هم کنار جدول ذخیره کنی.</small></div>
       <label class="btn btn-primary book-budget-upload-label" for="bookBudgetImageInput">📤 آپلود عکس بودجه‌بندی</label>
-      <input id="bookBudgetImageInput" type="file" accept="image/*" onchange="saveBookBudgetImage(event)" hidden></div>
+      <input id="bookBudgetImageInput" type="file" accept="image/*" multiple onchange="saveBookBudgetImage(event)" hidden></div>
       <div id="bookBudgetImageBox"></div>
     </div>
     <div class="book-budget-note">💡 اطلاعات جدول و تصویر برای پایه انتخاب‌شده و کلاس فعال، به‌صورت آفلاین روی همین دستگاه ذخیره می‌شود.</div>
@@ -3779,9 +3779,8 @@ function openLegacyRosterDB(dbName){
                 // فقط برای تشخیص Store؛ هیچ داده‌ای در DB قدیمی ایجاد یا حذف نمی‌کنیم.
                 const db=req.result;
                 if(!db.objectStoreNames.contains("rosters")){
-                    // هرگز پایگاه دادهٔ قدیمی را برای تشخیص ساختار حذف نکن؛ ممکن است
-                    // اطلاعات دیگری در آن باشد. فقط آن را نادیده می‌گیریم.
                     try{ db.close(); }catch(e){}
+                    try{ indexedDB.deleteDatabase(dbName); }catch(e){}
                     if(!settled){settled=true;resolve(null);}
                 }
             };
@@ -4101,36 +4100,11 @@ async function changeCurrentAccountCredentials(){
     const name=teacherFullName(); if(document.getElementById("headerTeacherName"))document.getElementById("headerTeacherName").textContent=name;
     setAuthMessage("accountSecurityMessage","✅ نام کاربری/رمز با موفقیت تغییر کرد.","success");
 }
-async function logoutOfflineAccount(){
+function logoutOfflineAccount(){
     if(!activeAccountUsername)return;
-    const usernameBeforeLogout=activeAccountUsername;
-    // ذخیرهٔ نهایی پیش از پاک‌کردن وضعیت نشست؛ خروج نباید ذخیره‌های در صف را جا بگذارد.
-    try{
-        await saveDatabase();
-        await accountSaveQueue;
-        if(database){
-            const snapshot=prepareMediaSnapshot(cloneForSync(database),[],new Set());
-            try{ localStorage.setItem(accountDataKey(usernameBeforeLogout),JSON.stringify(snapshot)); }
-            catch(storageError){ console.warn("Final local account snapshot could not be written",storageError); }
-        }
-    }catch(saveError){
-        console.error("Final save before logout failed",saveError);
-    }
-    activeAccountUsername="";
-    currentClass=null;
-    try{
-        localStorage.removeItem(SESSION_STORAGE_KEY);
-        localStorage.removeItem(LAST_USER_KEY);
-        localStorage.setItem(LOGGED_OUT_KEY,"1");
-    }catch(e){}
-    setCloudToken("");
-    showAuthOverlay();
-    showAuthMode("login");
-    const u=document.getElementById("authLoginUsername");
-    const pw=document.getElementById("authLoginPassword");
-    if(u)u.value="";
-    if(pw)pw.value="";
-    setAuthMessage("authLoginMessage","از حساب خارج شدید. اطلاعات این حساب حذف نشده است.","success");
+    activeAccountUsername=""; currentClass=null; try{ localStorage.removeItem(SESSION_STORAGE_KEY); localStorage.removeItem(LAST_USER_KEY); localStorage.setItem(LOGGED_OUT_KEY,"1"); }catch(e){} setCloudToken(""); showAuthOverlay(); showAuthMode("login");
+    const u=document.getElementById("authLoginUsername"); const pw=document.getElementById("authLoginPassword"); if(u)u.value="";if(pw)pw.value="";
+    setAuthMessage("authLoginMessage","از حساب خارج شدید.","success");
 }
 async function initializeOfflineAuth(){
     /* درخواست ذخیره‌سازی ماندگار پیش از هر کار دیگر، تا مرورگر/WebView داده‌ها را خودسرانه پاک نکند. */
@@ -8874,28 +8848,44 @@ function saveBookBudget(){
 function resetBookBudget(){ if(!confirm('بودجه‌بندی تدریس کتاب این پایه پاک و خالی شود؟')) return; const grade=document.getElementById('bookBudgetGrade')?.value||'3'; const data=getClassData(); if(!data){ if(window.__bookBudgetPreviewData) window.__bookBudgetPreviewData.bookBudgets[String(grade)]=blankBookBudget(); renderBookBudget(); return; } data.bookBudgets=data.bookBudgets||{}; data.bookBudgets[String(grade)]=blankBookBudget(); saveDatabase(); renderBookBudget(); }
 
 async function saveBookBudgetImage(event){
-  const file=event.target.files && event.target.files[0]; if(!file) return;
+  const files=Array.from(event.target.files||[]).filter(function(file){return file.type && file.type.indexOf('image/')===0;});
+  if(!files.length) return;
   try{
     const grade=document.getElementById('bookBudgetGrade')?.value||'3';
-    const data=getClassData(); if(!data) return;
+    const data=getClassData(); if(!data){ alert('ابتدا یک کلاس را انتخاب کنید.'); return; }
     if(!data.bookBudgetImages || typeof data.bookBudgetImages!=='object') data.bookBudgetImages={};
-    data.bookBudgetImages[String(grade)]=await resizeImage(file,1400,0.85);
-    saveDatabase(); renderBookBudgetImage(grade); updateDashboard(); alert('تصویر بودجه‌بندی با موفقیت ذخیره شد.');
-  }catch(e){ alert('در ذخیره تصویر بودجه‌بندی مشکلی پیش آمد.'); }
+    const key=String(grade), old=data.bookBudgetImages[key];
+    // سازگاری با نسخه‌های قدیمی که فقط یک تصویر رشته‌ای ذخیره می‌کردند.
+    let images=Array.isArray(old)?old.slice():(old?[old]:[]);
+    for(const file of files){
+      if(file.size>15*1024*1024){ alert('تصویر «'+file.name+'» بیشتر از ۱۵ مگابایت است و اضافه نشد.'); continue; }
+      images.push(await resizeImage(file,1400,0.82));
+    }
+    data.bookBudgetImages[key]=images;
+    saveDatabase(); renderBookBudgetImage(grade); updateDashboard();
+    alert(files.length===1?'تصویر بودجه‌بندی ذخیره شد.':'تصاویر انتخاب‌شده به بودجه‌بندی اضافه شدند.');
+  }catch(e){ console.error('save book budget images',e); alert('در ذخیره تصاویر مشکلی پیش آمد. اگر فضای ذخیره‌سازی پر است، عکس‌های کم‌حجم‌تری انتخاب کنید.'); }
   event.target.value='';
 }
 function renderBookBudgetImage(grade){
   const box=document.getElementById('bookBudgetImageBox'); if(!box) return;
   const data=getClassData(); if(!data){ box.innerHTML='<div class="book-budget-image-empty">🖼️ برای ذخیره و نمایش تصویر، ابتدا یک کلاس را انتخاب کنید.</div>'; return; }
-  const image=data.bookBudgetImages && data.bookBudgetImages[String(grade)] ? data.bookBudgetImages[String(grade)] : '';
-  if(!image){ box.innerHTML='<div class="book-budget-image-empty">🖼️ هنوز تصویری برای این پایه ثبت نشده است.</div>'; return; }
-  box.innerHTML='<div class="book-budget-image-preview"><img src="'+image+'" alt="تصویر بودجه‌بندی تدریس کتاب" onclick="showImageLarge(this.src)"><button class="btn btn-danger" type="button" onclick="deleteBookBudgetImage()">🗑️ حذف تصویر</button></div>';
+  const raw=data.bookBudgetImages && data.bookBudgetImages[String(grade)];
+  const images=Array.isArray(raw)?raw:(raw?[raw]:[]);
+  if(!images.length){ box.innerHTML='<div class="book-budget-image-empty">🖼️ هنوز تصویری برای این پایه ثبت نشده است. می‌توانید چند عکس را هم‌زمان انتخاب کنید.</div>'; return; }
+  box.innerHTML='<div class="book-budget-image-gallery">'+images.map(function(image,index){
+    return '<div class="book-budget-image-preview"><img src="'+image+'" alt="تصویر بودجه‌بندی '+(index+1)+'" onclick="showImageLarge(this.src)"><div class="book-budget-image-actions"><span>تصویر '+toPersianNumber(index+1)+'</span><button class="btn btn-danger btn-small" type="button" onclick="deleteBookBudgetImage('+index+')">🗑️ حذف این تصویر</button></div></div>';
+  }).join('')+'</div>';
 }
-function deleteBookBudgetImage(){
+function deleteBookBudgetImage(index){
   const grade=document.getElementById('bookBudgetGrade')?.value||'3';
   const data=getClassData(); if(!data) return;
-  if(!confirm('تصویر بودجه‌بندی این پایه حذف شود؟')) return;
-  if(data.bookBudgetImages) data.bookBudgetImages[String(grade)]='';
+  if(!confirm('این تصویر بودجه‌بندی حذف شود؟')) return;
+  const key=String(grade), raw=data.bookBudgetImages&&data.bookBudgetImages[key];
+  let images=Array.isArray(raw)?raw.slice():(raw?[raw]:[]);
+  if(typeof index!=='number') index=images.length-1;
+  if(index<0||index>=images.length) return;
+  images.splice(index,1); data.bookBudgetImages[key]=images;
   saveDatabase(); renderBookBudgetImage(grade);
 }
 
@@ -10973,29 +10963,40 @@ function editFeedback(id){var x=dfFind('feedback',id);if(!x)return;
  window.openJalaliCalendar=open;
 })();
 
-/* ===== کارتابل دانش‌آموز ===== */
+/* ===== کارتابل دانش‌آموز: حضور و غیاب روزانه و پیگیری فعالیت‌ها ===== */
 function renderStudentFile(){var s=document.getElementById('studentFileSelect');if(!s)return;fillStudentSelect('studentFileSelect');renderStudentFileBody()}
 function openStudentFile(id){showSection('studentFile');var s=document.getElementById('studentFileSelect');if(s){s.value=String(id);renderStudentFileBody()}}
 function renderStudentFileBody(){
  var box=document.getElementById('studentFileBody'),sel=document.getElementById('studentFileSelect');if(!box||!sel)return;
  var st=getStudent(sel.value);if(!st){box.innerHTML='<div class="empty-box">یک دانش‌آموز را انتخاب کنید.</div>';return}
- var d=getClassData(),id=String(st.id);
- function mine(c){return(d[c]||[]).filter(function(x){return String(x.studentId)===id}).slice().reverse()}
- function cnt(c,k,v){return mine(c).filter(function(x){return x[k]===v}).length}
- var E=mine('evaluations'),F=mine('feedback'),H=mine('homework'),G=mine('grades'),M=mine('monthlyPerformance'),P=mine('portfolio'),PA=mine('parents'),IN=mine('interests');
- function sec(t,arr,fn,open){return '<details class="sf-sec"'+(open?' open':'')+'><summary>'+t+' <i>'+toPersianNumber(arr.length)+' مورد</i></summary>'+(arr.length?arr.slice(0,10).map(function(x){return '<div class="sf-row">'+fn(x)+'</div>'}).join(''):'<div class="sf-row"><small>موردی ثبت نشده است.</small></div>')+'</details>'}
- function dt(x){return '<small>'+escapeHTML(formatPersianDate(x.date))+'</small>'}
+ var d=getClassData()||{},id=String(st.id);
+ function mine(c){return (Array.isArray(d[c])?d[c]:[]).filter(function(x){return String(x.studentId)===id}).slice().reverse()}
+ function cnt(c,k,v){return mine(c).filter(function(x){return String(x[k]||'')===v}).length}
+ var A=mine('attendance'),E=mine('evaluations'),F=mine('feedback'),H=mine('homework'),G=mine('grades'),M=mine('monthlyPerformance'),P=mine('portfolio'),PA=mine('parents'),IN=mine('interests'),EX=mine('experiments'),GO=mine('goals'),AT=mine('attention');
+ function sec(t,arr,fn,open){return '<details class="sf-sec"'+(open?' open':'')+'><summary>'+t+' <i>'+toPersianNumber(arr.length)+' مورد</i></summary>'+(arr.length?arr.slice(0,100).map(function(x){return '<div class="sf-row">'+fn(x)+'</div>'}).join(''):'<div class="sf-row"><small>موردی ثبت نشده است؛ اگر فعالیتی انجام شد، آن را در بخش مربوط ثبت کنید.</small></div>')+'</details>'}
+ function dt(x){var date=x.date||x.attendanceDate||x.createdAt||'';return date?'<small>'+escapeHTML(formatPersianDate(date))+'</small>':'<small>تاریخ ثبت نشده</small>'}
  function chip(n,l){return '<div class="sf-chip"><b>'+toPersianNumber(n)+'</b><small>'+l+'</small></div>'}
+ function activity(n,label){return '<div class="sf-activity-card"><b>'+toPersianNumber(n)+'</b><small>'+label+'</small></div>'}
+ var attendRows=A.slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));});
+ var attendanceHtml=sec('📆 سوابق روزانه حضور و غیاب',attendRows,function(x){var status=String(x.status||'ثبت‌نشده');var reason=x.reason||x.notes||x.description||'';return dt(x)+' <span class="sf-attendance-status">'+escapeHTML(status)+'</span>'+(reason?'<div>'+escapeHTML(reason)+'</div>':'')},true);
+ var homeworkDone=H.filter(function(x){return ['انجام شد','انجام‌شده','کامل','انجام شده'].indexOf(String(x.status||''))>=0}).length;
+ var homeworkNotDone=H.filter(function(x){return ['ناقص','انجام نشده','انجام‌نشده','ندارد'].indexOf(String(x.status||''))>=0}).length;
  box.innerHTML='<div class="sf-top">'+(st.photo?'<img src="'+st.photo+'" alt="">':'<div class="sf-ph">👤</div>')+'<div><b style="font-size:18px">'+escapeHTML(st.firstName+' '+st.lastName)+'</b><div style="color:#607d8b">'+escapeHTML(getStudentGradeLabel(st.grade))+(st.notes?' · '+escapeHTML(st.notes):'')+'</div></div><button class="btn btn-blue btn-small" type="button" onclick="editStudent(\''+id+'\')">✏️ ویرایش اطلاعات</button></div>'+
- '<div class="sf-chips">'+chip(cnt('attendance','status','حاضر'),'حاضر')+chip(cnt('attendance','status','غایب'),'غایب')+chip(cnt('attendance','status','تأخیر'),'تأخیر')+chip(cnt('homework','status','انجام شد'),'تکلیف انجام‌شده')+chip(cnt('homework','status','ناقص')+cnt('homework','status','انجام نشده'),'تکلیف ناقص/نشده')+chip(P.length,'نمونه‌کار')+'</div>'+
- sec('📚 تکالیف',H,function(x){return dt(x)+escapeHTML(x.status||'')+(x.feedback?' — '+escapeHTML(x.feedback):'')},true)+
+ '<div class="sf-chips">'+chip(cnt('attendance','status','حاضر'),'روزهای حاضر')+chip(cnt('attendance','status','غایب'),'روزهای غایب')+chip(cnt('attendance','status','تأخیر'),'روزهای تأخیر')+chip(homeworkDone,'تکالیف انجام‌شده')+chip(homeworkNotDone,'تکالیف ناقص/انجام‌نشده')+chip(P.length,'نمونه‌کارهای ثبت‌شده')+'</div>'+
+ '<h3>📊 خلاصه فعالیت‌های ثبت‌شده</h3><div class="sf-activity-grid">'+activity(A.length,'روزهای ثبت حضور و غیاب')+activity(H.length,'تکالیف ثبت‌شده')+activity(E.length,'ارزشیابی‌ها')+activity(F.length,'بازخوردهای آموزشی')+activity(G.length,'ارزشیابی کیفی')+activity(M.length,'گزارش‌های عملکرد ماهانه')+activity(P.length,'نمونه‌کارها')+activity(EX.length,'آزمایش‌های علوم')+activity(GO.length,'اهداف آموزشی')+activity(AT.length,'موارد نیازمند توجه')+'</div>'+attendanceHtml+
+ sec('📚 تکالیف و انجام فعالیت‌ها',H,function(x){return dt(x)+' <b>'+escapeHTML(x.title||x.subject||'تکلیف')+'</b> — <span class="sf-attendance-status">'+escapeHTML(x.status||'وضعیت ثبت نشده')+'</span>'+(x.feedback?'<div>'+escapeHTML(x.feedback)+'</div>':'')},true)+
  sec('⭐ ارزشیابی',E,function(x){return dt(x)+'<b>'+escapeHTML(x.subject||'')+'</b> · '+escapeHTML(x.level||'')+(x.notes?'<br>'+escapeHTML(x.notes):'')})+
- sec('💬 بازخورد آموزشی',F,function(x){return dt(x)+(x.subject?'<b>'+escapeHTML(x.subject)+'</b> · ':'')+escapeHTML(x.notes||'')})+
+ sec('💬 بازخورد آموزشی',F,function(x){return dt(x)+(x.subject?'<b>'+escapeHTML(x.subject)+'</b> · ':'')+escapeHTML(x.notes||x.feedback||'')})+
  sec('📝 ارزشیابی کیفی',G,function(x){return dt(x)+'<b>'+escapeHTML(x.subject||'')+'</b> · '+escapeHTML(x.level||'')+(x.notes?'<br>'+escapeHTML(x.notes):'')})+
- sec('📅 عملکرد ماهانه',M,function(x){return '<small>'+escapeHTML(x.month||'')+'</small>'+escapeHTML([x.academic,x.notes].filter(Boolean).join(' · '))})+
- sec('👨‍👩‍👧 والدین',PA,function(x){return '<b>'+escapeHTML(x.name||'')+'</b> · '+escapeHTML(x.relation||'')+' · '+escapeHTML(x.phone||'')})+
- sec('❤️ علاقه‌مندی‌ها',IN,function(x){return escapeHTML(x.text||'')});
+ sec('📅 عملکرد ماهانه',M,function(x){return '<small>'+escapeHTML(x.month||'')+'</small> '+escapeHTML([x.academic,x.notes].filter(Boolean).join(' · '))})+
+ sec('📁 پوشه‌کار و نمونه‌فعالیت‌ها',P,function(x){return dt(x)+'<b>'+escapeHTML(x.subject||'')+'</b> · '+escapeHTML(x.title||'نمونه‌کار')+(x.notes?'<div>'+escapeHTML(x.notes)+'</div>':'')+'<small> · '+toPersianNumber((Array.isArray(x.photos)?x.photos.length:(x.photo?1:0)))+' تصویر</small>'})+
+ sec('🔬 آزمایش‌های علوم',EX,function(x){return dt(x)+'<b>'+escapeHTML(x.title||x.subject||'فعالیت علمی')+'</b> '+escapeHTML(x.status||'')+(x.notes?'<div>'+escapeHTML(x.notes)+'</div>':'')})+
+ sec('🎯 اهداف آموزشی',GO,function(x){return dt(x)+escapeHTML(x.title||x.text||x.goal||'هدف آموزشی')+' '+escapeHTML(x.status||'')})+
+ sec('⚠️ نیازمند توجه',AT,function(x){return dt(x)+escapeHTML(x.title||x.reason||x.notes||'مورد ثبت‌شده')})+
+ sec('👨‍👩‍👧 اطلاعات والدین',PA,function(x){return '<b>'+escapeHTML(x.name||'')+'</b> · '+escapeHTML(x.relation||'')+' · '+escapeHTML(x.phone||'')})+
+ sec('❤️ علاقه‌مندی‌ها',IN,function(x){return escapeHTML(x.text||x.interest||'')});
 }
+
 </script>
 
 
@@ -11292,5 +11293,16 @@ html body .photo-preview img,html body .student-photo{border-radius:16px}
 }
 
 </style>
-</body>
+<style id="student-file-and-budget-multi-image-v1">
+.book-budget-image-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.book-budget-image-gallery .book-budget-image-preview{margin:0;min-width:0}
+.book-budget-image-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;color:#48616b}
+.sf-attendance-status{display:inline-block;padding:2px 9px;border-radius:999px;background:#eef7ff;color:#175b85;font-weight:800;margin:0 5px}
+.sf-activity-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;margin:14px 0}
+.sf-activity-card{border:1px solid #e2e8f0;border-radius:12px;padding:11px;background:#fff}
+.sf-activity-card b{display:block;font-size:18px;color:#0f766e}
+.sf-activity-card small{color:#64748b}
+@media(max-width:600px){.book-budget-image-gallery{grid-template-columns:1fr}.book-budget-image-actions .btn{flex:1}}
+</style>
+<style id="ui-refresh-v9">
 </html>
