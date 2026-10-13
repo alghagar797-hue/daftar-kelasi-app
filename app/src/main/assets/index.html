@@ -2129,6 +2129,7 @@ onchange="renderAttendance()"
 <div class="attendance-date-tools" style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
 <button class="btn btn-primary" type="button" onclick="moveAttendanceDate()">✏️ اصلاح تاریخ ثبت‌شده</button>
 <button class="btn btn-gray" type="button" onclick="deleteAttendanceDate()">🗑️ حذف حضور و غیاب این تاریخ</button>
+<div class="info-box" style="flex-basis:100%;margin-top:8px">اصلاح یا حذف فقط روی تاریخ انتخاب‌شده در بالای این بخش انجام می‌شود. پیش از حذف، تاریخ را دوباره بررسی کنید.</div>
 </div>
 
 <div
@@ -3062,7 +3063,7 @@ class="table-wrapper"
     <div class="book-budget-image-card">
       <div class="book-budget-image-head"><div><b>🖼️ تصویر بودجه‌بندی</b><small>در صورت داشتن جدول یا بخشنامه بودجه‌بندی، می‌توانی عکس آن را هم کنار جدول ذخیره کنی.</small></div>
       <label class="btn btn-primary book-budget-upload-label" for="bookBudgetImageInput">📤 آپلود عکس بودجه‌بندی</label>
-      <input id="bookBudgetImageInput" type="file" accept="image/*" onchange="saveBookBudgetImage(event)" hidden></div>
+      <input id="bookBudgetImageInput" type="file" accept="image/*" multiple onchange="saveBookBudgetImage(event)" hidden></div>
       <div id="bookBudgetImageBox"></div>
     </div>
     <div class="book-budget-note">💡 اطلاعات جدول و تصویر برای پایه انتخاب‌شده و کلاس فعال، به‌صورت آفلاین روی همین دستگاه ذخیره می‌شود.</div>
@@ -8874,31 +8875,62 @@ function saveBookBudget(){
 function resetBookBudget(){ if(!confirm('بودجه‌بندی تدریس کتاب این پایه پاک و خالی شود؟')) return; const grade=document.getElementById('bookBudgetGrade')?.value||'3'; const data=getClassData(); if(!data){ if(window.__bookBudgetPreviewData) window.__bookBudgetPreviewData.bookBudgets[String(grade)]=blankBookBudget(); renderBookBudget(); return; } data.bookBudgets=data.bookBudgets||{}; data.bookBudgets[String(grade)]=blankBookBudget(); saveDatabase(); renderBookBudget(); }
 
 async function saveBookBudgetImage(event){
-  const file=event.target.files && event.target.files[0]; if(!file) return;
+  const files=Array.from((event.target && event.target.files) || []);
+  if(!files.length) return;
   try{
     const grade=document.getElementById('bookBudgetGrade')?.value||'3';
     const data=getClassData(); if(!data) return;
     if(!data.bookBudgetImages || typeof data.bookBudgetImages!=='object') data.bookBudgetImages={};
-    data.bookBudgetImages[String(grade)]=await resizeImage(file,1400,0.85);
-    saveDatabase(); renderBookBudgetImage(grade); updateDashboard(); alert('تصویر بودجه‌بندی با موفقیت ذخیره شد.');
-  }catch(e){ alert('در ذخیره تصویر بودجه‌بندی مشکلی پیش آمد.'); }
-  event.target.value='';
+
+    // سازگاری با نسخه‌های قبلی که فقط یک تصویر به‌صورت رشته ذخیره می‌کردند.
+    const existing=data.bookBudgetImages[String(grade)];
+    const images=Array.isArray(existing) ? existing.slice() : (existing ? [existing] : []);
+    let added=0;
+    for(const file of files){
+      if(!file.type || !file.type.startsWith('image/')) continue;
+      // تغییر اندازه برای کاهش حجم و جلوگیری از پرشدن سریع فضای ذخیره‌سازی
+      const image=await resizeImage(file,1400,0.82);
+      if(image){ images.push(image); added++; }
+    }
+    if(!added){ alert('تصویر معتبری انتخاب نشد.'); return; }
+    data.bookBudgetImages[String(grade)]=images;
+    saveDatabase(); renderBookBudgetImage(grade); updateDashboard();
+    alert(added + ' تصویر بودجه‌بندی اضافه شد.');
+  }catch(e){
+    console.error(e);
+    alert('در ذخیره تصاویر بودجه‌بندی مشکلی پیش آمد.');
+  }finally{
+    if(event.target) event.target.value='';
+  }
 }
 function renderBookBudgetImage(grade){
   const box=document.getElementById('bookBudgetImageBox'); if(!box) return;
-  const data=getClassData(); if(!data){ box.innerHTML='<div class="book-budget-image-empty">🖼️ برای ذخیره و نمایش تصویر، ابتدا یک کلاس را انتخاب کنید.</div>'; return; }
-  const image=data.bookBudgetImages && data.bookBudgetImages[String(grade)] ? data.bookBudgetImages[String(grade)] : '';
-  if(!image){ box.innerHTML='<div class="book-budget-image-empty">🖼️ هنوز تصویری برای این پایه ثبت نشده است.</div>'; return; }
-  box.innerHTML='<div class="book-budget-image-preview"><img src="'+image+'" alt="تصویر بودجه‌بندی تدریس کتاب" onclick="showImageLarge(this.src)"><button class="btn btn-danger" type="button" onclick="deleteBookBudgetImage()">🗑️ حذف تصویر</button></div>';
+  const data=getClassData();
+  if(!data){ box.innerHTML='<div class="book-budget-image-empty">🖼️ برای ذخیره و نمایش تصویر، ابتدا یک کلاس را انتخاب کنید.</div>'; return; }
+  const raw=data.bookBudgetImages && data.bookBudgetImages[String(grade)] ? data.bookBudgetImages[String(grade)] : [];
+  // رشتهٔ قدیمی را به آرایه تبدیل می‌کنیم تا تصاویر قبلی از دست نروند.
+  const images=Array.isArray(raw) ? raw : (raw ? [raw] : []);
+  if(!images.length){ box.innerHTML='<div class="book-budget-image-empty">🖼️ هنوز تصویری برای این پایه ثبت نشده است.</div>'; return; }
+  box.innerHTML='<div class="book-budget-image-gallery" style="display:flex;flex-wrap:wrap;gap:12px;">'+images.map(function(image,index){
+    return '<div class="book-budget-image-preview" style="max-width:260px;padding:10px;border:1px solid #e1e8ee;border-radius:14px;background:#fff;">'
+      +'<img src="'+image+'" alt="تصویر بودجه‌بندی تدریس کتاب" style="max-width:100%;max-height:260px;object-fit:contain;cursor:zoom-in" onclick="showImageLarge(this.src)">'
+      +'<div style="font-size:12px;margin:6px 0;">تصویر '+(index+1)+'</div>'
+      +'<button class="btn btn-danger" type="button" onclick="deleteBookBudgetImage('+index+')">🗑️ حذف این تصویر</button></div>';
+  }).join('')+'</div>';
 }
-function deleteBookBudgetImage(){
+function deleteBookBudgetImage(index){
   const grade=document.getElementById('bookBudgetGrade')?.value||'3';
   const data=getClassData(); if(!data) return;
-  if(!confirm('تصویر بودجه‌بندی این پایه حذف شود؟')) return;
-  if(data.bookBudgetImages) data.bookBudgetImages[String(grade)]='';
+  const raw=data.bookBudgetImages && data.bookBudgetImages[String(grade)] ? data.bookBudgetImages[String(grade)] : [];
+  const images=Array.isArray(raw) ? raw.slice() : (raw ? [raw] : []);
+  if(!images.length) return;
+  const targetIndex=Number.isInteger(index) ? index : 0;
+  if(targetIndex<0 || targetIndex>=images.length) return;
+  if(!confirm('این تصویر بودجه‌بندی حذف شود؟')) return;
+  images.splice(targetIndex,1);
+  data.bookBudgetImages[String(grade)]=images;
   saveDatabase(); renderBookBudgetImage(grade);
 }
-
 /* =====================================================
    نیازمند توجه
 ===================================================== */
