@@ -117,98 +117,21 @@ class MainActivity : Activity() {
                 callback: ValueCallback<Array<Uri>>?,
                 params: FileChooserParams?
             ): Boolean {
-                // هر درخواست تازه، callback قبلی را دقیقاً یک‌بار خاتمه می‌دهد.
                 fileCallback?.onReceiveValue(null)
-                fileCallback = null
-
-                if (callback == null) return false
                 fileCallback = callback
-
-                // Chromium ممکن است accept=".json" را به‌صورت پسوند (نه MIME) تحویل دهد.
-                val types = params?.acceptTypes
-                    ?.flatMap { it.split(",") }
-                    ?.map { it.trim().lowercase(Locale.ROOT) }
-                    ?.filter { it.isNotBlank() }
-                    ?: emptyList()
-
-                val wantsJson = types.any {
-                    it == ".json" ||
-                    it.endsWith(".json") ||
-                    it == "application/json" ||
-                    it == "text/json" ||
-                    it.contains("json")
-                }
-                val wantsAudio = types.any {
-                    it.startsWith("audio/") ||
-                    it in setOf(".mp3", ".m4a", ".aac", ".wav", ".ogg", ".opus", ".3gp", ".amr")
-                }
-                val wantsImage = types.any {
-                    it.startsWith("image/") ||
-                    it in setOf(".jpg", ".jpeg", ".png", ".gif", ".webp", ".heic")
-                }
-
+                val types = params?.acceptTypes?.filter { it.isNotBlank() } ?: emptyList()
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
-                    putExtra(
-                        Intent.EXTRA_ALLOW_MULTIPLE,
-                        params?.mode == FileChooserParams.MODE_OPEN_MULTIPLE
-                    )
-
-                    when {
-                        wantsJson -> {
-                            // برخی فایل‌گردان‌ها JSON را application/octet-stream گزارش می‌کنند؛
-                            // type عمومی انتخاب را ممکن می‌کند و importData ساختار JSON را اعتبارسنجی می‌کند.
-                            type = "*/*"
-                            putExtra(
-                                Intent.EXTRA_MIME_TYPES,
-                                arrayOf("application/json", "text/json", "application/octet-stream")
-                            )
-                        }
-                        wantsAudio -> {
-                            type = "audio/*"
-                            val audioMimeTypes = types.filter { it.startsWith("audio/") }
-                            if (audioMimeTypes.isNotEmpty()) {
-                                putExtra(Intent.EXTRA_MIME_TYPES, audioMimeTypes.toTypedArray())
-                            }
-                        }
-                        wantsImage -> {
-                            type = "image/*"
-                            val imageMimeTypes = types.filter { it.startsWith("image/") }
-                            if (imageMimeTypes.isNotEmpty()) {
-                                putExtra(Intent.EXTRA_MIME_TYPES, imageMimeTypes.toTypedArray())
-                            }
-                        }
-                        types.size == 1 && types[0].contains("/") -> {
-                            type = types[0]
-                        }
-                        else -> {
-                            type = "*/*"
-                            val mimeTypes = types.filter { it.contains("/") && !it.startsWith(".") }
-                            if (mimeTypes.isNotEmpty()) {
-                                putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
-                            }
-                        }
-                    }
+                    type = if (types.size == 1) types[0] else "*/*"
+                    if (types.size > 1) putExtra(Intent.EXTRA_MIME_TYPES, types.toTypedArray())
+                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, params?.mode == FileChooserParams.MODE_OPEN_MULTIPLE)
                 }
-
-                val chooserTitle = when {
-                    wantsJson -> "انتخاب فایل پشتیبان"
-                    wantsAudio -> "انتخاب فایل صوتی"
-                    wantsImage -> "انتخاب تصویر"
-                    else -> "انتخاب فایل"
-                }
-
                 return try {
-                    @Suppress("DEPRECATION")
-                    startActivityForResult(
-                        Intent.createChooser(intent, chooserTitle),
-                        fileRequest
-                    )
+                    startActivityForResult(Intent.createChooser(intent, "انتخاب فایل صوتی"), fileRequest)
                     true
                 } catch (e: Exception) {
-                    val pendingCallback = fileCallback
+                    fileCallback?.onReceiveValue(null)
                     fileCallback = null
-                    pendingCallback?.onReceiveValue(null)
                     false
                 }
             }
@@ -553,16 +476,10 @@ class MainActivity : Activity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == fileRequest) {
-            val pendingCallback = fileCallback
+            val result = if (resultCode == RESULT_OK && data != null)
+                WebChromeClient.FileChooserParams.parseResult(resultCode, data) else null
+            fileCallback?.onReceiveValue(result)
             fileCallback = null
-            val result = if (resultCode == RESULT_OK && data != null) {
-                WebChromeClient.FileChooserParams.parseResult(resultCode, data)
-                    ?: data.data?.let { arrayOf(it) }
-            } else {
-                null
-            }
-            // در صورت لغو انتخاب، null به WebView اعلام می‌شود تا ورودی در حالت معلق نماند.
-            pendingCallback?.onReceiveValue(result)
         } else if (requestCode == exportFileRequest) {
             var success = false
             var message = "ذخیره فایل لغو شد."
@@ -605,8 +522,6 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
-        fileCallback?.onReceiveValue(null)
-        fileCallback = null
         pendingSpeechAfterPermission = false
         speechCountdownRunnable?.let { speechHandler.removeCallbacks(it) }
         speechCountdownRunnable = null
