@@ -2249,10 +2249,20 @@ placeholder="۱۴۰۵/۰۶/۲۳"
 درس
 </label>
 
-<input
-id="evaluationSubject"
-placeholder="مثلاً ریاضی"
->
+<select id="evaluationSubject">
+<option value="">انتخاب درس</option>
+<option>قرآن</option>
+<option>هدیه‌های آسمان</option>
+<option>فارسی</option>
+<option>نگارش</option>
+<option>ریاضی</option>
+<option>علوم تجربی</option>
+<option>مطالعات اجتماعی</option>
+<option>هنر</option>
+<option>تربیت بدنی</option>
+<option>کار و فناوری (پایه ششم)</option>
+<option>تفکر و پژوهش (پایه ششم)</option>
+</select>
 
 </div>
 
@@ -6993,7 +7003,7 @@ function addEvaluation(){
     });
 
     saveDatabase();
-    document.getElementById("evaluationSubject").value = "";
+    // درس انتخاب‌شده را نگه می‌داریم تا معلم بتواند همان درس را برای دانش‌آموزان بعدی ثبت کند.
     document.getElementById("evaluationNotes").value = "";
     clearVoiceDraft("evaluation");
     renderEvaluations();
