@@ -10207,23 +10207,45 @@ html body .sf-level-summary{display:grid;grid-template-columns:repeat(5,minmax(0
 @media(max-width:700px){html body .sf-report-hero{padding:15px;border-radius:17px}html body .sf-level-summary{grid-template-columns:repeat(2,minmax(0,1fr))}html body .sf-level-item:last-child{grid-column:1/-1}html body .sf-level-item{padding:10px}html body .sf-report-total{min-width:70px;min-height:70px;border-radius:16px}}
 </style>
 
+
+<style id="daftar-home-redesign-v712">
+/* نسخه ۷.۱.۲ — بازطراحی صفحه انتخاب کلاس؛ بدون تغییر منطق یا داده‌ها */
+:root{--home-ink:#172b4d;--home-muted:#60718b;--home-line:#e4eaf2;--home-teal:#087f8c;--home-bg:#f5f7fb}
+html body{background:radial-gradient(ellipse at 85% 0%,rgba(19,168,157,.10),transparent 34%),radial-gradient(ellipse at 0% 30%,rgba(93,113,235,.08),transparent 30%),#f5f7fb!important;color:var(--home-ink)}
+html body .header{position:relative;isolation:isolate;overflow:hidden;text-align:right;padding:28px clamp(18px,4vw,56px)!important;background:linear-gradient(115deg,#102b4e 0%,#135d70 55%,#0c948f 100%)!important;border-radius:0 0 30px 30px;box-shadow:0 16px 38px rgba(20,54,85,.18)!important}
+html body .header:before{content:"";position:absolute;z-index:-1;width:260px;height:260px;border:1px solid rgba(255,255,255,.14);border-radius:50%;left:-65px;top:-145px;box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025)}
+html body .header:after{content:"✦";position:absolute;left:9%;top:25%;font-size:38px;color:rgba(255,255,255,.20)}
+html body .header h1{font-size:clamp(25px,4vw,38px)!important;letter-spacing:-.5px;margin:0 0 5px!important;font-weight:900;text-shadow:0 2px 12px rgba(0,0,0,.12)}
+html body .header p{font-size:clamp(13px,1.6vw,16px)!important;color:rgba(255,255,255,.82)!important;margin:0!important}
+html body .container{width:min(1200px,calc(100% - 32px))!important;max-width:1200px!important;margin:28px auto 54px!important}
+html body #home{display:block}
+html body #home .teacher-home-card{position:relative;overflow:hidden;padding:24px clamp(18px,3vw,32px)!important;border:1px solid rgba(13,148,136,.16)!important;border-radius:24px!important;background:linear-gradient(115deg,#fff 0%,#f0fbf9 100%)!important;box-shadow:0 12px 34px rgba(29,61,87,.07)!important;margin-bottom:22px!important}
+html body #home .teacher-home-card:after{content:"📘";position:absolute;left:24px;bottom:-20px;font-size:94px;opacity:.07;pointer-events:none}
+html body #home .teacher-home-card .image-section-title{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+html body #home .teacher-home-card h2{color:#123b55!important;font-size:clamp(20px,2.5vw,27px)!important;font-weight:900!important;margin:0!important}
+html body #home .teacher-home-card p{color:#5a7184!important;font-size:14px!important}
+html body #home .teacher-home-card .btn{border:0!important;border-radius:14px!important;padding:12px 19px!important;background:linear-gradient(120deg,#087f8c,#0b9b91)!important;box-shadow:0 7px 16px rgba(8,127,140,.20)!important;font-weight:800!important;white-space:nowrap}
+html body #home>.card:not(.teacher-home-card){padding:clamp(18px,3vw,32px)!important;border:1px solid var(--home-line)!important;border-radius:26px!important;background:rgba(255,255,255,.94)!important;box-shadow:0 14px 36px rgba(27,50,78,.065)!important}
+html body #home>.card:not(.teacher-home-card)>h2{display:flex;align-items:center;gap:10px;color:#183653!important;font-size:clamp(21px,2.5vw,28px)!important;font-weight:900!important;margin:0 0 8px!important}
+html body #home>.card:not(.teacher-home-card)>p{color:#63748b!important;line-height:1.9!important;font-size:14px!important;margin:0 0 16px!important}
+html body #home .info-box{border:1px solid #d6eee9!important;border-right:4px solid #0e9b8d!important;border-radius:14px!important;padding:12px 16px!important;background:#f0fbf8!important;color:#285b60!important;margin:16px 0 24px!important}
+html body .class-grid{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))!important;gap:16px!important}
+html body .class-card{position:relative!important;isolation:isolate;overflow:hidden!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;min-height:158px!important;padding:24px 22px!important;text-align:right!important;border:1px solid rgba(255,255,255,.32)!important;border-radius:22px!important;color:#fff!important;box-shadow:0 12px 25px rgba(26,49,78,.13)!important;cursor:pointer!important;transition:transform .2s ease,box-shadow .2s ease,filter .2s ease!important}
+html body .class-card:before{content:"";position:absolute;z-index:-1;width:140px;height:140px;border:1px solid rgba(255,255,255,.22);border-radius:50%;left:-32px;bottom:-67px;box-shadow:0 0 0 18px rgba(255,255,255,.055),0 0 0 38px rgba(255,255,255,.035)}
+html body .class-card:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.08),transparent 62%);pointer-events:none}
+html body .class-card:hover{transform:translateY(-4px)!important;box-shadow:0 18px 34px rgba(26,49,78,.20)!important;filter:saturate(1.08)}
+html body .class-card h2{position:relative;margin:0 0 7px!important;color:#fff!important;font-size:23px!important;line-height:1.5!important;font-weight:900!important;text-shadow:0 1px 5px rgba(0,0,0,.12)!important}
+html body .class-card p{position:relative;margin:0!important;color:rgba(255,255,255,.91)!important;font-size:13px!important;line-height:1.8!important}
+html body .class-third{background:linear-gradient(130deg,#087f8c,#10a89a)!important;border-top:0!important}
+html body .class-fourth{background:linear-gradient(130deg,#3657b7,#6379e8)!important;border-top:0!important}
+html body .class-multi{background:linear-gradient(130deg,#7541a8,#a15bc7)!important;border-top:0!important}
+@media(max-width:600px){html body .header{border-radius:0 0 23px 23px;padding:24px 20px!important}html body .container{width:calc(100% - 22px)!important;margin:18px auto 32px!important}html body #home .teacher-home-card{padding:18px!important;border-radius:20px!important}html body #home .teacher-home-card .image-section-title{align-items:flex-start}html body #home .teacher-home-card .btn{width:100%;justify-content:center}html body #home>.card:not(.teacher-home-card){padding:17px!important;border-radius:21px!important}html body .class-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:11px!important}html body .class-card{min-height:132px!important;padding:17px 14px!important;border-radius:18px!important}html body .class-card h2{font-size:18px!important}html body .class-card p{font-size:11px!important}}
+@media(max-width:360px){html body .class-grid{grid-template-columns:1fr!important}html body .class-card{min-height:110px!important}}
+@media(prefers-reduced-motion:reduce){html body .class-card{transition:none!important}}
+</style>
 </body>
         
-<style id="v631-mobile-dashboard-render-fix">
-/* Fix v6.3.1: prevent dashboard cards from rendering as empty white panels in Android WebView */
-html body .dashboard-quick, html body .dashboard-capabilities { align-items:stretch!important; }
-html body .dashboard-mini { display:flex!important; flex-direction:column!important; align-items:flex-start!important; justify-content:flex-start!important; gap:7px!important; height:auto!important; min-height:112px!important; max-height:none!important; padding:14px!important; overflow:visible!important; color:#172b3a!important; background:#fff!important; border:1px solid #e1e9ef!important; border-radius:16px!important; box-shadow:0 5px 16px rgba(23,43,58,.06)!important; opacity:1!important; visibility:visible!important; }
-html body .dashboard-mini .mini-icon { display:flex!important; align-items:center!important; justify-content:center!important; width:38px!important; height:38px!important; border-radius:12px!important; background:#e8f7f4!important; color:#087f78!important; font-size:22px!important; line-height:1!important; opacity:1!important; visibility:visible!important; }
-html body .dashboard-mini strong, html body .dashboard-mini span:not(.mini-icon) { display:block!important; color:#243746!important; font-size:13px!important; line-height:1.6!important; font-weight:700!important; opacity:1!important; visibility:visible!important; }
-html body .dashboard-mini span:not(.mini-icon) { font-size:20px!important; font-weight:800!important; color:#087f78!important; }
-html body .dashboard-mini::before, html body .dashboard-mini::after { content:none!important; display:none!important; }
-html body .dashboard-capabilities .capability-card { min-height:120px!important; height:auto!important; display:flex!important; flex-direction:column!important; align-items:flex-start!important; justify-content:flex-start!important; gap:7px!important; padding:14px!important; color:#243746!important; background:#fff!important; border:1px solid #e1e9ef!important; border-radius:16px!important; box-shadow:0 4px 14px rgba(23,43,58,.05)!important; opacity:1!important; visibility:visible!important; overflow:visible!important; }
-html body .dashboard-capabilities .capability-card * { opacity:1!important; visibility:visible!important; }
-html body .dashboard-capabilities .capability-card strong { display:block!important; color:#172b3a!important; font-size:13px!important; line-height:1.5!important; }
-html body .dashboard-capabilities .capability-card span { display:block!important; color:#687989!important; font-size:11px!important; line-height:1.7!important; }
-html body .dashboard-capabilities .capability-icon { display:flex!important; align-items:center!important; justify-content:center!important; width:38px!important; height:38px!important; font-size:22px!important; background:#edf8f7!important; border-radius:12px!important; }
-@media(max-width:600px){ html body .dashboard-quick{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important} html body .dashboard-mini{min-height:106px!important;padding:12px!important} html body .dashboard-capabilities{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important} html body .dashboard-capabilities .capability-card{min-height:112px!important;padding:12px!important} }
-</style>
+
 
 </html>
     `);
@@ -10562,15 +10584,6 @@ function saveFeedback(){
     clearVoiceDraft("feedback");
     renderFeedback();
     alert("بازخورد با موفقیت ثبت شد.");
-}
-
-function editFeedback(id){
-    const item=(getClassData().feedback||[]).find(function(x){return String(x.id)===String(id)});
-    if(!item)return;
-    const notes=prompt("متن بازخورد:",item.notes||"");
-    if(notes===null)return;
-    item.notes=cleanPersianText(notes);
-    saveDatabase(); renderFeedback();
 }
 
 function deleteFeedback(id){
@@ -12127,4 +12140,54 @@ html body .dash-cap-card > div:first-child p { display:block!important; visibili
   html body .dashboard-capabilities .capability-card strong { font-size:12px!important; }
 }
 </style>
+
+
+<style id="daftar-signature-theme-v720">
+/* هویت بصری امضادار ۷.۲: لوکس + مدرن + الهام ایرانی؛ فقط لایهٔ ظاهر */
+:root{
+ --ds-brand:#176b63;--ds-brand-strong:#104e49;--ds-brand-soft:#e5f2ed;
+ --ds-gold:#b78b45;--ds-gold-soft:#f7f0e3;--ds-ink:#20312f;
+ --ds-muted:#687875;--ds-bg:#f7f6f1;--ds-surface:#fffefa;
+ --ds-line:#e4e8df;--ds-shadow:0 8px 24px rgba(29,61,54,.07);
+}
+html{scroll-behavior:smooth}
+html body{background:radial-gradient(ellipse at 92% 0%,rgba(183,139,69,.08),transparent 27%),var(--ds-bg)!important;color:var(--ds-ink)}
+html body button,html body input,html body select,html body textarea{font-family:"Vazirmatn","IRANSansX","IRANSans","Segoe UI",Tahoma,sans-serif}
+html body .smart-header{background:rgba(255,254,250,.94)!important;border-bottom:1px solid var(--ds-line)!important;box-shadow:0 5px 22px rgba(29,61,54,.04)!important;backdrop-filter:blur(16px)}
+html body .smart-header h1,html body #smartPageTitle{color:#183d38!important;font-weight:850!important;letter-spacing:-.25px}
+html body .app-sidebar{background:linear-gradient(180deg,#153e39 0%,#102f2c 100%)!important;border-left:1px solid rgba(255,255,255,.08)!important;box-shadow:-10px 0 30px rgba(20,49,44,.08)!important}
+html body .sidebar-brand{border-bottom-color:rgba(255,255,255,.12)!important}
+html body .brand-mark{background:linear-gradient(145deg,#d5b779,#a77d3b)!important;color:#173c36!important;border-radius:14px!important;box-shadow:0 5px 14px rgba(0,0,0,.12)}
+html body .app-sidebar .nav button{border-radius:12px!important;margin:3px 8px!important;transition:background .18s ease,transform .18s ease!important}
+html body .app-sidebar .nav button:hover{background:rgba(255,255,255,.09)!important;transform:translateX(-2px)}
+html body .app-sidebar .nav button.active{background:linear-gradient(100deg,rgba(213,183,121,.23),rgba(255,255,255,.08))!important;color:#fff!important;box-shadow:inset -3px 0 #d5b779!important}
+html body .card,html body .teacher-home-card,html body .dashboard-showcase-main,html body .dashboard-showcase-side{border:1px solid var(--ds-line)!important;border-radius:20px!important;box-shadow:var(--ds-shadow)!important}
+html body .card h2,html body .card h3{color:#24453f}
+html body .btn-primary,html body .btn-blue,html body button.primary{background:linear-gradient(125deg,#176b63,#23887b)!important;border-color:transparent!important;border-radius:12px!important;box-shadow:0 5px 13px rgba(23,107,99,.15)!important}
+html body .btn-primary:hover,html body .btn-blue:hover{filter:brightness(1.04);transform:translateY(-1px)}
+html body input,html body select,html body textarea{border-color:#dce4dc!important;border-radius:12px!important;background:#fffefa}
+html body input:focus,html body select:focus,html body textarea:focus{outline:0!important;border-color:#40968a!important;box-shadow:0 0 0 3px rgba(23,107,99,.12)!important}
+html body .dashboard-quick .dashboard-mini,html body .dashboard-capabilities .capability-card{border-radius:17px!important;border-color:#e1e7de!important;box-shadow:0 5px 15px rgba(29,61,54,.045)!important;transition:transform .18s ease,box-shadow .18s ease!important}
+html body .dashboard-quick .dashboard-mini:hover,html body .dashboard-capabilities .capability-card:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(29,61,54,.09)!important}
+html body .dashboard-mini .mini-icon,html body .dashboard-capabilities .capability-icon{background:#e5f2ed!important;color:#176b63!important;border-radius:12px!important}
+html body .dash-section-title{color:#284b43!important;font-weight:850!important}
+html body .dash-more{border:1px solid #e1e7de!important;border-radius:15px!important;background:rgba(255,254,250,.88)!important;overflow:hidden}
+html body .dash-more>summary{padding:14px 17px!important;color:#244b43!important;font-weight:800!important;cursor:pointer}
+html body .dash-more[open]>summary{background:#edf5ef!important;border-bottom:1px solid #e1e7de}
+html body .dash-more-body{padding:14px!important}
+html body table th{background:#edf5ef!important;color:#24584f!important}
+html body .mobile-quickbar{background:rgba(20,58,52,.97)!important;border:1px solid rgba(213,183,121,.22)!important;box-shadow:0 12px 32px rgba(15,43,38,.25)!important}
+html body .mobile-quickbar button.active{background:rgba(213,183,121,.2)!important;color:#fff!important}
+html body .info-box{background:#edf6f0!important;border-color:#d6e9dc!important;color:#315d50!important}
+/* نقش هندسی بسیار ظریف، الهام‌گرفته از هندسهٔ ایرانی؛ بدون تصویر و وابستگی خارجی */
+html body .header{background:linear-gradient(115deg,#153e39 0%,#176b63 62%,#2b8b7d 100%)!important}
+html body .header:before{border-color:rgba(213,183,121,.22)!important;box-shadow:0 0 0 28px rgba(213,183,121,.035),0 0 0 58px rgba(255,255,255,.025)!important}
+html body .class-card{border-radius:19px!important;box-shadow:0 10px 24px rgba(20,49,44,.14)!important}
+html body .class-third{background:linear-gradient(130deg,#176b63,#2b9a89)!important}
+html body .class-fourth{background:linear-gradient(130deg,#365d73,#548b9a)!important}
+html body .class-multi{background:linear-gradient(130deg,#78613d,#b78b45)!important}
+@media(max-width:600px){html body .card{border-radius:17px!important}html body .dash-more-body{padding:10px!important}}
+@media(prefers-reduced-motion:reduce){html body *,html body *:before,html body *:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+
 </html>
