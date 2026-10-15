@@ -1,3 +1,4 @@
+```gradle
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -31,13 +32,19 @@ android {
             def keyAliasProp = System.getenv('DAFTAR_KEY_ALIAS')
             def keyPasswordProp = System.getenv('DAFTAR_KEY_PASSWORD')
 
-            if (!storeFileProp || !storePasswordProp || !keyAliasProp || !keyPasswordProp) {
-                throw new GradleException('Release signing credentials are missing. Configure the GitHub Actions secrets before building a release APK.')
+            if (!storeFileProp || !storePasswordProp ||
+                !keyAliasProp || !keyPasswordProp) {
+                throw new GradleException(
+                    'Release signing credentials are missing. Configure the GitHub Actions secrets before building a release APK.'
+                )
             }
 
             def keystore = file(storeFileProp)
+
             if (!keystore.exists() || !keystore.isFile()) {
-                throw new GradleException('Release keystore file does not exist: ' + storeFileProp)
+                throw new GradleException(
+                    'Release keystore file does not exist: ' + storeFileProp
+                )
             }
 
             storeFile keystore
@@ -62,3 +69,4 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.webkit:webkit:1.13.0'
 }
+```
