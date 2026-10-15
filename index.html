@@ -10058,7 +10058,24 @@ html body .sf-level-summary{display:grid;grid-template-columns:repeat(5,minmax(0
 </style>
 
 </body>
-        </html>
+        
+<style id="v631-mobile-dashboard-render-fix">
+/* Fix v6.3.1: prevent dashboard cards from rendering as empty white panels in Android WebView */
+html body .dashboard-quick, html body .dashboard-capabilities { align-items:stretch!important; }
+html body .dashboard-mini { display:flex!important; flex-direction:column!important; align-items:flex-start!important; justify-content:flex-start!important; gap:7px!important; height:auto!important; min-height:112px!important; max-height:none!important; padding:14px!important; overflow:visible!important; color:#172b3a!important; background:#fff!important; border:1px solid #e1e9ef!important; border-radius:16px!important; box-shadow:0 5px 16px rgba(23,43,58,.06)!important; opacity:1!important; visibility:visible!important; }
+html body .dashboard-mini .mini-icon { display:flex!important; align-items:center!important; justify-content:center!important; width:38px!important; height:38px!important; border-radius:12px!important; background:#e8f7f4!important; color:#087f78!important; font-size:22px!important; line-height:1!important; opacity:1!important; visibility:visible!important; }
+html body .dashboard-mini strong, html body .dashboard-mini span:not(.mini-icon) { display:block!important; color:#243746!important; font-size:13px!important; line-height:1.6!important; font-weight:700!important; opacity:1!important; visibility:visible!important; }
+html body .dashboard-mini span:not(.mini-icon) { font-size:20px!important; font-weight:800!important; color:#087f78!important; }
+html body .dashboard-mini::before, html body .dashboard-mini::after { content:none!important; display:none!important; }
+html body .dashboard-capabilities .capability-card { min-height:120px!important; height:auto!important; display:flex!important; flex-direction:column!important; align-items:flex-start!important; justify-content:flex-start!important; gap:7px!important; padding:14px!important; color:#243746!important; background:#fff!important; border:1px solid #e1e9ef!important; border-radius:16px!important; box-shadow:0 4px 14px rgba(23,43,58,.05)!important; opacity:1!important; visibility:visible!important; overflow:visible!important; }
+html body .dashboard-capabilities .capability-card * { opacity:1!important; visibility:visible!important; }
+html body .dashboard-capabilities .capability-card strong { display:block!important; color:#172b3a!important; font-size:13px!important; line-height:1.5!important; }
+html body .dashboard-capabilities .capability-card span { display:block!important; color:#687989!important; font-size:11px!important; line-height:1.7!important; }
+html body .dashboard-capabilities .capability-icon { display:flex!important; align-items:center!important; justify-content:center!important; width:38px!important; height:38px!important; font-size:22px!important; background:#edf8f7!important; border-radius:12px!important; }
+@media(max-width:600px){ html body .dashboard-quick{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important} html body .dashboard-mini{min-height:106px!important;padding:12px!important} html body .dashboard-capabilities{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important} html body .dashboard-capabilities .capability-card{min-height:112px!important;padding:12px!important} }
+</style>
+
+</html>
     `);
 
     win.document.close();
@@ -11891,4 +11908,21 @@ html body .info-box,html body .info-box *{font-size:13.5px!important; line-heigh
 .sf-personal-meta b{font-size:13px;color:#172033;font-weight:700}
 @media(max-width:600px){.sf-personal-meta{width:100%}.sf-personal-meta span{flex:1 1 40%}#students .card{padding:14px!important}}
 </style>
+
+<style id="v631-mobile-dashboard-render-fix">
+/* Fix v6.3.1: prevent dashboard cards from rendering as empty white panels in Android WebView */
+html body .dashboard-quick, html body .dashboard-capabilities { align-items:stretch!important; }
+html body .dashboard-mini { display:flex!important; flex-direction:column!important; align-items:flex-start!important; justify-content:flex-start!important; gap:7px!important; height:auto!important; min-height:112px!important; max-height:none!important; padding:14px!important; overflow:visible!important; color:#172b3a!important; background:#fff!important; border:1px solid #e1e9ef!important; border-radius:16px!important; box-shadow:0 5px 16px rgba(23,43,58,.06)!important; opacity:1!important; visibility:visible!important; }
+html body .dashboard-mini .mini-icon { display:flex!important; align-items:center!important; justify-content:center!important; width:38px!important; height:38px!important; border-radius:12px!important; background:#e8f7f4!important; color:#087f78!important; font-size:22px!important; line-height:1!important; opacity:1!important; visibility:visible!important; }
+html body .dashboard-mini strong, html body .dashboard-mini span:not(.mini-icon) { display:block!important; color:#243746!important; font-size:13px!important; line-height:1.6!important; font-weight:700!important; opacity:1!important; visibility:visible!important; }
+html body .dashboard-mini span:not(.mini-icon) { font-size:20px!important; font-weight:800!important; color:#087f78!important; }
+html body .dashboard-mini::before, html body .dashboard-mini::after { content:none!important; display:none!important; }
+html body .dashboard-capabilities .capability-card { min-height:120px!important; height:auto!important; display:flex!important; flex-direction:column!important; align-items:flex-start!important; justify-content:flex-start!important; gap:7px!important; padding:14px!important; color:#243746!important; background:#fff!important; border:1px solid #e1e9ef!important; border-radius:16px!important; box-shadow:0 4px 14px rgba(23,43,58,.05)!important; opacity:1!important; visibility:visible!important; overflow:visible!important; }
+html body .dashboard-capabilities .capability-card * { opacity:1!important; visibility:visible!important; }
+html body .dashboard-capabilities .capability-card strong { display:block!important; color:#172b3a!important; font-size:13px!important; line-height:1.5!important; }
+html body .dashboard-capabilities .capability-card span { display:block!important; color:#687989!important; font-size:11px!important; line-height:1.7!important; }
+html body .dashboard-capabilities .capability-icon { display:flex!important; align-items:center!important; justify-content:center!important; width:38px!important; height:38px!important; font-size:22px!important; background:#edf8f7!important; border-radius:12px!important; }
+@media(max-width:600px){ html body .dashboard-quick{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important} html body .dashboard-mini{min-height:106px!important;padding:12px!important} html body .dashboard-capabilities{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important} html body .dashboard-capabilities .capability-card{min-height:112px!important;padding:12px!important} }
+</style>
+
 </html>
