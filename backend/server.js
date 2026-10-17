@@ -16,7 +16,7 @@ const jwtSecret = process.env.JWT_SECRET;
 if (!process.env.DATABASE_URL || !jwtSecret) throw new Error('DATABASE_URL و JWT_SECRET الزامی هستند.');
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized:true } });
 const allowedOrigins = (process.env.CORS_ORIGIN || '').split(',').map(s=>s.trim()).filter(Boolean);
-app.use(cors({ origin: (origin, cb) => { if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) return cb(null, true); return cb(new Error('CORS_ORIGIN_NOT_ALLOWED')); } }));
+app.use(cors({ origin: (origin, cb) => { if (!origin || allowedOrigins.includes(origin)) return cb(null, true); return cb(null, false); } }));
 app.disable('x-powered-by');
 app.use(express.json({ limit:'12mb' }));
 
