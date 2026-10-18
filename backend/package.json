@@ -3,13 +3,16 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "scripts": {"start":"node server.js"},
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js"
+  },
   "dependencies": {
-    "bcryptjs":"^3.0.2",
-    "cors":"^2.8.5",
-    "express":"^5.1.0",
-    "jsonwebtoken":"^9.0.2",
-    "pg":"^8.16.3",
-    "multer":"^2.0.2"
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
+    "multer": "^2.0.2"
   }
 }

@@ -1775,6 +1775,7 @@ td,th{border-color:var(--dk-line)!important}
     </div>
     <div id="authLoginPane">
       <div class="auth-field"><label>نام کاربری</label><input id="authLoginUsername" autocomplete="username" placeholder="نام کاربری خود را وارد کنید"></div>
+      <div class="auth-field"><label>کد عضویت مدرسه (برای اتصال حساب قبلی، اختیاری)</label><input id="authLoginSchoolCode" autocomplete="off" placeholder="کد مدرسه"></div>
       <div class="auth-field"><label>رمز عبور</label><input id="authLoginPassword" type="password" autocomplete="current-password" placeholder="رمز عبور"></div>
       <div id="authLoginMessage" class="auth-message"></div>
       <button id="authLoginButton" class="auth-main-btn" type="button" onclick="loginOfflineAccount()">🔐 ورود به برنامه</button>
@@ -1783,10 +1784,11 @@ td,th{border-color:var(--dk-line)!important}
     <div id="authRegisterPane" style="display:none">
       <div class="auth-field"><label>نام کاربری دلخواه</label><input id="authRegisterUsername" autocomplete="username" placeholder="مثلاً teacher_ali"></div>
       <div class="auth-field"><label>رمز عبور دلخواه</label><input id="authRegisterPassword" type="password" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر"></div>
+      <div class="auth-field"><label>کد عضویت مدرسه (اختیاری)</label><input id="authRegisterSchoolCode" autocomplete="off" placeholder="کد مدرسه را از مدیر بگیرید"></div>
       <div class="auth-field"><label>تکرار رمز عبور</label><input id="authRegisterPassword2" type="password" autocomplete="new-password" placeholder="رمز را دوباره وارد کنید"></div>
       <div id="authRegisterMessage" class="auth-message"></div>
       <button id="authRegisterButton" class="auth-main-btn" type="button" onclick="registerOfflineAccount()">✅ ساخت حساب و ورود</button>
-      <div class="auth-hint">هر معلم نام کاربری و رمز خودش را انتخاب می‌کند. اطلاعات هر حساب روی همان دستگاه جداگانه ذخیره می‌شود و برای کارکرد اصلی برنامه اینترنت لازم نیست.</div>
+      <div class="auth-hint">هر معلم حساب جداگانه دارد. برای پیوستن به مدرسه، کد عضویت را وارد کنید. بدون اینترنت، اطلاعات روی دستگاه ذخیره می‌شود و بعداً قابل همگام‌سازی است.</div>
     </div>
   </div>
 </div>
@@ -3714,6 +3716,9 @@ function renderTeacherCardSafe(){
 ===================================================== */
 const AUTH_STORAGE_KEY = "دفتر_کلاسی_حساب‌ها_v1";
 const SESSION_STORAGE_KEY = "دفتر_کلاسی_نشست_v1";
+const CLOUD_ROLE_KEY = "دفتر_کلاسی_cloud_role_v1";
+let activeCloudRole = "teacher";
+let activeSchoolId = null;
 const ACCOUNT_STORAGE_PREFIX = "دفتر_کلاسی_حساب_";
 const ACCOUNT_DB_NAME = "DaftarKelasiAccountsStore";
 const ACCOUNT_STORE = "accounts";
@@ -4225,13 +4230,14 @@ async function cloudRequest(path,options){
     if(!response.ok) throw new Error(body.error||("HTTP "+response.status));
     return body;
 }
-async function cloudRegister(username,password){
-    const data=await cloudRequest("/api/auth/register",{method:"POST",body:JSON.stringify({username,password})});
-    setCloudToken(data.token); return data;
+async function cloudRegister(username,password,schoolCodeOverride){
+    const schoolCode=String(schoolCodeOverride ?? document.getElementById("authRegisterSchoolCode")?.value ?? "").trim().toUpperCase();
+    const data=await cloudRequest("/api/auth/register",{method:"POST",body:JSON.stringify({username,password,schoolCode})});
+    setCloudToken(data.token); activeCloudRole=data.teacher?.role||"teacher"; activeSchoolId=data.teacher?.schoolId||null; try{localStorage.setItem(CLOUD_ROLE_KEY,activeCloudRole);}catch(e){} return data;
 }
 async function cloudLogin(username,password){
     const data=await cloudRequest("/api/auth/login",{method:"POST",body:JSON.stringify({username,password})});
-    setCloudToken(data.token); return data;
+    setCloudToken(data.token); activeCloudRole=data.teacher?.role||"teacher"; activeSchoolId=data.teacher?.schoolId||null; try{localStorage.setItem(CLOUD_ROLE_KEY,activeCloudRole);}catch(e){} return data;
 }
 async function cloudPullSnapshot(){
     if(!CLOUD_ENDPOINT||!cloudToken()) return null;
@@ -4241,15 +4247,22 @@ async function cloudInitialSync(username){
     if(!CLOUD_ENDPOINT||!cloudToken()||!database) return;
     try{
         const remote=await cloudPullSnapshot();
-        const hasRemote=remote && remote.payload && Object.keys(remote.payload).length>0;
-        const hasLocal=database && database.teacher;
-        const pending=await getPendingSyncItems(username);
-        if(hasRemote && pending.length===0){
-            database=migrateDatabaseSafely(remote.payload); await writeAccountDatabase(username,database); setCloudRevision(username,remote.revision||"initial"); refreshAll(); renderHeaderImages();
-        } else if(hasLocal){
-            await queueSyncSnapshot(username,database); scheduleSyncFlush();
+        const localBefore=cloneForSync(database);
+        const remotePayload=remote&&remote.payload&&typeof remote.payload==="object"?remote.payload:{};
+        // Preserve a recoverable copy before combining local and remote records.
+        if(localBefore && (Object.keys(localBefore).length>0)){
+            try{await writeMigrationBackup(username,localBefore,databaseSchemaVersion(localBefore));}catch(e){console.warn("Pre-sync backup skipped",e);}
         }
-    }catch(e){ console.warn("Cloud initial sync skipped",e); }
+        // Merge rather than replacing either side: the merge helper preserves distinct
+        // student/attendance records and applies deletion tombstones to avoid resurrection.
+        database=mergeDatabasesSafely(remotePayload,localBefore);
+        setCloudRevision(username,remote&&remote.revision||"initial");
+        await writeAccountDatabase(username,database);
+        refreshAll();renderHeaderImages();
+        // saveDatabase refreshes the pending queue using the remote revision as its base.
+        await saveDatabase();
+        scheduleSyncFlush();
+    }catch(e){ console.warn("Cloud initial sync skipped; local data retained",e); }
 }
 
 async function registerOfflineAccount(){
@@ -4271,7 +4284,7 @@ async function registerOfflineAccount(){
     let accountDatabase=database;
     if(accounts.length===0 && localStorage.getItem(STORAGE_KEY)){try{accountDatabase=JSON.parse(localStorage.getItem(STORAGE_KEY))||database;}catch(e){}}
     localStorage.setItem(accountDataKey(username),JSON.stringify(accountDatabase));
-    accounts.push({username:username,passwordHash:hash,createdAt:Date.now(),authMode:CLOUD_ENDPOINT?"cloud":"offline"});
+    accounts.push({username:username,passwordHash:hash,createdAt:Date.now(),authMode:CLOUD_ENDPOINT?"cloud":"offline",role:cloudAccount?.teacher?.role||"teacher",schoolId:cloudAccount?.teacher?.schoolId||null});
     await saveAuthAccounts(accounts);
     await loadDatabaseForAccount(username);
     if(CLOUD_ENDPOINT && cloudAccount) await cloudInitialSync(username);
@@ -4287,15 +4300,24 @@ async function loginOfflineAccount(){
     let account=accounts.find(function(a){return String(a.username).toLowerCase()===username.toLowerCase();});
     if(CLOUD_ENDPOINT){
         try{ await cloudLogin(username,password); }
-        catch(e){ if(!account){setAuthMessage("authLoginMessage","❌ نام کاربری یا رمز عبور نادرست است.","error");return;} }
+        catch(e){
+            if(!account){setAuthMessage("authLoginMessage","❌ نام کاربری یا رمز عبور نادرست است.","error");return;}
+            const joinCode=String(document.getElementById("authLoginSchoolCode")?.value||"").trim().toUpperCase();
+            if(joinCode){try{await cloudRegister(username,password,joinCode); account.role=activeCloudRole; account.schoolId=activeSchoolId; account.authMode="cloud"; await saveAuthAccounts(accounts);}catch(regErr){setAuthMessage("authLoginMessage","❌ اتصال حساب قبلی به مدرسه انجام نشد: "+String(regErr.message||regErr),"error");return;}}
+            else {setCloudToken("");activeCloudRole=account.role||"teacher";activeSchoolId=account.schoolId||null;}
+        }
+    }
+    if(CLOUD_ENDPOINT && cloudToken() && String(document.getElementById("authLoginSchoolCode")?.value||"").trim() && activeCloudRole==="teacher" && !activeSchoolId){
+        try{const joined=await cloudRequest("/api/school/join",{method:"POST",body:JSON.stringify({schoolCode:String(document.getElementById("authLoginSchoolCode").value||"").trim().toUpperCase()})});activeSchoolId=joined.school?.id||null;}catch(joinErr){setAuthMessage("authLoginMessage","⚠️ ورود انجام شد، اما اتصال به مدرسه ناموفق بود: "+String(joinErr.message||joinErr),"error");}
     }
     if(!account){
         if(CLOUD_ENDPOINT && cloudToken()){
-            account={username:username,passwordHash:await hashAccountPassword(password),createdAt:Date.now(),authMode:"cloud"};
+            account={username:username,passwordHash:await hashAccountPassword(password),createdAt:Date.now(),authMode:"cloud",role:activeCloudRole,schoolId:activeSchoolId};
             accounts.push(account); await saveAuthAccounts(accounts);
         } else { setAuthMessage("authLoginMessage","❌ نام کاربری یا رمز عبور نادرست است.","error");return; }
     }
     if(!CLOUD_ENDPOINT){
+        activeCloudRole=account.role||"teacher"; activeSchoolId=account.schoolId||null; try{localStorage.setItem(CLOUD_ROLE_KEY,activeCloudRole);}catch(e){}
         const hash=await hashAccountPassword(password);
         if(hash!==account.passwordHash){setAuthMessage("authLoginMessage","❌ نام کاربری یا رمز عبور نادرست است.","error");return;}
     }
@@ -4305,6 +4327,18 @@ async function loginOfflineAccount(){
     await saveDatabase();
     enterAuthenticatedApp();
 }
+function installSchoolMembershipButton(){
+    let role=activeCloudRole||"teacher"; const id=role==="admin"?"schoolAdminLaunch":"daftarSchoolJoinButton"; if(document.getElementById(id)) return;
+    if(!CLOUD_ENDPOINT || !cloudToken()) return;
+    const b=document.createElement("button");b.id=id;b.type="button";b.textContent=role==="admin"?"🏫 پنل مدیر مدرسه":"🏫 اتصال به مدرسه";
+    b.style.cssText="position:fixed;left:16px;bottom:18px;z-index:9997;background:#315fe8;color:#fff;border:0;border-radius:13px;padding:11px 14px;font:700 12px Tahoma;box-shadow:0 8px 24px #1746c844;cursor:pointer";
+    b.onclick=async function(){
+      if(role==="admin"){if(window.openSchoolAdmin)window.openSchoolAdmin();return;}
+      const code=prompt("کد عضویت مدرسه را از مدیر دریافت کنید:");if(!code)return;
+      try{const d=await cloudRequest("/api/school/join",{method:"POST",body:JSON.stringify({schoolCode:code.trim().toUpperCase()})});activeSchoolId=d.school?.id||null;alert("حساب شما به مدرسه «"+d.school.name+"» متصل شد. اطلاعات محلی شما حفظ می‌شود.");}
+      catch(e){alert("اتصال به مدرسه انجام نشد: "+String(e.message||e));}
+    };document.body.appendChild(b);
+}
 function enterAuthenticatedApp(){
     hideAuthOverlay();
     const home=document.getElementById("home"), app=document.getElementById("app");
@@ -4312,6 +4346,7 @@ function enterAuthenticatedApp(){
     currentClass=null;
     initializeScalableStorage().then(function(){refreshAll();renderHeaderImages();setTimeout(runDailyAutoBackup,2500);}).catch(function(){refreshAll();renderHeaderImages();setTimeout(runDailyAutoBackup,4000);});
     updateAccountSecurityFields();
+    setTimeout(installSchoolMembershipButton,500);
 }
 function updateAccountSecurityFields(){
     const el=document.getElementById("accountNewUsername"); if(el)el.value=activeAccountUsername||"";
@@ -4344,7 +4379,7 @@ async function changeCurrentAccountCredentials(){
 }
 function logoutOfflineAccount(){
     if(!activeAccountUsername)return;
-    activeAccountUsername=""; currentClass=null; try{ localStorage.removeItem(SESSION_STORAGE_KEY); localStorage.removeItem(LAST_USER_KEY); localStorage.setItem(LOGGED_OUT_KEY,"1"); }catch(e){} setCloudToken(""); showAuthOverlay(); showAuthMode("login");
+    activeAccountUsername=""; currentClass=null; document.getElementById("daftarSchoolJoinButton")?.remove(); try{ localStorage.removeItem(SESSION_STORAGE_KEY); localStorage.removeItem(LAST_USER_KEY); localStorage.setItem(LOGGED_OUT_KEY,"1"); }catch(e){} setCloudToken(""); showAuthOverlay(); showAuthMode("login");
     const u=document.getElementById("authLoginUsername"); const pw=document.getElementById("authLoginPassword"); if(u)u.value="";if(pw)pw.value="";
     setAuthMessage("authLoginMessage","از حساب خارج شدید.","success");
 }
@@ -10243,6 +10278,7 @@ html body .class-multi{background:linear-gradient(130deg,#7541a8,#a15bc7)!import
 @media(max-width:360px){html body .class-grid{grid-template-columns:1fr!important}html body .class-card{min-height:110px!important}}
 @media(prefers-reduced-motion:reduce){html body .class-card{transition:none!important}}
 </style>
+
 </body>
         
 
@@ -12746,6 +12782,13 @@ input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{bo
 @media(max-width:820px){.app-sidebar{background:linear-gradient(180deg,#102a75,#1746c8)!important}.smart-header{border-radius:15px!important}.capability-card{border-radius:15px!important}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
 </style>
+
+
+<!-- پنل مدیریتی مدرسه؛ فقط برای حساب مدیرِ احراز هویت‌شده -->
+<div id="schoolAdminOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(10,25,65,.62);padding:18px;overflow:auto"><div style="max-width:1100px;margin:2vh auto;background:#fff;border-radius:20px;padding:22px;box-shadow:0 20px 70px #071b4b55;direction:rtl;color:#14213d"><div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h2 style="margin:0;color:#1746c8">پنل مدیریت مدرسه</h2><p id="schoolAdminSubtitle" style="margin:4px 0;color:#60708b">در حال دریافت اطلاعات...</p></div><div style="display:flex;gap:8px"><button type="button" onclick="refreshSchoolAdmin()" style="border:0;background:#1746c8;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer">به‌روزرسانی</button><button type="button" onclick="closeSchoolAdmin()" style="border:1px solid #d8e2f4;background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer">بستن ✕</button></div></div><div id="schoolAdminMessage" style="padding:12px;margin:14px 0;background:#f3f6ff;border-radius:10px">در حال بارگذاری...</div><div id="schoolAdminStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0"></div><h3 style="color:#1746c8">معلمان و کلاس‌ها</h3><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;min-width:580px"><thead><tr><th style="text-align:right;padding:10px;background:#edf3ff">حساب</th><th style="text-align:right;padding:10px;background:#edf3ff">نقش</th><th style="text-align:right;padding:10px;background:#edf3ff">تعداد دانش‌آموز</th><th style="text-align:right;padding:10px;background:#edf3ff">آخرین همگام‌سازی</th><th style="text-align:right;padding:10px;background:#edf3ff">جزئیات</th></tr></thead><tbody id="schoolAdminTeachers"></tbody></table></div><div id="schoolAdminDetail" style="display:none;margin-top:18px;padding:14px;background:#f7f9ff;border:1px solid #dce5f7;border-radius:12px;white-space:pre-wrap;overflow:auto;max-height:360px"></div><p style="font-size:12px;color:#68758d;margin-top:18px">داده‌ها از سرور مدرسه خوانده می‌شوند. دسترسی مدیر فقط به معلمان عضو همین مدرسه محدود است.</p></div></div>
+<script>
+(function(){const roleKey='دفتر_کلاسی_cloud_role_v1';function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}function endpoint(){return (window.DAFTAR_CLOUD_ENDPOINT||window.DAFTAR_SYNC_ENDPOINT||'').trim().replace(/\/$/,'')}function token(){try{return localStorage.getItem('دفتر_کلاسی_cloud_token_v2')||''}catch(e){return ''}}window.openSchoolAdmin=async function(){let role='teacher';try{role=localStorage.getItem(roleKey)||'teacher'}catch(e){}if(role!=='admin'){alert('این بخش فقط برای حساب مدیر مدرسه فعال است.');return}if(!endpoint()||!token()){alert('برای مشاهده پنل مدیر، ابتدا سرور مدرسه را پیکربندی و آنلاین شوید.');return}document.getElementById('schoolAdminOverlay').style.display='block';await window.refreshSchoolAdmin()};window.closeSchoolAdmin=function(){document.getElementById('schoolAdminOverlay').style.display='none'};window.refreshSchoolAdmin=async function(){const msg=document.getElementById('schoolAdminMessage');msg.textContent='در حال دریافت گزارش‌های مدرسه...';try{const r=await fetch(endpoint()+'/api/admin/overview',{headers:{Authorization:'Bearer '+token()}});const d=await r.json();if(!r.ok)throw new Error(d.message||d.error||'خطا در دریافت اطلاعات');document.getElementById('schoolAdminSubtitle').textContent=d.school.name+' · کد عضویت: '+d.school.join_code;msg.textContent='آخرین دریافت اطلاعات: '+new Date(d.generatedAt).toLocaleString('fa-IR');document.getElementById('schoolAdminStats').innerHTML=[['معلمان',d.stats.teacherCount],['دانش‌آموزان ثبت‌شده',d.stats.studentCount],['کلاس‌های دارای داده',d.stats.classCount],['ثبت حضور و غیاب',d.stats.attendanceRecords],['غیبت ثبت‌شده',d.stats.absentRecords],['تأخیر ثبت‌شده',d.stats.lateRecords]].map(x=>'<div style="padding:16px;border:1px solid #dce5f7;border-radius:14px;background:#f8faff"><div style="font-size:12px;color:#64748b">'+esc(x[0])+'</div><strong style="font-size:26px;color:#1746c8">'+esc(x[1])+'</strong></div>').join('');document.getElementById('schoolAdminTeachers').innerHTML=d.teachers.map(t=>'<tr><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+esc(t.username)+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+(t.role==='admin'?'مدیر':'معلم')+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+esc(t.studentCount)+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+(t.lastSync?esc(new Date(t.lastSync).toLocaleString('fa-IR')):'هنوز همگام‌سازی نشده')+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+(t.role==='teacher'?'<button onclick="viewSchoolTeacher(\''+esc(t.id)+'\')" style="border:0;border-radius:8px;background:#eaf0ff;color:#1746c8;padding:7px 10px;cursor:pointer">مشاهده داده‌ها</button>':'—')+'</td></tr>').join('')||'<tr><td colspan="5" style="padding:12px">هنوز حسابی به این مدرسه متصل نشده است.</td></tr>'}catch(e){msg.textContent='دریافت اطلاعات ناموفق بود: '+e.message+' — اتصال سرور و نقش مدیر را بررسی کنید.';document.getElementById('schoolAdminStats').innerHTML='';document.getElementById('schoolAdminTeachers').innerHTML=''}};window.viewSchoolTeacher=async function(id){const box=document.getElementById('schoolAdminDetail');box.style.display='block';box.textContent='در حال دریافت پرونده...';try{const r=await fetch(endpoint()+'/api/admin/teacher/'+encodeURIComponent(id)+'/snapshot',{headers:{Authorization:'Bearer '+token()}});const d=await r.json();if(!r.ok)throw new Error(d.error||'خطا');const p=d.payload||{};let out='معلم: '+d.username+'\nآخرین ذخیره: '+(d.updated_at?new Date(d.updated_at).toLocaleString('fa-IR'):'ثبت نشده')+'\n\n';for(const [k,v] of Object.entries(p)){if(v&&typeof v==='object'&&Array.isArray(v.students)){out+='کلاس '+k+' — '+v.students.length+' دانش‌آموز\n';v.students.forEach((st,i)=>{out+='  '+(i+1)+'. '+(st.name||[st.firstName,st.lastName].filter(Boolean).join(' ')||st.fullName||'دانش‌آموز')+'\n'});const att=Array.isArray(v.attendance)?v.attendance:[];out+='  رکورد حضور و غیاب: '+att.length+'\n';att.slice(-20).forEach(a=>{out+='    '+(a.date||'')+' · '+(a.status||'ثبت وضعیت نشده')+'\n'})}}box.textContent=out||'این حساب هنوز اطلاعات دانش‌آموزی همگام‌سازی نکرده است.'}catch(e){box.textContent='خطا در نمایش اطلاعات: '+e.message}};function addButton(){let role='teacher';try{role=localStorage.getItem(roleKey)||'teacher'}catch(e){}if(role!=='admin'||document.getElementById('schoolAdminLaunch'))return;const b=document.createElement('button');b.id='schoolAdminLaunch';b.type='button';b.textContent='🏫 پنل مدیر مدرسه';b.onclick=window.openSchoolAdmin;b.style.cssText='position:fixed;left:16px;bottom:18px;z-index:9998;background:#1746c8;color:#fff;border:0;border-radius:14px;padding:12px 16px;font:700 13px Tahoma;box-shadow:0 8px 24px #1746c844;cursor:pointer';document.body.appendChild(b)};document.addEventListener('DOMContentLoaded',()=>setTimeout(addButton,900));const observer=new MutationObserver(()=>{if(token())addButton()});observer.observe(document.documentElement,{childList:true,subtree:true})})();
+</script>
 
 </body>
 </html>

@@ -1,11 +1,27 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE IF NOT EXISTS schools (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(160) NOT NULL,
+  join_code VARCHAR(24) NOT NULL UNIQUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS teachers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   username VARCHAR(32) NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
+  role VARCHAR(16) NOT NULL DEFAULT 'teacher' CHECK (role IN ('teacher','admin')),
+  school_id UUID REFERENCES schools(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Safe migrations for installations created by older releases.
+ALTER TABLE teachers ADD COLUMN IF NOT EXISTS role VARCHAR(16) NOT NULL DEFAULT 'teacher';
+ALTER TABLE teachers ADD COLUMN IF NOT EXISTS school_id UUID REFERENCES schools(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS teachers_school_id_idx ON teachers(school_id);
+
 CREATE TABLE IF NOT EXISTS teacher_snapshots (
   teacher_id UUID PRIMARY KEY REFERENCES teachers(id) ON DELETE CASCADE,
   revision VARCHAR(64) NOT NULL,
