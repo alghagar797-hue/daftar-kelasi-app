@@ -57,7 +57,7 @@ function summarizePayload(payload){
 
 app.get('/api/health',(_,res)=>res.json({ok:true,service:'daftar-kelasi',time:new Date().toISOString(),version:'2.0.0'}));
 
-// One-time bootstrap endpoint. Set ADMIN_SETUP_KEY on the server and call it only over HTTPS.
+// Protected school bootstrap endpoint. Each school is provisioned only by an operator holding ADMIN_SETUP_KEY; call over HTTPS.
 app.post('/api/admin/setup',async(req,res)=>{
   const setupKey=String(req.headers['x-admin-setup-key']||'');
   if(!process.env.ADMIN_SETUP_KEY || process.env.ADMIN_SETUP_KEY.length<20 || setupKey.length<20 || Buffer.byteLength(setupKey)!==Buffer.byteLength(process.env.ADMIN_SETUP_KEY) || !crypto.timingSafeEqual(Buffer.from(setupKey),Buffer.from(process.env.ADMIN_SETUP_KEY))) return res.status(403).json({error:'SETUP_FORBIDDEN'});
@@ -69,8 +69,8 @@ app.post('/api/admin/setup',async(req,res)=>{
   try{
     await client.query('BEGIN');
     await client.query('SELECT pg_advisory_xact_lock(731945210)');
-    const existing=await client.query("SELECT 1 FROM teachers WHERE role='admin' LIMIT 1");
-    if(existing.rowCount) { await client.query('ROLLBACK'); return res.status(409).json({error:'ADMIN_ALREADY_INITIALIZED'}); }
+    // Multiple independent schools are supported. The high-entropy setup key authorizes provisioning;
+    // the database transaction and unique username constraint prevent partial/duplicate account creation.
     const code=safeSchoolCode();
     const school=(await client.query('INSERT INTO schools(name,join_code) VALUES($1,$2) RETURNING id,name,join_code',[schoolName,code])).rows[0];
     const hash=await bcrypt.hash(password,12);
@@ -150,17 +150,17 @@ app.get('/api/admin/overview',auth,adminOnly,async(req,res)=>{
     for(const c of summary.classes){ const key=t.id+':'+c.classKey; classMap.set(key,{teacher:t.username,...c}); }
     return {id:t.id,username:t.username,role:t.role,createdAt:t.created_at,lastSync:t.updated_at||null,revision:t.revision||'initial',studentCount:summary.studentCount,attendanceRecords:summary.attendanceRecords,absentRecords:summary.absentRecords,lateRecords:summary.lateRecords,classes:summary.classes};
   });
-  res.json({school:school.rows[0],stats:{teacherCount:staff.filter(x=>x.role==='teacher').length,studentCount:totalStudents,classCount:classMap.size,staffCount:staff.length,attendanceRecords:totalAttendance,absentRecords:totalAbsences,lateRecords:totalLate},teachers:staff,classes:[...classMap.values()],generatedAt:new Date().toISOString()});
+  res.json({school:school.rows[0],stats:{teacherCount:staff.filter(x=>x.role==='teacher'||x.role==='admin').length,studentCount:totalStudents,classCount:classMap.size,staffCount:staff.length,attendanceRecords:totalAttendance,absentRecords:totalAbsences,lateRecords:totalLate},teachers:staff,classes:[...classMap.values()],generatedAt:new Date().toISOString()});
 });
 app.get('/api/admin/teacher/:id/snapshot',auth,adminOnly,async(req,res)=>{
-  const r=await pool.query(`SELECT t.id,t.username,ts.revision,ts.payload,ts.updated_at FROM teachers t LEFT JOIN teacher_snapshots ts ON ts.teacher_id=t.id WHERE t.id=$1 AND t.school_id=$2 AND t.role='teacher'`,[req.params.id,req.user.school_id]);
+  const r=await pool.query(`SELECT t.id,t.username,ts.revision,ts.payload,ts.updated_at FROM teachers t LEFT JOIN teacher_snapshots ts ON ts.teacher_id=t.id WHERE t.id=$1 AND t.school_id=$2 AND t.role IN ('teacher','admin')`,[req.params.id,req.user.school_id]);
   if(!r.rowCount) return res.status(404).json({error:'TEACHER_NOT_FOUND'});
   res.json(r.rows[0]);
 });
 
 // مدیر فقط برای معلم عضو مدرسه خودش بازخورد ثبت می‌کند.
 app.get('/api/admin/teacher/:id/feedback',auth,adminOnly,async(req,res)=>{
-  const teacher=await pool.query("SELECT id FROM teachers WHERE id=$1 AND school_id=$2 AND role='teacher'",[req.params.id,req.user.school_id]);
+  const teacher=await pool.query("SELECT id FROM teachers WHERE id=$1 AND school_id=$2 AND role IN ('teacher','admin')",[req.params.id,req.user.school_id]);
   if(!teacher.rowCount) return res.status(404).json({error:'TEACHER_NOT_FOUND'});
   const r=await pool.query('SELECT id,message,created_at FROM teacher_feedback WHERE teacher_id=$1 AND school_id=$2 ORDER BY created_at DESC LIMIT 100',[req.params.id,req.user.school_id]);
   res.json({feedback:r.rows});
@@ -168,13 +168,13 @@ app.get('/api/admin/teacher/:id/feedback',auth,adminOnly,async(req,res)=>{
 app.post('/api/admin/teacher/:id/feedback',auth,adminOnly,async(req,res)=>{
   const message=String(req.body?.message||'').trim();
   if(!message || message.length>5000) return res.status(400).json({error:'INVALID_FEEDBACK',message:'متن بازخورد باید بین ۱ تا ۵۰۰۰ نویسه باشد.'});
-  const teacher=await pool.query("SELECT id FROM teachers WHERE id=$1 AND school_id=$2 AND role='teacher'",[req.params.id,req.user.school_id]);
+  const teacher=await pool.query("SELECT id FROM teachers WHERE id=$1 AND school_id=$2 AND role IN ('teacher','admin')",[req.params.id,req.user.school_id]);
   if(!teacher.rowCount) return res.status(404).json({error:'TEACHER_NOT_FOUND'});
   const r=await pool.query('INSERT INTO teacher_feedback(school_id,teacher_id,admin_id,message) VALUES($1,$2,$3,$4) RETURNING id,message,created_at',[req.user.school_id,req.params.id,req.user.id,message]);
   res.status(201).json({feedback:r.rows[0]});
 });
 app.get('/api/teacher/feedback',auth,async(req,res)=>{
-  if(req.user.role!=='teacher') return res.status(403).json({error:'TEACHER_ACCOUNT_REQUIRED'});
+  if(!['teacher','admin'].includes(req.user.role)) return res.status(403).json({error:'TEACHER_ACCOUNT_REQUIRED'});
   const r=await pool.query('SELECT id,message,created_at FROM teacher_feedback WHERE teacher_id=$1 AND school_id=$2 ORDER BY created_at DESC LIMIT 100',[req.user.id,req.user.school_id]);
   res.json({feedback:r.rows});
 });
