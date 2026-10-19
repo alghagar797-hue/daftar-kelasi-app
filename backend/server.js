@@ -158,6 +158,27 @@ app.get('/api/admin/teacher/:id/snapshot',auth,adminOnly,async(req,res)=>{
   res.json(r.rows[0]);
 });
 
+// مدیر فقط برای معلم عضو مدرسه خودش بازخورد ثبت می‌کند.
+app.get('/api/admin/teacher/:id/feedback',auth,adminOnly,async(req,res)=>{
+  const teacher=await pool.query("SELECT id FROM teachers WHERE id=$1 AND school_id=$2 AND role='teacher'",[req.params.id,req.user.school_id]);
+  if(!teacher.rowCount) return res.status(404).json({error:'TEACHER_NOT_FOUND'});
+  const r=await pool.query('SELECT id,message,created_at FROM teacher_feedback WHERE teacher_id=$1 AND school_id=$2 ORDER BY created_at DESC LIMIT 100',[req.params.id,req.user.school_id]);
+  res.json({feedback:r.rows});
+});
+app.post('/api/admin/teacher/:id/feedback',auth,adminOnly,async(req,res)=>{
+  const message=String(req.body?.message||'').trim();
+  if(!message || message.length>5000) return res.status(400).json({error:'INVALID_FEEDBACK',message:'متن بازخورد باید بین ۱ تا ۵۰۰۰ نویسه باشد.'});
+  const teacher=await pool.query("SELECT id FROM teachers WHERE id=$1 AND school_id=$2 AND role='teacher'",[req.params.id,req.user.school_id]);
+  if(!teacher.rowCount) return res.status(404).json({error:'TEACHER_NOT_FOUND'});
+  const r=await pool.query('INSERT INTO teacher_feedback(school_id,teacher_id,admin_id,message) VALUES($1,$2,$3,$4) RETURNING id,message,created_at',[req.user.school_id,req.params.id,req.user.id,message]);
+  res.status(201).json({feedback:r.rows[0]});
+});
+app.get('/api/teacher/feedback',auth,async(req,res)=>{
+  if(req.user.role!=='teacher') return res.status(403).json({error:'TEACHER_ACCOUNT_REQUIRED'});
+  const r=await pool.query('SELECT id,message,created_at FROM teacher_feedback WHERE teacher_id=$1 AND school_id=$2 ORDER BY created_at DESC LIMIT 100',[req.user.id,req.user.school_id]);
+  res.json({feedback:r.rows});
+});
+
 app.post('/api/files',auth,upload.single('file'),async(req,res)=>{
   if(!req.file) return res.status(400).json({error:'FILE_REQUIRED_OR_TYPE_NOT_ALLOWED'});
   const safe=crypto.randomUUID()+path.extname(req.file.originalname).toLowerCase().slice(0,8); const target=path.join(uploadDir,safe);

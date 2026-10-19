@@ -37,3 +37,15 @@ CREATE TABLE IF NOT EXISTS sync_events (
   UNIQUE(teacher_id, revision)
 );
 CREATE INDEX IF NOT EXISTS sync_events_teacher_id_id_idx ON sync_events(teacher_id,id);
+
+
+-- مدیر مدرسه می‌تواند بازخوردهای ثبت‌شده برای معلمان را نگهداری کند.
+CREATE TABLE IF NOT EXISTS teacher_feedback (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  school_id UUID NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+  teacher_id UUID NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
+  admin_id UUID NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
+  message TEXT NOT NULL CHECK (char_length(message) BETWEEN 1 AND 5000),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS teacher_feedback_teacher_created_idx ON teacher_feedback(teacher_id, created_at DESC);
