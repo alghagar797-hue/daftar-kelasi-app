@@ -15,7 +15,7 @@ const port = Number(process.env.PORT || 8080);
 const jwtSecret = process.env.JWT_SECRET;
 if (!process.env.DATABASE_URL || !jwtSecret || jwtSecret.length < 32) throw new Error('DATABASE_URL و JWT_SECRET با حداقل ۳۲ نویسه الزامی هستند.');
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized:true } });
-const allowedOrigins = (process.env.CORS_ORIGIN || '').split(',').map(s=>s.trim()).filter(Boolean);
+const allowedOrigins = [...(process.env.CORS_ORIGIN || '').split(',').map(s=>s.trim()).filter(Boolean), 'https://appassets.androidplatform.net']; // origin داخلی اپ اندروید (WebView)
 app.use(cors({ origin: (origin, cb) => { if (!origin || allowedOrigins.includes(origin)) return cb(null, true); return cb(null, false); } }));
 app.disable('x-powered-by');
 app.use(express.json({ limit:'12mb' }));

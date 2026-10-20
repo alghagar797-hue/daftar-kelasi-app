@@ -4320,11 +4320,14 @@ async function loginOfflineAccount(){
             if(!account){setAuthMessage("authLoginMessage","❌ نام کاربری یا رمز عبور نادرست است.","error");return;}
             const joinCode=String(document.getElementById("authLoginSchoolCode")?.value||"").trim().toUpperCase();
             if(joinCode){try{await cloudRegister(username,password,joinCode); account.role=activeCloudRole; account.schoolId=activeSchoolId; account.authMode="cloud"; await saveAuthAccounts(accounts);}catch(regErr){setAuthMessage("authLoginMessage","❌ اتصال حساب قبلی به مدرسه انجام نشد: "+String(regErr.message||regErr),"error");return;}}
-            else {setCloudToken("");activeCloudRole=account.role||"teacher";activeSchoolId=account.schoolId||null;}
+            else {setCloudToken("");activeCloudRole=account.role||"teacher";activeSchoolId=account.schoolId||null;try{localStorage.setItem(CLOUD_ROLE_KEY,activeCloudRole);}catch(e){}}
         }
     }
     if(CLOUD_ENDPOINT && cloudToken() && String(document.getElementById("authLoginSchoolCode")?.value||"").trim() && activeCloudRole==="teacher" && !activeSchoolId){
         try{const joined=await cloudRequest("/api/school/join",{method:"POST",body:JSON.stringify({schoolCode:String(document.getElementById("authLoginSchoolCode").value||"").trim().toUpperCase()})});activeSchoolId=joined.school?.id||null;}catch(joinErr){setAuthMessage("authLoginMessage","⚠️ ورود انجام شد، اما اتصال به مدرسه ناموفق بود: "+String(joinErr.message||joinErr),"error");}
+    }
+    if(account && CLOUD_ENDPOINT && cloudToken() && activeCloudRole){
+        if(account.role!==activeCloudRole || (account.schoolId||null)!==(activeSchoolId||null)){ account.role=activeCloudRole; account.schoolId=activeSchoolId||null; account.authMode="cloud"; try{await saveAuthAccounts(accounts);}catch(e){} }
     }
     if(!account){
         if(CLOUD_ENDPOINT && cloudToken()){
@@ -4343,13 +4346,58 @@ async function loginOfflineAccount(){
     await saveDatabase();
     enterAuthenticatedApp();
 }
-function installSchoolMembershipButton(){
-    const role=activeCloudRole||localStorage.getItem(CLOUD_ROLE_KEY)||"teacher";
-    if(!CLOUD_ENDPOINT || !cloudToken()) return;
+function daftarAskAdminPassword(username){
+    return new Promise(function(resolve){
+        const old=document.getElementById("daftarAdminReloginBox"); if(old)old.remove();
+        const box=document.createElement("div"); box.id="daftarAdminReloginBox";
+        box.style.cssText="position:fixed;inset:0;z-index:100000;background:rgba(10,25,65,.62);display:flex;align-items:center;justify-content:center;padding:18px;direction:rtl";
+        box.innerHTML='<div style="background:#fff;border-radius:18px;padding:20px;max-width:340px;width:100%;font-family:Tahoma"><h3 style="margin:0 0 8px;color:#1746c8">ورود دوباره مدیر</h3><p style="margin:0 0 12px;color:#60708b;font-size:13px;line-height:1.8">نشست آنلاین شما منقضی شده است. برای باز کردن پنل مدیر، رمز عبور حساب «'+String(username||"").replace(/[&<>"]/g,"")+'» را وارد کنید.</p><input id="daftarAdminReloginPw" type="password" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #d6e0f4;border-radius:10px;font:inherit"><div style="display:flex;gap:8px;margin-top:12px"><button id="daftarAdminReloginOk" type="button" style="flex:1;border:0;background:#1746c8;color:#fff;padding:11px;border-radius:10px;font:700 13px Tahoma;cursor:pointer">ورود</button><button id="daftarAdminReloginNo" type="button" style="flex:1;border:1px solid #d8e2f4;background:#fff;padding:11px;border-radius:10px;font:700 13px Tahoma;cursor:pointer">انصراف</button></div></div>';
+        document.body.appendChild(box);
+        const done=function(v){box.remove();resolve(v);};
+        document.getElementById("daftarAdminReloginOk").onclick=function(){done(document.getElementById("daftarAdminReloginPw").value||"");};
+        document.getElementById("daftarAdminReloginNo").onclick=function(){done(null);};
+        setTimeout(function(){try{document.getElementById("daftarAdminReloginPw").focus();}catch(e){}},50);
+    });
+}
+async function ensureAdminCloudSession(){
+    if(!CLOUD_ENDPOINT){alert("آدرس سرور مدرسه در برنامه تنظیم نشده است.");return false;}
+    if(cloudToken()){
+        try{ await cloudRequest("/api/auth/me"); return true; }
+        catch(e){ if(!/UNAUTHORIZED|HTTP 401/.test(String(e.message||e))){ alert("اتصال به سرور مدرسه برقرار نشد. اینترنت را بررسی کنید و چند لحظه بعد دوباره تلاش کنید. (سرورهای رایگان ممکن است تا ۱ دقیقه دیر بیدار شوند.)"); return false; } setCloudToken(""); }
+    }
+    const pw=await daftarAskAdminPassword(activeAccountUsername);
+    if(!pw) return false;
+    try{ await cloudLogin(activeAccountUsername,pw); try{localStorage.setItem(CLOUD_ROLE_KEY,activeCloudRole);}catch(e){} return activeCloudRole==="admin"; }
+    catch(e){ alert("ورود آنلاین ناموفق بود: "+String(e.message||e)); return false; }
+}
+async function resolveActiveCloudRole(){
+    let role="";
+    if(CLOUD_ENDPOINT && cloudToken()){
+        try{
+            const me=await cloudRequest("/api/auth/me");
+            const u=me.user||me.teacher||me;
+            if(u && u.role){ role=u.role; activeCloudRole=role; activeSchoolId=u.school_id||u.schoolId||activeSchoolId; try{localStorage.setItem(CLOUD_ROLE_KEY,role);}catch(e){} }
+        }catch(e){}
+    }
+    if(!role){
+        try{
+            const accs=await getAuthAccounts();
+            const mine=accs.find(function(a){return String(a.username).toLowerCase()===String(activeAccountUsername).toLowerCase();});
+            if(mine && mine.role) role=mine.role;
+        }catch(e){}
+    }
+    if(!role){ try{role=localStorage.getItem(CLOUD_ROLE_KEY)||"";}catch(e){} }
+    return role||"teacher";
+}
+async function installSchoolMembershipButton(){
+    if(!CLOUD_ENDPOINT) return;
+    const role=await resolveActiveCloudRole();
     const isAdmin=role==="admin";
+    if(isAdmin){ activeCloudRole="admin"; try{localStorage.setItem(CLOUD_ROLE_KEY,"admin");}catch(e){} }
+    if(!isAdmin && !cloudToken()) return;
     const id=isAdmin?"schoolAdminLaunch":"daftarSchoolJoinButton";
     const action=async function(){
-      if(isAdmin){if(window.openSchoolAdmin)window.openSchoolAdmin();return;}
+      if(isAdmin){ if(!(await ensureAdminCloudSession())) return; if(window.openSchoolAdmin)window.openSchoolAdmin(); return;}
       const code=prompt("کد عضویت مدرسه را از مدیر دریافت کنید:");if(!code)return;
       try{const d=await cloudRequest("/api/school/join",{method:"POST",body:JSON.stringify({schoolCode:code.trim().toUpperCase()})});activeSchoolId=d.school?.id||null;alert("حساب شما به مدرسه «"+d.school.name+"» متصل شد. اطلاعات محلی شما حفظ می‌شود.");}
       catch(e){alert("اتصال به مدرسه انجام نشد: "+String(e.message||e));}
@@ -4367,7 +4415,7 @@ function enterAuthenticatedApp(){
     currentClass=null;
     initializeScalableStorage().then(function(){refreshAll();renderHeaderImages();setTimeout(runDailyAutoBackup,2500);}).catch(function(){refreshAll();renderHeaderImages();setTimeout(runDailyAutoBackup,4000);});
     updateAccountSecurityFields();
-    setTimeout(installSchoolMembershipButton,500);
+    setTimeout(installSchoolMembershipButton,500); setTimeout(installSchoolMembershipButton,6000);
 }
 function updateAccountSecurityFields(){
     const el=document.getElementById("accountNewUsername"); if(el)el.value=activeAccountUsername||"";
@@ -4400,7 +4448,7 @@ async function changeCurrentAccountCredentials(){
 }
 function logoutOfflineAccount(){
     if(!activeAccountUsername)return;
-    activeAccountUsername=""; currentClass=null; document.getElementById("daftarSchoolJoinButton")?.remove(); try{ localStorage.removeItem(SESSION_STORAGE_KEY); localStorage.removeItem(LAST_USER_KEY); localStorage.setItem(LOGGED_OUT_KEY,"1"); }catch(e){} setCloudToken(""); showAuthOverlay(); showAuthMode("login");
+    activeAccountUsername=""; currentClass=null; document.getElementById("daftarSchoolJoinButton")?.remove(); document.getElementById("schoolAdminLaunch")?.remove(); document.getElementById("schoolAdminNavItem")?.remove(); activeCloudRole="teacher"; activeSchoolId=null; try{localStorage.removeItem(CLOUD_ROLE_KEY);}catch(e){} try{ localStorage.removeItem(SESSION_STORAGE_KEY); localStorage.removeItem(LAST_USER_KEY); localStorage.setItem(LOGGED_OUT_KEY,"1"); }catch(e){} setCloudToken(""); showAuthOverlay(); showAuthMode("login");
     const u=document.getElementById("authLoginUsername"); const pw=document.getElementById("authLoginPassword"); if(u)u.value="";if(pw)pw.value="";
     setAuthMessage("authLoginMessage","از حساب خارج شدید.","success");
 }
