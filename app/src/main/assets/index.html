@@ -1788,7 +1788,7 @@ td,th{border-color:var(--dk-line)!important}
       <div class="auth-field"><label>تکرار رمز عبور</label><input id="authRegisterPassword2" type="password" autocomplete="new-password" placeholder="رمز را دوباره وارد کنید"></div>
       <div id="authRegisterMessage" class="auth-message"></div>
       <button id="authRegisterButton" class="auth-main-btn" type="button" onclick="registerOfflineAccount()">✅ ساخت حساب و ورود</button>
-      <div class="auth-hint">هر معلم حساب جداگانه دارد. برای پیوستن به مدرسه، کد عضویت را وارد کنید. بدون اینترنت، اطلاعات روی دستگاه ذخیره می‌شود و بعداً قابل همگام‌سازی است.</div>
+      <div class="auth-hint">هر معلم حساب جداگانه دارد. برای پیوستن به مدرسه، کد عضویت را از مدیر بگیرید. <b>اولین حسابی که بدون کد عضویت ثبت‌نام کند، مدیر آن مدرسه است و «پنل مدیریت مدرسه» را می‌بیند.</b> بدون اینترنت، اطلاعات روی دستگاه ذخیره می‌شود و بعداً قابل همگام‌سازی است.</div>
     </div>
   </div>
 </div>
@@ -4289,11 +4289,33 @@ async function registerOfflineAccount(){
     if(!validAccountUsername(username)){setAuthMessage("authRegisterMessage","❌ نام کاربری باید ۳ تا ۳۲ کاراکتر و بدون فاصله باشد.","error");return;}
     if(!validAccountPassword(password)){setAuthMessage("authRegisterMessage","❌ رمز عبور باید حداقل ۶ کاراکتر باشد.","error");return;}
     if(password!==password2){setAuthMessage("authRegisterMessage","❌ تکرار رمز عبور با رمز اصلی یکسان نیست.","error");return;}
-    if(accounts.some(function(a){return String(a.username).toLowerCase()===username.toLowerCase();})){setAuthMessage("authRegisterMessage","❌ این نام کاربری قبلاً استفاده شده است.","error");return;}
+    const dupIndex=accounts.findIndex(function(a){return String(a.username).toLowerCase()===username.toLowerCase();});
     let cloudAccount=null;
     if(CLOUD_ENDPOINT){
         try{ cloudAccount=await cloudRegister(username,password); }
         catch(e){ setAuthMessage("authRegisterMessage", "❌ ساخت حساب آنلاین ناموفق بود: "+String(e.message||e), "error"); return; }
+    }
+    if(dupIndex>=0){
+        /* اگر سرور همین نام کاربری را پذیرفت، حساب قدیمیِ همین دستگاه به سرور جدید متصل می‌شود
+           (برای مهاجرت: اولین حساب ثبت‌شده روی سرور جدید، نقش مدیر مدرسه می‌گیرد). */
+        if(!cloudAccount){setAuthMessage("authRegisterMessage","❌ این نام کاربری قبلاً استفاده شده است.","error");return;}
+        const acc=accounts[dupIndex];
+        acc.role=activeCloudRole||acc.role||"teacher";
+        acc.schoolId=activeSchoolId||null;
+        acc.authMode="cloud";
+        acc.passwordHash=await hashAccountPassword(password);
+        acc.updatedAt=Date.now();
+        await saveAuthAccounts(accounts);
+        activeAccountUsername=username; rememberSession(username);
+        await loadDatabaseForAccount(username);
+        if(CLOUD_ENDPOINT && cloudAccount) await cloudInitialSync(username);
+        database=await restoreCanonicalRosters(username,database);
+        await saveDatabase();
+        setAuthMessage("authRegisterMessage", activeCloudRole==="admin"
+            ? "✅ حساب موجود شما به سرور مدرسه متصل شد و نقش «مدیر مدرسه» گرفت."
+            : "✅ حساب موجود شما به سرور مدرسه متصل شد.", "success");
+        enterAuthenticatedApp();
+        return;
     }
     const hash=await hashAccountPassword(password);
     // اگر نسخه قدیمی برنامه روی گوشی داده داشته باشد، آن داده‌ها به اولین حساب منتقل می‌شوند.
@@ -4415,7 +4437,7 @@ function enterAuthenticatedApp(){
     currentClass=null;
     initializeScalableStorage().then(function(){refreshAll();renderHeaderImages();setTimeout(runDailyAutoBackup,2500);}).catch(function(){refreshAll();renderHeaderImages();setTimeout(runDailyAutoBackup,4000);});
     updateAccountSecurityFields();
-    setTimeout(installSchoolMembershipButton,500); setTimeout(installSchoolMembershipButton,6000);
+    setTimeout(installSchoolMembershipButton,500); setTimeout(installSchoolMembershipButton,6000); setTimeout(installSchoolMembershipButton,15000);
 }
 function updateAccountSecurityFields(){
     const el=document.getElementById("accountNewUsername"); if(el)el.value=activeAccountUsername||"";
@@ -12868,9 +12890,294 @@ input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{bo
 
 
 <!-- پنل مدیریتی مدرسه؛ فقط برای حساب مدیرِ احراز هویت‌شده -->
-<div id="schoolAdminOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(10,25,65,.62);padding:18px;overflow:auto"><div style="max-width:1100px;margin:2vh auto;background:#fff;border-radius:20px;padding:22px;box-shadow:0 20px 70px #071b4b55;direction:rtl;color:#14213d"><div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h2 style="margin:0;color:#1746c8">پنل مدیریت مدرسه</h2><p id="schoolAdminSubtitle" style="margin:4px 0;color:#60708b">در حال دریافت اطلاعات...</p></div><div style="display:flex;gap:8px"><button type="button" onclick="refreshSchoolAdmin()" style="border:0;background:#1746c8;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer">به‌روزرسانی</button><button type="button" onclick="closeSchoolAdmin()" style="border:1px solid #d8e2f4;background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer">بستن ✕</button></div></div><div id="schoolAdminMessage" style="padding:12px;margin:14px 0;background:#f3f6ff;border-radius:10px">در حال بارگذاری...</div><div id="schoolAdminStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0"></div><h3 style="color:#1746c8">معلمان و کلاس‌ها</h3><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;min-width:580px"><thead><tr><th style="text-align:right;padding:10px;background:#edf3ff">حساب</th><th style="text-align:right;padding:10px;background:#edf3ff">نقش</th><th style="text-align:right;padding:10px;background:#edf3ff">تعداد دانش‌آموز</th><th style="text-align:right;padding:10px;background:#edf3ff">آخرین همگام‌سازی</th><th style="text-align:right;padding:10px;background:#edf3ff">جزئیات</th></tr></thead><tbody id="schoolAdminTeachers"></tbody></table></div><div id="schoolAdminDetail" style="display:none;margin-top:18px;padding:14px;background:#f7f9ff;border:1px solid #dce5f7;border-radius:12px;white-space:pre-wrap;overflow:auto;max-height:360px"></div><section id="schoolAdminFeedback" style="display:none;margin-top:16px;padding:16px;background:#fff;border:1px solid #dce5f7;border-radius:14px"><h3 style="color:#1746c8;margin-top:0">ثبت بازخورد برای معلم</h3><p id="schoolAdminFeedbackTeacher" style="color:#64748b;font-size:12px"></p><textarea id="schoolAdminFeedbackText" maxlength="5000" rows="4" placeholder="بازخورد مدیر درباره عملکرد آموزشی، نقاط قوت و موارد قابل بهبود..." style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #d6e0f4;border-radius:10px;font:inherit"></textarea><button type="button" onclick="submitSchoolTeacherFeedback()" style="margin-top:8px;border:0;background:#1746c8;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer">ثبت بازخورد</button><div id="schoolAdminFeedbackList" style="margin-top:12px"></div></section><p style="font-size:12px;color:#68758d;margin-top:18px">داده‌ها از سرور مدرسه خوانده می‌شوند. دسترسی مدیر فقط به معلمان عضو همین مدرسه محدود است.</p></div></div>
+<div id="schoolAdminOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(10,25,65,.62);padding:18px;overflow:auto"><div style="max-width:1100px;margin:2vh auto;background:#fff;border-radius:20px;padding:22px;box-shadow:0 20px 70px #071b4b55;direction:rtl;color:#14213d"><div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h2 style="margin:0;color:#1746c8">پنل مدیریت مدرسه</h2><p id="schoolAdminSubtitle" style="margin:4px 0;color:#60708b">در حال دریافت اطلاعات...</p></div><div style="display:flex;gap:8px"><button type="button" onclick="refreshSchoolAdmin()" style="border:0;background:#1746c8;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer">به‌روزرسانی</button><button type="button" onclick="closeSchoolAdmin()" style="border:1px solid #d8e2f4;background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer">بستن ✕</button></div></div><div id="schoolAdminMessage" style="padding:12px;margin:14px 0;background:#f3f6ff;border-radius:10px">در حال بارگذاری...</div><div id="schoolAdminStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0"></div><h3 style="color:#1746c8">معلمان و کلاس‌ها</h3><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;min-width:580px"><thead><tr><th style="text-align:right;padding:10px;background:#edf3ff">حساب</th><th style="text-align:right;padding:10px;background:#edf3ff">نقش</th><th style="text-align:right;padding:10px;background:#edf3ff">تعداد دانش‌آموز</th><th style="text-align:right;padding:10px;background:#edf3ff">آخرین همگام‌سازی</th><th style="text-align:right;padding:10px;background:#edf3ff">جزئیات</th></tr></thead><tbody id="schoolAdminTeachers"></tbody></table></div><div id="schoolAdminDetail" style="display:none;margin-top:18px;padding:14px;background:#f7f9ff;border:1px solid #dce5f7;border-radius:12px;white-space:pre-wrap;overflow:auto;max-height:360px"></div><div id="schoolAdminClassReports" style="display:none;margin-top:12px;padding:14px;border:1px solid #dce5f7;border-radius:12px;background:#fff"></div><section id="schoolAdminFeedback" style="display:none;margin-top:16px;padding:16px;background:#fff;border:1px solid #dce5f7;border-radius:14px"><h3 style="color:#1746c8;margin-top:0">ثبت بازخورد برای معلم</h3><p id="schoolAdminFeedbackTeacher" style="color:#64748b;font-size:12px"></p><textarea id="schoolAdminFeedbackText" maxlength="5000" rows="4" placeholder="بازخورد مدیر درباره عملکرد آموزشی، نقاط قوت و موارد قابل بهبود..." style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #d6e0f4;border-radius:10px;font:inherit"></textarea><button type="button" onclick="submitSchoolTeacherFeedback()" style="margin-top:8px;border:0;background:#1746c8;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer">ثبت بازخورد</button><div id="schoolAdminFeedbackList" style="margin-top:12px"></div></section><p style="font-size:12px;color:#68758d;margin-top:18px">داده‌ها از سرور مدرسه خوانده می‌شوند. دسترسی مدیر فقط به معلمان عضو همین مدرسه محدود است.</p></div></div>
 <script>
-(function(){let selectedSchoolTeacherId='',selectedSchoolTeacherName='';const roleKey='دفتر_کلاسی_cloud_role_v1';function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}function endpoint(){return (window.DAFTAR_CLOUD_ENDPOINT||window.DAFTAR_SYNC_ENDPOINT||'').trim().replace(/\/$/,'')}function token(){try{return localStorage.getItem('دفتر_کلاسی_cloud_token_v2')||''}catch(e){return ''}}window.openSchoolAdmin=async function(){let role='teacher';try{role=localStorage.getItem(roleKey)||'teacher'}catch(e){}if(role!=='admin'){alert('این بخش فقط برای حساب مدیر مدرسه فعال است.');return}if(!endpoint()||!token()){alert('برای مشاهده پنل مدیر، ابتدا سرور مدرسه را پیکربندی و آنلاین شوید.');return}document.getElementById('schoolAdminOverlay').style.display='block';await window.refreshSchoolAdmin()};window.closeSchoolAdmin=function(){document.getElementById('schoolAdminOverlay').style.display='none'};window.refreshSchoolAdmin=async function(){const msg=document.getElementById('schoolAdminMessage');msg.textContent='در حال دریافت گزارش‌های مدرسه...';try{const r=await fetch(endpoint()+'/api/admin/overview',{headers:{Authorization:'Bearer '+token()}});const d=await r.json();if(!r.ok)throw new Error(d.message||d.error||'خطا در دریافت اطلاعات');document.getElementById('schoolAdminSubtitle').textContent=d.school.name+' · کد عضویت: '+d.school.join_code;msg.textContent='آخرین دریافت اطلاعات: '+new Date(d.generatedAt).toLocaleString('fa-IR');document.getElementById('schoolAdminStats').innerHTML=[['معلمان',d.stats.teacherCount],['دانش‌آموزان ثبت‌شده',d.stats.studentCount],['کلاس‌های دارای داده',d.stats.classCount],['ثبت حضور و غیاب',d.stats.attendanceRecords],['غیبت ثبت‌شده',d.stats.absentRecords],['تأخیر ثبت‌شده',d.stats.lateRecords]].map(x=>'<div style="padding:16px;border:1px solid #dce5f7;border-radius:14px;background:#f8faff"><div style="font-size:12px;color:#64748b">'+esc(x[0])+'</div><strong style="font-size:26px;color:#1746c8">'+esc(x[1])+'</strong></div>').join('');document.getElementById('schoolAdminTeachers').innerHTML=d.teachers.map(t=>'<tr><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+esc(t.username)+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+(t.role==='admin'?'مدیر و معلم':'معلم')+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+esc(t.studentCount)+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+(t.lastSync?esc(new Date(t.lastSync).toLocaleString('fa-IR')):'هنوز همگام‌سازی نشده')+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+(t.role==='teacher'||t.role==='admin'?'<button onclick="viewSchoolTeacher(\''+esc(t.id)+'\')" style="border:0;border-radius:8px;background:#eaf0ff;color:#1746c8;padding:7px 10px;cursor:pointer">مشاهده داده‌ها</button>':'—')+'</td></tr>').join('')||'<tr><td colspan="5" style="padding:12px">هنوز حسابی به این مدرسه متصل نشده است.</td></tr>'}catch(e){msg.textContent='دریافت اطلاعات ناموفق بود: '+e.message+' — اتصال سرور و نقش مدیر را بررسی کنید.';document.getElementById('schoolAdminStats').innerHTML='';document.getElementById('schoolAdminTeachers').innerHTML=''}};window.viewSchoolTeacher=async function(id){const box=document.getElementById('schoolAdminDetail');box.style.display='block';box.textContent='در حال دریافت پرونده...';try{const r=await fetch(endpoint()+'/api/admin/teacher/'+encodeURIComponent(id)+'/snapshot',{headers:{Authorization:'Bearer '+token()}});const d=await r.json();if(!r.ok)throw new Error(d.error||'خطا');selectedSchoolTeacherId=id;selectedSchoolTeacherName=d.username;const p=d.payload||{};let out='معلم: '+d.username+'\nآخرین همگام‌سازی: '+(d.updated_at?new Date(d.updated_at).toLocaleString('fa-IR'):'ثبت نشده')+'\n\n';let classCount=0;for(const [k,v] of Object.entries(p)){if(v&&typeof v==='object'&&Array.isArray(v.students)){classCount++;out+='کلاس: '+(v.name||v.className||v.grade||k)+'\nتعداد دانش‌آموز: '+v.students.length+'\n';v.students.forEach((st,i)=>{const name=st.name||[st.firstName,st.lastName].filter(Boolean).join(' ')||st.fullName||st.full_name||'دانش‌آموز';out+='  '+(i+1)+'. '+name+(st.studentCode?' · کد: '+st.studentCode:'')+'\n'});const att=Array.isArray(v.attendance)?v.attendance:[];out+='ثبت‌های حضور و غیاب: '+att.length+'\n';att.slice(-20).forEach(a=>{out+='  '+(a.date||'')+' · '+(a.studentName||a.name||'')+' · '+(a.status||a.state||'ثبت وضعیت نشده')+'\n'});out+='\n'}}box.textContent=out||'این حساب هنوز اطلاعات دانش‌آموزی همگام‌سازی نکرده است.';const fb=document.getElementById('schoolAdminFeedback');fb.style.display='block';document.getElementById('schoolAdminFeedbackTeacher').textContent='بازخوردها برای '+d.username;document.getElementById('schoolAdminFeedbackText').value='';await loadSchoolTeacherFeedback()}catch(e){box.textContent='خطا در نمایش اطلاعات: '+e.message}};window.loadSchoolTeacherFeedback=async function(){const el=document.getElementById('schoolAdminFeedbackList');if(!selectedSchoolTeacherId){el.textContent='ابتدا پرونده یک معلم را انتخاب کنید.';return}try{const r=await fetch(endpoint()+'/api/admin/teacher/'+encodeURIComponent(selectedSchoolTeacherId)+'/feedback',{headers:{Authorization:'Bearer '+token()}});const d=await r.json();if(!r.ok)throw new Error(d.error||'خطا');el.innerHTML=(d.feedback||[]).map(f=>'<article style="padding:10px;margin-top:8px;border:1px solid #e1e8f5;border-radius:10px;background:#f8faff"><small style="color:#64748b">'+esc(new Date(f.created_at).toLocaleString('fa-IR'))+'</small><div style="white-space:pre-wrap;margin-top:5px">'+esc(f.message)+'</div></article>').join('')||'<p style="color:#64748b">هنوز بازخوردی ثبت نشده است.</p>'}catch(e){el.textContent='دریافت بازخوردها ناموفق بود: '+e.message}};window.submitSchoolTeacherFeedback=async function(){const message=document.getElementById('schoolAdminFeedbackText').value.trim();if(!selectedSchoolTeacherId||!message){alert('ابتدا معلم را انتخاب کنید و متن بازخورد را بنویسید.');return}try{const r=await fetch(endpoint()+'/api/admin/teacher/'+encodeURIComponent(selectedSchoolTeacherId)+'/feedback',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},body:JSON.stringify({message})});const d=await r.json();if(!r.ok)throw new Error(d.message||d.error||'خطا');document.getElementById('schoolAdminFeedbackText').value='';await loadSchoolTeacherFeedback();alert('بازخورد با موفقیت ثبت شد.')}catch(e){alert('ثبت بازخورد ناموفق بود: '+e.message)}};// از یک مسیر مشترک برای تشخیص نقش و ساخت دکمه استفاده می‌کنیم؛
+(function(){let selectedSchoolTeacherId='',selectedSchoolTeacherName='';const roleKey='دفتر_کلاسی_cloud_role_v1';function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}function endpoint(){return (window.DAFTAR_CLOUD_ENDPOINT||window.DAFTAR_SYNC_ENDPOINT||'').trim().replace(/\/$/,'')}function token(){try{return localStorage.getItem('دفتر_کلاسی_cloud_token_v2')||''}catch(e){return ''}}window.openSchoolAdmin=async function(){let role='teacher';try{role=localStorage.getItem(roleKey)||'teacher'}catch(e){}if(role!=='admin'){alert('این بخش فقط برای حساب مدیر مدرسه فعال است.');return}if(!endpoint()||!token()){alert('برای مشاهده پنل مدیر، ابتدا سرور مدرسه را پیکربندی و آنلاین شوید.');return}document.getElementById('schoolAdminOverlay').style.display='block';await window.refreshSchoolAdmin()};window.closeSchoolAdmin=function(){document.getElementById('schoolAdminOverlay').style.display='none'};window.refreshSchoolAdmin=async function(){const msg=document.getElementById('schoolAdminMessage');msg.textContent='در حال دریافت گزارش‌های مدرسه...';try{const r=await fetch(endpoint()+'/api/admin/overview',{headers:{Authorization:'Bearer '+token()}});const d=await r.json();if(!r.ok)throw new Error(d.message||d.error||'خطا در دریافت اطلاعات');document.getElementById('schoolAdminSubtitle').textContent=d.school.name+' · کد عضویت: '+d.school.join_code;msg.textContent='آخرین دریافت اطلاعات: '+new Date(d.generatedAt).toLocaleString('fa-IR');document.getElementById('schoolAdminStats').innerHTML=[['معلمان',d.stats.teacherCount],['دانش‌آموزان ثبت‌شده',d.stats.studentCount],['کلاس‌های دارای داده',d.stats.classCount],['ثبت حضور و غیاب',d.stats.attendanceRecords],['غیبت ثبت‌شده',d.stats.absentRecords],['تأخیر ثبت‌شده',d.stats.lateRecords]].map(x=>'<div style="padding:16px;border:1px solid #dce5f7;border-radius:14px;background:#f8faff"><div style="font-size:12px;color:#64748b">'+esc(x[0])+'</div><strong style="font-size:26px;color:#1746c8">'+esc(x[1])+'</strong></div>').join('');document.getElementById('schoolAdminTeachers').innerHTML=d.teachers.map(t=>'<tr><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+esc(t.username)+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+(t.role==='admin'?'مدیر و معلم':'معلم')+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+esc(t.studentCount)+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+(t.lastSync?esc(new Date(t.lastSync).toLocaleString('fa-IR')):'هنوز همگام‌سازی نشده')+'</td><td style="padding:10px;border-bottom:1px solid #e5eaf5">'+(t.role==='teacher'||t.role==='admin'?'<button onclick="viewSchoolTeacher(\''+esc(t.id)+'\')" style="border:0;border-radius:8px;background:#eaf0ff;color:#1746c8;padding:7px 10px;cursor:pointer">مشاهده داده‌ها</button>':'—')+'</td></tr>').join('')||'<tr><td colspan="5" style="padding:12px">هنوز حسابی به این مدرسه متصل نشده است.</td></tr>'}catch(e){msg.textContent='دریافت اطلاعات ناموفق بود: '+e.message+' — اتصال سرور و نقش مدیر را بررسی کنید.';document.getElementById('schoolAdminStats').innerHTML='';document.getElementById('schoolAdminTeachers').innerHTML=''}};window.viewSchoolTeacher=async function(id){
+  const box=document.getElementById('schoolAdminDetail');
+  box.style.display='block';
+  box.innerHTML='<p style="color:#475569">در حال دریافت پرونده...</p>';
+  try{
+    const r=await fetch(endpoint()+'/api/admin/teacher/'+encodeURIComponent(id)+'/snapshot',{headers:{Authorization:'Bearer '+token()}});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'خطا');
+    selectedSchoolTeacherId=id; selectedSchoolTeacherName=d.username;
+    const p=d.payload||{};
+    const classNames=(p.classNames&&typeof p.classNames==='object')?p.classNames:{};
+    const classes=[];
+    for(const [k,v] of Object.entries(p)){
+      if(v&&typeof v==='object'&&Array.isArray(v.students)){
+        classes.push({key:String(k),name:String(classNames[k]||v.name||v.className||v.grade||('کلاس '+k)),students:v.students.filter(function(s){return s&&typeof s==='object';}),attendance:Array.isArray(v.attendance)?v.attendance.filter(function(a){return a&&typeof a==='object';}):[]});
+      }
+    }
+    let schoolName='';
+    try{ const st=document.getElementById('schoolAdminSubtitle'); if(st) schoolName=(st.textContent||'').split('·')[0].trim(); }catch(e){}
+    window.__dfAdminState={teacherId:id,teacherName:d.username,synced:d.updated_at||null,classes:classes,schoolName:schoolName};
+    window._schoolAdminCurrentTeacher=d.username;
+    window._schoolAdminClasses=classes.map(function(c){return {key:c.key,value:{name:c.name,className:c.name,grade:c.name,students:c.students,attendance:c.attendance}};});
+    const crb=document.getElementById('schoolAdminClassReports');
+    if(crb){crb.style.display=window._schoolAdminClasses.length?'block':'none';
+    crb.innerHTML=window._schoolAdminClasses.length?'<h3 style="margin:0 0 10px;color:#1746c8">گزارش PDF هر کلاس</h3><p style="font-size:12px;color:#64748b">برای هر کلاس، گزارش خلاصه را در پنجرهٔ چاپ باز کنید و گزینهٔ «ذخیره به‌صورت PDF» را بزنید. برای گزارش کامل‌تر، از کارت کلاس «گزارش تحلیلی PDF» را دانلود کنید.</p>'+window._schoolAdminClasses.map((c,i)=>'<button type="button" onclick="printSchoolClassReport('+i+')" style="margin:4px;border:0;border-radius:9px;background:#1746c8;color:white;padding:9px 12px;cursor:pointer">گزارش '+esc(c.value.name||c.value.className||c.value.grade||c.key)+'</button>').join(''):'';}
+    let html='';
+    if(!classes.length){
+      html='<p style="color:#64748b">این حساب هنوز اطلاعات دانش‌آموزی همگام‌سازی نکرده است.</p>';
+    }else{
+      html+='<p style="color:#475569;font-size:12px;margin:6px 0">روی کارت هر کلاس بزنید تا فهرست دانش‌آموزان با آمار حضور و غیاب نمایش داده شود و «گزارش تحلیلی PDF» همان کلاس را دانلود کنید.</p>';
+      html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px">';
+      classes.forEach(function(c){
+        const st=window.__dfAdminClassStats(c);
+        html+='<button type="button" onclick="dfAdminToggleClass(\''+esc(c.key)+'\')" style="text-align:right;border:1px solid #dce5f7;background:#f8faff;border-radius:14px;padding:14px;cursor:pointer">';
+        html+='<div style="font-weight:700;color:#1746c8;font-size:14px">🏫 '+esc(c.name)+'</div>';
+        html+='<div style="margin-top:6px;font-size:12px;color:#475569">👥 '+toPersianNumber(c.students.length)+' دانش‌آموز</div>';
+        html+='<div style="margin-top:4px;font-size:12px;color:#475569">🗓 '+toPersianNumber(st.records)+' ثبت حضور</div>';
+        html+='<div style="margin-top:8px;font-size:12px;line-height:2"><span style="color:#15803d">حاضر '+toPersianNumber(st.present)+'</span> · <span style="color:#b91c1c">غایب '+toPersianNumber(st.absent)+'</span> · <span style="color:#b45309">تأخیر '+toPersianNumber(st.late)+'</span></div>';
+        html+='<div style="margin-top:8px;font-size:11px;color:#1746c8;font-weight:700">مشاهده جزئیات + گزارش PDF ↗</div>';
+        html+='</button>';
+      });
+      html+='</div>';
+    }
+    box.innerHTML=html;
+    const fb=document.getElementById('schoolAdminFeedback');
+    fb.style.display='block';
+    document.getElementById('schoolAdminFeedbackTeacher').textContent='بازخوردها برای '+d.username;
+    document.getElementById('schoolAdminFeedbackText').value='';
+    await loadSchoolTeacherFeedback();
+  }catch(e){
+    box.textContent='خطا در نمایش اطلاعات: '+e.message;
+  }
+};
+window.printSchoolClassReport=function(index){
+  const item=(window._schoolAdminClasses||[])[Number(index)];if(!item)return;
+  const c=item.value||{},teacher=window._schoolAdminCurrentTeacher||'';
+  const escHtml=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const students=Array.isArray(c.students)?c.students:[],attendance=Array.isArray(c.attendance)?c.attendance:[];
+  const absent=attendance.filter(a=>/غایب|غائب|absent/i.test(String(a.status||a.state||''))).length;
+  const late=attendance.filter(a=>/تأخیر|تاخیر|late/i.test(String(a.status||a.state||''))).length;
+  const title=c.name||c.className||c.grade||item.key;
+  const rows=students.map((st,i)=>'<tr><td>'+(i+1)+'</td><td>'+escHtml(st.name||[st.firstName,st.lastName].filter(Boolean).join(' ')||st.fullName||st.full_name||'دانش‌آموز')+'</td><td>'+escHtml(st.studentCode||'—')+'</td></tr>').join('');
+  const recent=attendance.slice(-100).map(a=>'<tr><td>'+escHtml(a.date||'—')+'</td><td>'+escHtml(a.studentName||a.name||'—')+'</td><td>'+escHtml(a.status||a.state||'ثبت نشده')+'</td></tr>').join('');
+  const w=window.open('','_blank');if(!w){alert('مرورگر بازشدن پنجره گزارش را مسدود کرده است. اجازه بازشدن پنجره را بدهید و دوباره تلاش کنید.');return;}
+  w.document.open();w.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>گزارش کلاس '+escHtml(title)+'</title><style>body{font-family:Tahoma,Arial,sans-serif;color:#172033;margin:24px;line-height:1.8}h1{font-size:22px}h2{font-size:16px;margin-top:24px}.meta{display:flex;gap:20px;flex-wrap:wrap;background:#f2f6ff;padding:12px;border-radius:8px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border:1px solid #ccd5e5;padding:6px;text-align:right;font-size:12px}th{background:#edf3ff}.actions{margin-bottom:18px}button{padding:8px 14px}@media print{.actions{display:none}body{margin:10mm}tr{break-inside:avoid}}</style></head><body><div class="actions"><button onclick="window.print()">چاپ / ذخیره PDF</button></div><h1>گزارش تحلیلی کلاس: '+escHtml(title)+'</h1><div class="meta"><span>مدرسه: '+escHtml((document.getElementById('schoolAdminSubtitle')||{textContent:''}).textContent)+'</span><span>معلم: '+escHtml(teacher)+'</span><span>تاریخ گزارش: '+escHtml(new Date().toLocaleDateString('fa-IR'))+'</span><span>تعداد دانش‌آموز: '+students.length+'</span><span>ثبت حضور و غیاب: '+attendance.length+'</span><span>غیبت: '+absent+'</span><span>تأخیر: '+late+'</span></div><h2>فهرست دانش‌آموزان</h2><table><thead><tr><th>ردیف</th><th>نام دانش‌آموز</th><th>کد دانش‌آموزی</th></tr></thead><tbody>'+rows+'</tbody></table><h2>خلاصه ثبت‌های اخیر حضور و غیاب (حداکثر ۱۰۰ مورد)</h2><table><thead><tr><th>تاریخ</th><th>دانش‌آموز</th><th>وضعیت</th></tr></thead><tbody>'+recent+'</tbody></table><p>این گزارش از داده‌های همگام‌شده معلم تهیه شده است؛ داده‌های ثبت‌شده فقط روی دستگاه معلم در این گزارش دیده نمی‌شوند.</p><script>window.onload=()=>setTimeout(()=>window.print(),300);<\/script></body></html>');w.document.close();
+};
+window.dfAdminPrintClass=function(key){
+  const list=window._schoolAdminClasses||[];
+  const idx=list.findIndex(function(x){return x.key===key;});
+  if(idx<0){ alert('ابتدا پروندهٔ معلم را از فهرست باز کنید.'); return; }
+  window.printSchoolClassReport(idx);
+};
+window.__dfAdminClassStats=function(c){
+  const per={};
+  (c.students||[]).forEach(function(s,i){ per[String(s.id!==undefined?s.id:i)]={present:0,absent:0,late:0,total:0}; });
+  let records=0,present=0,absent=0,late=0;
+  (c.attendance||[]).forEach(function(a){
+    const st=String(a.status||a.state||'');
+    if(!st||st==='ثبت نشده')return;
+    records++;
+    const k=String(a.studentId!==undefined?a.studentId:(a.student_id!==undefined?a.student_id:''));
+    if(!per[k])per[k]={present:0,absent:0,late:0,total:0};
+    per[k].total++;
+    if(st.indexOf('غایب')>=0||/absent/i.test(st)){ per[k].absent++; absent++; }
+    else if(st.indexOf('تأخیر')>=0||st.indexOf('تاخیر')>=0||/late/i.test(st)){ per[k].late++; late++; }
+    else { per[k].present++; present++; }
+  });
+  return {records:records,present:present,absent:absent,late:late,per:per};
+};
+window.dfAdminToggleClass=function(key){
+  const S=window.__dfAdminState;
+  const c=S&&S.classes?S.classes.find(function(x){return x.key===key;}):null;
+  const old=document.getElementById('dfAdminClassDetail');
+  if(old){
+    if(old.getAttribute('data-key')===key){ old.remove(); return; }
+    old.remove();
+  }
+  if(!c)return;
+  const st=window.__dfAdminClassStats(c);
+  const div=document.createElement('div');
+  div.id='dfAdminClassDetail';
+  div.setAttribute('data-key',key);
+  div.style.cssText='margin-top:14px;padding:16px;background:#f7f9ff;border:1px solid #dce5f7;border-radius:14px';
+  let h='<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><h3 style="margin:0;color:#1746c8">🏫 '+esc(c.name)+' — فهرست دانش‌آموزان</h3>';
+  h+='<button type="button" onclick="dfAdminClassPdf(\''+esc(key)+'\')" style="border:0;background:#1746c8;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer">📄 گزارش تحلیلی PDF</button><button type="button" onclick="dfAdminPrintClass(\''+esc(key)+'\')" style="border:1px solid #d8e2f4;background:#fff;color:#1746c8;padding:10px 14px;border-radius:10px;cursor:pointer">🖨 گزارش چاپی خلاصه</button></div>';
+  if(!c.students.length){
+    h+='<p style="color:#64748b">دانش‌آموزی در این کلاس ثبت نشده است.</p>';
+  }else{
+    h+='<div style="overflow:auto;margin-top:10px"><table style="width:100%;border-collapse:collapse;min-width:560px"><thead><tr>';
+    ['ردیف','نام و نام خانوادگی','کد','کل ثبت','حاضر','غایب','تأخیر','درصد حضور'].forEach(function(t){ h+='<th style="text-align:right;padding:8px;background:#edf3ff;font-size:12px">'+t+'</th>'; });
+    h+='</tr></thead><tbody>';
+    c.students.forEach(function(s,i){
+      const k=String(s.id!==undefined?s.id:i);
+      const pr=st.per[k]||{present:0,absent:0,late:0,total:0};
+      const name=s.name||[s.firstName,s.lastName].filter(Boolean).join(' ')||s.fullName||s.full_name||'دانش‌آموز';
+      const pct=pr.total?Math.round(pr.present/pr.total*100):null;
+      h+='<tr>'
+        +'<td style="padding:8px;border-bottom:1px solid #e5eaf5;font-size:12px">'+toPersianNumber(i+1)+'</td>'
+        +'<td style="padding:8px;border-bottom:1px solid #e5eaf5;font-size:12px">'+esc(name)+'</td>'
+        +'<td style="padding:8px;border-bottom:1px solid #e5eaf5;font-size:12px">'+esc(s.studentCode||s.code||'—')+'</td>'
+        +'<td style="padding:8px;border-bottom:1px solid #e5eaf5;font-size:12px">'+toPersianNumber(pr.total)+'</td>'
+        +'<td style="padding:8px;border-bottom:1px solid #e5eaf5;font-size:12px;color:#15803d">'+toPersianNumber(pr.present)+'</td>'
+        +'<td style="padding:8px;border-bottom:1px solid #e5eaf5;font-size:12px;color:#b91c1c">'+toPersianNumber(pr.absent)+'</td>'
+        +'<td style="padding:8px;border-bottom:1px solid #e5eaf5;font-size:12px;color:#b45309">'+toPersianNumber(pr.late)+'</td>'
+        +'<td style="padding:8px;border-bottom:1px solid #e5eaf5;font-size:12px;font-weight:700">'+(pct===null?'—':toPersianNumber(pct)+'٪')+'</td>'
+        +'</tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  div.innerHTML=h;
+  document.getElementById('schoolAdminDetail').appendChild(div);
+  try{ div.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(e){}
+};
+window.dfAdminClassPdf=async function(key){
+  const S=window.__dfAdminState;
+  const c=S&&S.classes?S.classes.find(function(x){return x.key===key;}):null;
+  if(!c){ alert('ابتدا داده‌های کلاس را از فهرست معلمان بارگذاری کنید.'); return; }
+  try{
+    const pages=await window.__dfRenderClassAnalysisPages({
+      title:'گزارش تحلیلی کلاس',
+      subtitle:c.name,
+      meta:['معلم: '+(S.teacherName||'—'),'مدرسه: '+(S.schoolName||'—'),'آخرین همگام‌سازی: '+(S.synced?new Date(S.synced).toLocaleString('fa-IR'):'—')].join('   •   '),
+      cls:c, stats:window.__dfAdminClassStats(c)
+    });
+    const fname='گزارش-تحلیلی-'+String(c.name).replace(/[\\\/:*?"<>|]/g,'-').replace(/\s+/g,'-')+'.pdf';
+    await dfDeliverPdf(fname,pages);
+  }catch(err){ console.error(err); alert('ساخت PDF با خطا روبه‌رو شد. لطفاً دوباره تلاش کنید.'); }
+};
+window.__dfRenderClassAnalysisPages=async function(opts){
+  try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+  const W=1240,H=1754,M=70;
+  const c=opts.cls, st=opts.stats;
+  const rows=[];
+  (c.students||[]).forEach(function(s,i){
+    const k=String(s.id!==undefined?s.id:i);
+    const pr=st.per[k]||{present:0,absent:0,late:0,total:0};
+    const name=s.name||[s.firstName,s.lastName].filter(Boolean).join(' ')||s.fullName||s.full_name||'دانش‌آموز';
+    rows.push({name:name,code:s.studentCode||s.code||'',total:pr.total,present:pr.present,absent:pr.absent,late:pr.late,pct:pr.total?Math.round(pr.present/pr.total*100):null});
+  });
+  const overallPct=st.records?Math.round(st.present/st.records*100):null;
+  const cw={idx:64,name:350,code:110,total:100,present:100,absent:100,late:100,pct:176};
+  const X0=W-M;
+  const cxIdx=X0-cw.idx/2;
+  const xNameRight=X0-cw.idx-14;
+  const cxCode=X0-cw.idx-cw.name-cw.code/2;
+  const cxTotal=X0-cw.idx-cw.name-cw.code-cw.total/2;
+  const cxPresent=X0-cw.idx-cw.name-cw.code-cw.total-cw.present/2;
+  const cxAbsent=X0-cw.idx-cw.name-cw.code-cw.total-cw.present-cw.absent/2;
+  const cxLate=X0-cw.idx-cw.name-cw.code-cw.total-cw.present-cw.absent-cw.late/2;
+  const cxPct=X0-cw.idx-cw.name-cw.code-cw.total-cw.present-cw.absent-cw.late-cw.pct/2;
+  const tableW=W-2*M;
+  const ROW_H=76, HEAD_H=58;
+  const pages=[];
+  let canvas,ctx,y,pageNo=0;
+  function chipsRow(paintY){
+    const chips=[['دانش‌آموز',c.students.length],['ثبت حضور',st.records],['حاضر',st.present],['غایب',st.absent],['تأخیر',st.late],['میانگین حضور',overallPct===null?'—':(overallPct+'٪')]];
+    const chipW=170,gap=14;
+    let cx=W-M;
+    chips.forEach(function(ch){
+      ctx.fillStyle='#eaf0ff'; dfRoundRect(ctx,cx-chipW,paintY,chipW,74,16); ctx.fill();
+      ctx.fillStyle='#1746c8'; ctx.textAlign='center'; ctx.direction='rtl';
+      ctx.font='800 30px '+DF_PDF_FONT; ctx.fillText(String(ch[1]),cx-chipW/2,paintY+26);
+      ctx.font='500 20px '+DF_PDF_FONT; ctx.fillText(ch[0],cx-chipW/2,paintY+54);
+      cx-=chipW+gap;
+    });
+  }
+  function newPage(first){
+    canvas=document.createElement('canvas'); canvas.width=W; canvas.height=H;
+    ctx=canvas.getContext('2d');
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
+    ctx.direction='rtl'; ctx.textBaseline='middle';
+    pages.push(canvas); pageNo++;
+    if(first){
+      const g=ctx.createLinearGradient(0,0,W,0);
+      g.addColorStop(0,'#3498db'); g.addColorStop(.5,'#16a085'); g.addColorStop(1,'#087f8c');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,230);
+      ctx.fillStyle='#fff'; ctx.textAlign='right';
+      ctx.font='800 52px '+DF_PDF_FONT; ctx.fillText(opts.title,W-M,80);
+      ctx.font='600 30px '+DF_PDF_FONT; ctx.fillText(opts.subtitle,W-M,140);
+      ctx.font='400 21px '+DF_PDF_FONT; ctx.globalAlpha=.94;
+      const metaLines=dfWrapText(ctx,opts.meta||'',W-2*M,1);
+      ctx.fillText(metaLines[0]||'',W-M,190); ctx.globalAlpha=1;
+      y=254;
+      chipsRow(y);
+      y+=74+30;
+    }else{
+      y=M;
+    }
+    drawTableHeader();
+  }
+  function drawTableHeader(){
+    ctx.fillStyle='#087f8c'; dfRoundRect(ctx,M,y,tableW,HEAD_H,12); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='700 23px '+DF_PDF_FONT; ctx.textAlign='center';
+    ctx.fillText('ردیف',cxIdx,y+HEAD_H/2);
+    ctx.textAlign='right'; ctx.fillText('نام و نام خانوادگی',xNameRight,y+HEAD_H/2);
+    ctx.textAlign='center';
+    ctx.fillText('کد',cxCode,y+HEAD_H/2);
+    ctx.fillText('کل ثبت',cxTotal,y+HEAD_H/2);
+    ctx.fillText('حاضر',cxPresent,y+HEAD_H/2);
+    ctx.fillText('غایب',cxAbsent,y+HEAD_H/2);
+    ctx.fillText('تأخیر',cxLate,y+HEAD_H/2);
+    ctx.fillText('درصد حضور',cxPct,y+HEAD_H/2);
+    y+=HEAD_H+8;
+  }
+  function drawFooter(n,total){
+    ctx.fillStyle='#94a3b8'; ctx.font='400 21px '+DF_PDF_FONT; ctx.textAlign='center'; ctx.direction='rtl';
+    ctx.fillText('گزارش تحلیلی مدرسه — پنل مدیر  •  دفتر کلاسی من  •  صفحهٔ '+toPersianNumber(n)+' از '+toPersianNumber(total),W/2,H-38);
+  }
+  newPage(true);
+  for(let i=0;i<rows.length;i++){
+    if(y+ROW_H>H-90){ newPage(false); }
+    const r=rows[i];
+    ctx.fillStyle=(i%2===0)?'#f6fbfb':'#ffffff';
+    ctx.fillRect(M,y,tableW,ROW_H);
+    ctx.strokeStyle='#e2eeee'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(M,y+ROW_H); ctx.lineTo(M+tableW,y+ROW_H); ctx.stroke();
+    const cy=y+ROW_H/2;
+    ctx.fillStyle='#475569'; ctx.font='500 23px '+DF_PDF_FONT; ctx.textAlign='center';
+    ctx.fillText(toPersianNumber(i+1),cxIdx,cy);
+    ctx.fillStyle='#263238'; ctx.font='700 25px '+DF_PDF_FONT; ctx.textAlign='right';
+    const nameLines=dfWrapText(ctx,r.name,cw.name-30,2);
+    nameLines.forEach(function(t,k){ ctx.fillText(t,xNameRight,cy+(k-(nameLines.length-1)/2)*32); });
+    ctx.fillStyle='#607d8b'; ctx.font='500 22px '+DF_PDF_FONT; ctx.textAlign='center';
+    ctx.fillText(r.code?toPersianNumber(r.code):'—',cxCode,cy);
+    ctx.fillStyle='#37474f'; ctx.font='600 23px '+DF_PDF_FONT;
+    ctx.fillText(toPersianNumber(r.total),cxTotal,cy);
+    ctx.fillStyle='#15803d'; ctx.fillText(toPersianNumber(r.present),cxPresent,cy);
+    ctx.fillStyle='#b91c1c'; ctx.fillText(toPersianNumber(r.absent),cxAbsent,cy);
+    ctx.fillStyle='#b45309'; ctx.fillText(toPersianNumber(r.late),cxLate,cy);
+    if(r.pct===null){
+      ctx.fillStyle='#b0bec5'; ctx.font='500 22px '+DF_PDF_FONT; ctx.fillText('—',cxPct,cy);
+    }else{
+      const col=r.pct>=85?{bg:'#dcfce7',fg:'#15803d'}:(r.pct>=65?{bg:'#fef3c7',fg:'#b45309'}:{bg:'#fee2e2',fg:'#b91c1c'});
+      const bw=120,bh=44,bx=cxPct-bw/2;
+      ctx.fillStyle=col.bg; dfRoundRect(ctx,bx,cy-bh/2,bw,bh,22); ctx.fill();
+      ctx.fillStyle=col.fg; ctx.font='700 23px '+DF_PDF_FONT;
+      ctx.fillText(toPersianNumber(r.pct)+'٪',cxPct,cy);
+    }
+    y+=ROW_H;
+  }
+  const attention=rows.filter(function(r){ return r.absent>=2||r.late>=3; })
+      .sort(function(a,b){ return (b.absent-a.absent)||(b.late-a.late); }).slice(0,8);
+  if(attention.length){
+    if(y+90+attention.length*44+70>H-90){ newPage(false); }
+    y+=26;
+    ctx.fillStyle='#fff7ed'; dfRoundRect(ctx,M,y,tableW,64+attention.length*46,16); ctx.fill();
+    ctx.strokeStyle='#fed7aa'; ctx.lineWidth=2; dfRoundRect(ctx,M,y,tableW,64+attention.length*46,16); ctx.stroke();
+    ctx.fillStyle='#b45309'; ctx.font='800 26px '+DF_PDF_FONT; ctx.textAlign='right';
+    ctx.fillText('⚠️ موارد نیازمند پیگیری',W-M-18,y+34);
+    let ay=y+72;
+    attention.forEach(function(r){
+      ctx.fillStyle='#7c2d12'; ctx.font='600 23px '+DF_PDF_FONT; ctx.textAlign='right';
+      const line='• '+r.name+' — '+toPersianNumber(r.absent)+' غیبت، '+toPersianNumber(r.late)+' تأخیر'+(r.pct===null?'':' ('+toPersianNumber(r.pct)+'٪ حضور)');
+      ctx.fillText(line,W-M-24,ay);
+      ay+=46;
+    });
+    y+=64+attention.length*46;
+  }
+  const total=pages.length;
+  pages.forEach(function(cn,i){
+    ctx=cn.getContext('2d'); ctx.direction='rtl'; ctx.textBaseline='middle';
+    drawFooter(i+1,total);
+  });
+  return pages;
+};
+window.loadSchoolTeacherFeedback=async function(){const el=document.getElementById('schoolAdminFeedbackList');if(!selectedSchoolTeacherId){el.textContent='ابتدا پرونده یک معلم را انتخاب کنید.';return}try{const r=await fetch(endpoint()+'/api/admin/teacher/'+encodeURIComponent(selectedSchoolTeacherId)+'/feedback',{headers:{Authorization:'Bearer '+token()}});const d=await r.json();if(!r.ok)throw new Error(d.error||'خطا');el.innerHTML=(d.feedback||[]).map(f=>'<article style="padding:10px;margin-top:8px;border:1px solid #e1e8f5;border-radius:10px;background:#f8faff"><small style="color:#64748b">'+esc(new Date(f.created_at).toLocaleString('fa-IR'))+'</small><div style="white-space:pre-wrap;margin-top:5px">'+esc(f.message)+'</div></article>').join('')||'<p style="color:#64748b">هنوز بازخوردی ثبت نشده است.</p>'}catch(e){el.textContent='دریافت بازخوردها ناموفق بود: '+e.message}};window.submitSchoolTeacherFeedback=async function(){const message=document.getElementById('schoolAdminFeedbackText').value.trim();if(!selectedSchoolTeacherId||!message){alert('ابتدا معلم را انتخاب کنید و متن بازخورد را بنویسید.');return}try{const r=await fetch(endpoint()+'/api/admin/teacher/'+encodeURIComponent(selectedSchoolTeacherId)+'/feedback',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},body:JSON.stringify({message})});const d=await r.json();if(!r.ok)throw new Error(d.message||d.error||'خطا');document.getElementById('schoolAdminFeedbackText').value='';await loadSchoolTeacherFeedback();alert('بازخورد با موفقیت ثبت شد.')}catch(e){alert('ثبت بازخورد ناموفق بود: '+e.message)}};// از یک مسیر مشترک برای تشخیص نقش و ساخت دکمه استفاده می‌کنیم؛
 // این مسیر نقش را از /api/auth/me نیز دوباره بررسی می‌کند تا خطای موقتی سرور
 // هنگام ورود باعث پنهان ماندن دائمی دکمه مدیر نشود.
 let lastInstallAttempt=0,installInProgress=false;

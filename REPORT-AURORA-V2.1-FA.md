@@ -11,7 +11,7 @@
 - `.github/workflows/build-apk.yml`: نام Artifact به `DaftarKelasi-APK-v7.4.1` تغییر کرد.
 - `.gitignore`: جلوگیری از ثبت اسرار، keystore، build output، node_modules و فایل‌های آپلودشده.
 - `backend/.env.example`: الگوی تنظیمات بدون اسرار واقعی.
-- `backend/server.js`: مبدأهای مرورگری فقط در صورت وجود در `CORS_ORIGIN` مجاز می‌شوند؛ حالت فهرست خالی دیگر همه مبدأها را مجاز نمی‌کند.
+- نکته: این گزارش مربوط به نسخه‌ای قدیمی‌تر است؛ فایل سرور فعلی `backend/index.js` است.
 - `backend/README.md`: توضیح محدودیت‌های CORS و آپلود.
 - `CHANGELOG-AURORA-V2.1-FA.md` و `RELEASE-NOTES-7.4.1-FA.md`: مستندات تغییرات.
 
@@ -19,7 +19,7 @@
 - تجزیه نحوی تمام 5 اسکریپت inline در HTML با `node --check`: موفق.
 - تأیید شد چهار اسکریپت قدیمی HTML بدون تغییر باقی مانده‌اند.
 - تجزیه CSS برای لایه‌های جدید با `tinycss2`: بدون خطای تجزیه.
-- `node --check backend/server.js`: موفق.
+- بررسی نحوی گزارش‌شده در نسخه قدیمی روی `backend/server.js` انجام شده بود؛ در این بسته فایل فعلی `backend/index.js` است.
 - تطابق دقیق `index.html` و `app/src/main/assets/index.html`: موفق.
 - بررسی DOM در مرورگر آزمایشی: عنوان صفحه و 24 دکمه ناوبری شناسایی شدند.
 - بررسی عرض صفحه در 320، 360، 390، 768، 1024 و 1440 پیکسل در محیط آزمایشی: اسکرول افقی سطح صفحه مشاهده نشد.

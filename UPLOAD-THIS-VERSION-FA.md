@@ -2,8 +2,7 @@
 
 ## فایل‌ها
 - `index.html`: نسخه وب (با لوگوی تازه)
-- `backend/server.js`: سرور به‌روزشده
-- `backend/schema.sql`: ساختار پایگاه داده
+- `backend/index.js`: فایل اصلی سرور در این نسخه
 - `app/`: نسخه اندروید و آیکون‌های لانچر
 - `assets/daftar-logo.png`: لوگوی سربرگ وب
 
