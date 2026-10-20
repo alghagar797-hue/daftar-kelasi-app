@@ -1,5 +1,8 @@
 name: Build Android Release APK
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
   push:
@@ -45,9 +48,18 @@ jobs:
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 --decode > daftar-release.keystore
-          test -f daftar-release.keystore
-          echo "KEYSTORE_FILE=$GITHUB_WORKSPACE/daftar-release.keystore" >> $GITHUB_ENV
+          set -euo pipefail
+          if [ -z "${KEYSTORE_BASE64:-}" ]; then
+            echo "ERROR: GitHub Secret KEYSTORE_BASE64 is missing."
+            exit 1
+          fi
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > daftar-release.keystore
+          if [ ! -s daftar-release.keystore ]; then
+            echo "ERROR: decoded keystore is empty or invalid."
+            exit 1
+          fi
+          chmod 600 daftar-release.keystore
+          echo "KEYSTORE_FILE=$GITHUB_WORKSPACE/daftar-release.keystore" >> "$GITHUB_ENV"
 
 
       - name: Build Release APK
@@ -81,7 +93,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DaftarKelasi-APK-v7.5.1
+          name: DaftarKelasi-APK-v7.5.2
           path: release/DaftarKelasi.apk
           retention-days: 30
 
