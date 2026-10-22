@@ -19,6 +19,7 @@
 
 const express = require("express");
 const crypto = require("crypto");
+const path = require("path");
 
 const APP_VERSION = "3.0.0";
 const PORT = Number(process.env.PORT || 3000);
@@ -646,11 +647,20 @@ app.post("/api/admin/teacher/:id/feedback", async function (req, res) {
   }
 });
 
-/* مسیر ریشه — پیام راهنما */
+/* فایل‌های رابط کاربری که داخل Root Directory سرویس Render قرار دارند.
+ * Render فقط محتوای backend/ را در دسترس سرویس می‌گذارد؛ بنابراین نسخهٔ وب
+ * داخل backend/public نگهداری می‌شود تا مسیر ریشه خود برنامه را نمایش دهد.
+ */
+const PUBLIC_DIR = path.join(__dirname, "public");
+app.use("/assets", express.static(path.join(PUBLIC_DIR, "assets"), { fallthrough: false, maxAge: "1h" }));
+app.get("/admin.html", function (req, res) {
+  res.sendFile(path.join(PUBLIC_DIR, "admin.html"));
+});
+app.get("/admin-setup.html", function (req, res) {
+  res.sendFile(path.join(PUBLIC_DIR, "admin-setup.html"));
+});
 app.get("/", function (req, res) {
-  res.type("text/plain; charset=utf-8").send(
-    "سرور ابری «دفتر کلاسی» فعال است. وضعیت: /api/health\n"
-  );
+  res.sendFile(path.join(PUBLIC_DIR, "index.html"));
 });
 
 /* خطاهای JSON نامعتبر */
