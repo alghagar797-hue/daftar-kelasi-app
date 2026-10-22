@@ -1,4 +1,4 @@
-صیئتنزدتname: Build Android Release APK
+name: Build Android Release APK
 
 permissions:
   contents: read
