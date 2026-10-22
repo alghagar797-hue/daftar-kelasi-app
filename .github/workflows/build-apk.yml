@@ -1,4 +1,4 @@
-mamashki7979name: Build Android Release APK
+name: Build Android Release APK
 
 permissions:
   contents: read
@@ -92,7 +92,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DaftarKelasi-APK-v7.9
+          name: DaftarKelasi-APK-v8.1.1
           path: release/DaftarKelasi.apk
           retention-days: 30
 
