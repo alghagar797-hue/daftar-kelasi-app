@@ -24,7 +24,7 @@ const APP_VERSION = "3.0.0";
 const PORT = Number(process.env.PORT || 3000);
 const DATABASE_URL = (process.env.DATABASE_URL || "").trim();
 const TOKEN_SECRET =
-  (process.env.TOKEN_SECRET || "").trim() || crypto.randomBytes(32).toString("hex");
+  (process.env.TOKEN_SECRET || process.env.JWT_SECRET || "").trim() || crypto.randomBytes(32).toString("hex");
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 30; // ۳۰ روز
 
 /* ============================================================
@@ -268,7 +268,7 @@ app.use(function cors(req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", process.env.ALLOWED_ORIGIN || origin);
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Daftar-Protocol");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Daftar-Protocol, X-Admin-Setup-Key");
   res.setHeader("Access-Control-Max-Age", "86400");
   if (req.method === "OPTIONS") { res.status(204).end(); return; }
   next();
@@ -331,6 +331,44 @@ function analyzePayload(payload) {
 ============================================================ */
 app.get("/api/health", function (req, res) {
   res.json({ ok: true, service: "daftar-kelasi", time: new Date().toISOString(), version: APP_VERSION });
+});
+
+/* ---------- راه‌اندازی امن مدیر مدرسه ----------
+ * با ADMIN_SETUP_KEY محافظت می‌شود؛ از ساخت مدیر بدون کلید جلوگیری می‌کند.
+ * با همان store فعلی کار می‌کند تا مدل داده و ذخیره‌سازی دوگانه نشود.
+ */
+app.post("/api/admin/setup", rateLimit, async function (req, res) {
+  const configuredKey = String(process.env.ADMIN_SETUP_KEY || "");
+  const suppliedKey = String(req.headers["x-admin-setup-key"] || "");
+  if (configuredKey.length < 20 || suppliedKey.length !== configuredKey.length ||
+      !crypto.timingSafeEqual(Buffer.from(suppliedKey), Buffer.from(configuredKey))) {
+    return res.status(403).json({ error: "SETUP_FORBIDDEN", message: "کلید راه‌اندازی نامعتبر است." });
+  }
+  try {
+    const schoolName = String((req.body && req.body.schoolName) || "").trim().slice(0, 160);
+    const username = String((req.body && req.body.username) || "").trim().toLowerCase();
+    const password = String((req.body && req.body.password) || "");
+    if (!schoolName || !/^[a-z0-9_\u0600-\u06FF\u200c.]{3,32}$/.test(username) || password.length < 10) {
+      return res.status(400).json({ error: "INVALID_SETUP_DATA", message: "نام مدرسه و نام کاربری معتبر لازم است؛ رمز مدیر حداقل ۱۰ نویسه باشد." });
+    }
+    if (await store.getTeacherByUsername(username)) {
+      return res.status(409).json({ error: "USERNAME_EXISTS", message: "این نام کاربری قبلاً ثبت شده است." });
+    }
+    const school = await store.createSchool({ name: schoolName, join_code: joinCode(), owner_teacher_id: null });
+    const passwordData = hashPassword(password);
+    const admin = await store.createTeacher({ username, password_hash: passwordData.hash, password_salt: passwordData.salt, role: "admin", school_id: school.id });
+    await store.updateTeacher(admin.id, {});
+    // Initial snapshot is optional for this store; create an empty one so admin panel sees a consistent record.
+    await store.saveSnapshot(admin.id, {}, "initial");
+    // Set owner after the admin ID exists, using the same school record and no schema migration.
+    if (store instanceof PgStore) await store.q("UPDATE dk_schools SET owner_teacher_id=$1 WHERE id=$2", [admin.id, school.id]);
+    else { school.owner_teacher_id = admin.id; store._save(); }
+    return res.status(201).json({ ok: true, school: { id: school.id, name: school.name, joinCode: school.join_code }, admin: { username: admin.username, role: admin.role } });
+  } catch (e) {
+    console.error("[admin/setup]", e);
+    if (e && e.code === "23505") return res.status(409).json({ error: "USERNAME_EXISTS", message: "این نام کاربری قبلاً ثبت شده است." });
+    return res.status(500).json({ error: "SERVER_ERROR", message: "ساخت حساب مدیر انجام نشد؛ لاگ سرور را بررسی کنید." });
+  }
 });
 
 /* ---------- ثبت‌نام ----------
@@ -519,6 +557,7 @@ app.get("/api/admin/overview", async function (req, res) {
     const teachers = await store.listTeachersBySchool(school.id);
     const stats = { teacherCount: teachers.length, studentCount: 0, classCount: 0, attendanceRecords: 0, absentRecords: 0, lateRecords: 0 };
     const teacherRows = [];
+    const classRows = [];
     for (const t of teachers) {
       const snap = await store.getSnapshot(t.id);
       const an = analyzePayload(snap ? snap.payload : null);
@@ -527,16 +566,23 @@ app.get("/api/admin/overview", async function (req, res) {
       stats.attendanceRecords += an.attendanceRecords;
       stats.absentRecords += an.absentRecords;
       stats.lateRecords += an.lateRecords;
+      for (const c of an.classes) classRows.push({
+        classKey: c.key, className: c.name, teacher: t.username,
+        studentCount: c.students.length, attendanceRecords: c.attendance.length,
+        absentRecords: c.attendance.filter(a => /غایب|غائب|absent/i.test(String(a.status || a.state || ""))).length,
+        lateRecords: c.attendance.filter(a => /تأخیر|تاخیر|late/i.test(String(a.status || a.state || ""))).length
+      });
       teacherRows.push({
         id: t.id, username: t.username, role: t.role,
-        studentCount: an.studentCount,
+        studentCount: an.studentCount, attendanceRecords: an.attendanceRecords,
+        absentRecords: an.absentRecords, lateRecords: an.lateRecords,
         lastSync: snap ? snap.updated_at : null
       });
     }
     res.json({
       school: { id: school.id, name: school.name, join_code: school.join_code },
       generatedAt: nowIso(),
-      stats, teachers: teacherRows
+      stats, teachers: teacherRows, classes: classRows
     });
   } catch (e) {
     console.error("[admin/overview]", e);
