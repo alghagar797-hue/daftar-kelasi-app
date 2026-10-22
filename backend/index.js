@@ -21,7 +21,7 @@ const express = require("express");
 const crypto = require("crypto");
 const path = require("path");
 
-const APP_VERSION = "3.0.0";
+const APP_VERSION = "3.1.0";
 const PORT = Number(process.env.PORT || 3000);
 const DATABASE_URL = (process.env.DATABASE_URL || "").trim();
 const TOKEN_SECRET =
@@ -41,6 +41,13 @@ function joinCode() {
   return s;
 }
 function newId() { return crypto.randomUUID(); }
+// Normalize Persian/Arabic digits so the same username works on Android and desktop.
+function normalizeUsername(value) {
+  return String(value || "").trim()
+    .replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
+    .replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+    .toLowerCase();
+}
 function nowIso() { return new Date().toISOString(); }
 function hashPassword(password, salt) {
   salt = salt || crypto.randomBytes(16).toString("hex");
@@ -110,14 +117,14 @@ class FileStore {
   async getSchoolById(id) { return this.data.schools.find(s => s.id === id) || null; }
   async createTeacher({ username, password_hash, password_salt, role, school_id }) {
     const t = {
-      id: newId(), username: String(username).toLowerCase(),
+      id: newId(), username: normalizeUsername(username),
       password_hash, password_salt, role, school_id: school_id || null, created_at: nowIso()
     };
     this.data.teachers.push(t); this._save(); return t;
   }
   async getTeacherByUsername(u) {
-    const k = String(u || "").toLowerCase();
-    return this.data.teachers.find(t => t.username === k) || null;
+    const k = normalizeUsername(u);
+    return this.data.teachers.find(t => normalizeUsername(t.username) === k) || null;
   }
   async getTeacherById(id) { return this.data.teachers.find(t => t.id === id) || null; }
   async updateTeacher(id, fields) {
@@ -205,11 +212,13 @@ class PgStore {
   async createTeacher({ username, password_hash, password_salt, role, school_id }) {
     const r = await this.q(
       "INSERT INTO dk_teachers (id,username,password_hash,password_salt,role,school_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
-      [newId(), String(username).toLowerCase(), password_hash, password_salt, role, school_id || null]);
+      [newId(), normalizeUsername(username), password_hash, password_salt, role, school_id || null]);
     return this._teacher(r[0]);
   }
   async getTeacherByUsername(u) {
-    const r = await this.q("SELECT * FROM dk_teachers WHERE username=$1", [String(u || "").toLowerCase()]);
+    const r = await this.q(
+      "SELECT * FROM dk_teachers WHERE translate(lower(username), '۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789')=$1 LIMIT 1",
+      [normalizeUsername(u)]);
     return this._teacher(r[0]);
   }
   async getTeacherById(id) {
@@ -354,7 +363,7 @@ app.post("/api/admin/setup", rateLimit, async function (req, res) {
   }
   try {
     const schoolName = String((req.body && req.body.schoolName) || "").trim().slice(0, 160);
-    const username = String((req.body && req.body.username) || "").trim().toLowerCase();
+    const username = normalizeUsername(req.body && req.body.username);
     const password = String((req.body && req.body.password) || "");
     if (!schoolName || !/^[a-z0-9_\u0600-\u06FF\u200c.]{3,32}$/.test(username) || password.length < 10) {
       return res.status(400).json({ error: "INVALID_SETUP_DATA", message: "نام مدرسه و نام کاربری معتبر لازم است؛ رمز مدیر حداقل ۱۰ نویسه باشد." });
@@ -386,7 +395,7 @@ app.post("/api/admin/setup", rateLimit, async function (req, res) {
  */
 app.post("/api/auth/register", rateLimit, async function (req, res) {
   try {
-    const username = String((req.body && req.body.username) || "").trim().toLowerCase();
+    const username = normalizeUsername(req.body && req.body.username);
     const password = String((req.body && req.body.password) || "");
     const schoolCode = String((req.body && req.body.schoolCode) || "").trim().toUpperCase();
     const schoolName = String((req.body && req.body.schoolName) || "").trim();
@@ -442,7 +451,7 @@ app.post("/api/auth/register", rateLimit, async function (req, res) {
 /* ---------- ورود ---------- */
 app.post("/api/auth/login", rateLimit, async function (req, res) {
   try {
-    const username = String((req.body && req.body.username) || "").trim().toLowerCase();
+    const username = normalizeUsername(req.body && req.body.username);
     const password = String((req.body && req.body.password) || "");
     const teacher = await store.getTeacherByUsername(username);
     if (!teacher) return fail(res, 401, "نام کاربری یا رمز عبور نادرست است.");
@@ -452,6 +461,47 @@ app.post("/api/auth/login", rateLimit, async function (req, res) {
     res.json({ ok: true, token, teacher: teacherPublic(teacher) });
   } catch (e) {
     console.error("[login]", e);
+    fail(res, 500, "SERVER_ERROR");
+  }
+});
+
+/* ---------- تغییر نام کاربری / رمز عبور (همگام بین دستگاه‌ها) ----------
+ * برای رفع مشکل «رمز روی گوشی جواب نمی‌دهد»: تغییرات اعتبارنامه روی سرور اعمال می‌شود
+ * تا همهٔ دستگاه‌ها با همان رمز وارد شوند. توکن تازه برمی‌گردد.
+ */
+app.post("/api/auth/change-credentials", rateLimit, async function (req, res) {
+  try {
+    const auth = authTeacher(req);
+    if (!auth) return fail(res, 401, "UNAUTHORIZED");
+    const teacher = await store.getTeacherById(auth.tid);
+    if (!teacher) return fail(res, 401, "UNAUTHORIZED");
+    const body = req.body || {};
+    const currentPassword = String(body.currentPassword || "");
+    const newUsername = String(body.newUsername || "").trim().toLowerCase();
+    const newPassword = String(body.newPassword || "");
+    if (!verifyPassword(currentPassword, teacher.password_salt, teacher.password_hash))
+      return fail(res, 401, "رمز فعلی نادرست است.");
+    if (newPassword && newPassword.length < 6) return fail(res, 400, "رمز جدید باید حداقل ۶ کاراکتر باشد.");
+    const fields = {};
+    if (newUsername && newUsername !== teacher.username) {
+      if (!/^[a-z0-9_\u0600-\u06FF\u200c.]{3,32}$/.test(newUsername))
+        return fail(res, 400, "نام کاربری باید ۳ تا ۳۲ کاراکتر و بدون فاصله باشد.");
+      const dup = await store.getTeacherByUsername(newUsername);
+      if (dup && dup.id !== teacher.id) return fail(res, 409, "این نام کاربری قبلاً ثبت شده است.");
+      fields.username = newUsername;
+    }
+    if (newPassword) {
+      const h = hashPassword(newPassword);
+      fields.password_hash = h.hash;
+      fields.password_salt = h.salt;
+    }
+    if (!Object.keys(fields).length) return fail(res, 400, "تغییری برای اعمال ارسال نشده است.");
+    const updated = await store.updateTeacher(teacher.id, fields);
+    const token = signToken({ tid: updated.id, username: updated.username, role: updated.role, schoolId: updated.school_id || null, exp: Date.now() + TOKEN_TTL_MS });
+    console.log("[change-credentials]", { id: updated.id, usernameChanged: !!fields.username, passwordChanged: !!fields.password_hash });
+    res.json({ ok: true, token, teacher: teacherPublic(updated) });
+  } catch (e) {
+    console.error("[change-credentials]", e);
     fail(res, 500, "SERVER_ERROR");
   }
 });
@@ -547,16 +597,47 @@ app.post("/api/sync/push", async function (req, res) {
 /* ============================================================
    API پنل مدیر مدرسه
 ============================================================ */
-function requireAdmin(req, res) {
+/* نقش مدیر از دیتابیس بررسی می‌شود تا «انتقال مدیریت» بلافاصله روی همهٔ توکن‌ها اثر بگذارد. */
+async function requireAdmin(req, res) {
   const auth = authTeacher(req);
   if (!auth) { fail(res, 401, "UNAUTHORIZED"); return null; }
-  if (auth.role !== "admin") { fail(res, 403, "این بخش فقط برای مدیر مدرسه است."); return null; }
-  return auth;
+  const teacher = await store.getTeacherById(auth.tid);
+  if (!teacher || teacher.role !== "admin") { fail(res, 403, "این بخش فقط برای مدیر مدرسه است."); return null; }
+  return { tid: teacher.id, username: teacher.username, role: teacher.role, schoolId: teacher.school_id || null };
 }
+
+/* ---------- انتقال نقش مدیر مدرسه به یک معلم ----------
+ * فقط مدیر فعلی می‌تواند نقش را به معلمِ عضو همین مدرسه بدهد؛
+ * پس از انتقال، حساب مدیر قبلی «معلم» می‌شود.
+ */
+app.post("/api/admin/transfer", rateLimit, async function (req, res) {
+  try {
+    const auth = await requireAdmin(req, res); if (!auth) return;
+    const me = await store.getTeacherById(auth.tid);
+    if (!me || !me.school_id) return fail(res, 400, "مدرسهٔ شما یافت نشد؛ ابتدا با کد عضویت به مدرسه متصل شوید.");
+    const body = req.body || {};
+    const targetId = String(body.teacherId || "").trim();
+    const targetUsername = String(body.username || "").trim().toLowerCase();
+    let target = null;
+    if (targetId) target = await store.getTeacherById(targetId);
+    else if (targetUsername) target = await store.getTeacherByUsername(targetUsername);
+    if (!target) return fail(res, 404, "حساب معلم مورد نظر یافت نشد.");
+    if (target.id === me.id) return fail(res, 400, "شما هم‌اکنون مدیر این مدرسه هستید.");
+    if ((target.school_id || null) !== (me.school_id || null)) return fail(res, 403, "انتقال مدیریت فقط به معلمان عضو همین مدرسه ممکن است.");
+    await store.updateTeacher(target.id, { role: "admin" });
+    await store.updateTeacher(me.id, { role: "teacher" });
+    console.log("[admin/transfer]", { from: me.username, to: target.username, school: me.school_id });
+    const fresh = await store.getTeacherById(target.id);
+    res.json({ ok: true, message: "نقش مدیر مدرسه به حساب «" + fresh.username + "» منتقل شد. حساب شما اکنون «معلم» است.", newAdmin: teacherPublic(fresh) });
+  } catch (e) {
+    console.error("[admin/transfer]", e);
+    fail(res, 500, "SERVER_ERROR");
+  }
+});
 
 app.get("/api/admin/overview", async function (req, res) {
   try {
-    const auth = requireAdmin(req, res); if (!auth) return;
+    const auth = await requireAdmin(req, res); if (!auth) return;
     const me = await store.getTeacherById(auth.tid);
     if (!me || !me.school_id) return fail(res, 400, "مدرسهٔ شما یافت نشد؛ با پشتیبانی تماس بگیرید.");
     const school = await store.getSchoolById(me.school_id);
@@ -600,7 +681,7 @@ app.get("/api/admin/overview", async function (req, res) {
 
 app.get("/api/admin/teacher/:id/snapshot", async function (req, res) {
   try {
-    const auth = requireAdmin(req, res); if (!auth) return;
+    const auth = await requireAdmin(req, res); if (!auth) return;
     const me = await store.getTeacherById(auth.tid);
     const target = await store.getTeacherById(req.params.id);
     if (!target) return fail(res, 404, "این حساب یافت نشد.");
@@ -622,7 +703,7 @@ app.get("/api/admin/teacher/:id/snapshot", async function (req, res) {
 
 app.get("/api/admin/teacher/:id/feedback", async function (req, res) {
   try {
-    const auth = requireAdmin(req, res); if (!auth) return;
+    const auth = await requireAdmin(req, res); if (!auth) return;
     const me = await store.getTeacherById(auth.tid);
     const target = await store.getTeacherById(req.params.id);
     if (!target) return fail(res, 404, "این حساب یافت نشد.");
@@ -638,7 +719,7 @@ app.get("/api/admin/teacher/:id/feedback", async function (req, res) {
 
 app.post("/api/admin/teacher/:id/feedback", async function (req, res) {
   try {
-    const auth = requireAdmin(req, res); if (!auth) return;
+    const auth = await requireAdmin(req, res); if (!auth) return;
     const me = await store.getTeacherById(auth.tid);
     const target = await store.getTeacherById(req.params.id);
     if (!target) return fail(res, 404, "این حساب یافت نشد.");
