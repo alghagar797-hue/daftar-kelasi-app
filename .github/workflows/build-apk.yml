@@ -92,7 +92,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DaftarKelasi-APK-v7.5.2
+          name: DaftarKelasi-APK-v7.6
           path: release/DaftarKelasi.apk
           retention-days: 30
 
