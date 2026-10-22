@@ -13865,76 +13865,80 @@ html body .app-sidebar button.sidebar-collapse:hover{
 }
 </style>
 
-<script id="v771-safe-navigation">
+
+<script id="daftar-v78-integration">
 (function(){
   "use strict";
-  function navFor(sectionId){
-    return Array.from(document.querySelectorAll('#mainNav [onclick], #appSidebar [onclick], #mobileQuickbar [onclick]'))
-      .filter(function(el){return (el.getAttribute('onclick')||'').indexOf("showSection('"+sectionId+"'")>=0;});
-  }
-  function hideNav(sectionId){
-    navFor(sectionId).forEach(function(el){
-      el.style.display='none';
-      el.setAttribute('aria-hidden','true');
-      el.dataset.mergedHidden='1';
+  function getNav(id){
+    return Array.from(document.querySelectorAll('#mainNav button[onclick]')).filter(function(b){
+      return (b.getAttribute('onclick')||'').indexOf("showSection('"+id+"'")>=0;
     });
   }
-  function addShortcuts(targetId, items){
+  function mergeSections(targetId, sourceIds, title){
     var target=document.getElementById(targetId);
-    if(!target || target.querySelector('.v771-section-shortcuts')) return;
-    var card=document.createElement('div');
-    card.className='card v771-section-shortcuts';
-    card.style.cssText='display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0;padding:14px';
-    var heading=document.createElement('strong');
-    heading.textContent='بخش‌های مرتبط';
-    heading.style.cssText='width:100%;font-size:15px';
-    card.appendChild(heading);
-    items.forEach(function(item){
-      var btn=document.createElement('button');
-      btn.type='button'; btn.className='btn btn-primary';
-      btn.textContent=item.label;
-      btn.addEventListener('click',function(){ if(typeof window.showSection==='function') window.showSection(item.id); });
-      card.appendChild(btn);
+    if(!target) return;
+    var targetCard=target.querySelector('.card');
+    if(title && targetCard){var h=targetCard.querySelector('h2'); if(h) h.textContent=title;}
+    sourceIds.forEach(function(sourceId){
+      var source=document.getElementById(sourceId);
+      if(!source || source===target || source.dataset.v78Merged==='1') return;
+      Array.from(source.children).forEach(function(child){
+        // Move complete cards/controls, preserving their original IDs and event handlers.
+        target.appendChild(child);
+      });
+      source.dataset.v78Merged='1';
+      source.remove();
+      getNav(sourceId).forEach(function(btn){btn.remove();});
     });
-    target.insertBefore(card,target.firstChild);
+  }
+  function renameNav(id,label){
+    getNav(id).forEach(function(btn){
+      btn.setAttribute('data-nav-label',label);
+      var s=btn.querySelector('.sb-label'); if(s) s.textContent=label;
+      else btn.textContent=label;
+    });
+  }
+  function addSchoolNameEditor(){
+    var info=document.getElementById('accountSchoolInfo');
+    if(!info || document.getElementById('v78EditSchoolName')) return;
+    var btn=document.createElement('button');
+    btn.id='v78EditSchoolName'; btn.type='button'; btn.textContent='✏️ ویرایش نام مدرسه';
+    btn.style.cssText='display:block;margin-top:10px;border:0;border-radius:9px;background:#1746c8;color:#fff;padding:9px 12px;cursor:pointer;font:700 12px Tahoma';
+    btn.addEventListener('click',async function(){
+      var name=prompt('نام جدید مدرسه را وارد کنید:');
+      if(name===null) return;
+      name=name.trim();
+      if(!name){alert('نام مدرسه نمی‌تواند خالی باشد.');return;}
+      if(typeof window.cloudRequest!=='function'){
+        alert('اتصال سرور در دسترس نیست؛ نام مدرسه تغییر نکرد.');return;
+      }
+      try{
+        var d=await window.cloudRequest('/api/admin/school/name',{method:'POST',body:JSON.stringify({name:name})});
+        try{localStorage.setItem('دفتر_کلاسی_school_name_v1',d.school.name);}catch(e){}
+        if(typeof window.paintSchoolName==='function') window.paintSchoolName(d.school.name,d.school.join_code||'');
+        alert('نام مدرسه ذخیره شد.');
+      }catch(e){alert('ویرایش نام مدرسه انجام نشد: '+String(e.message||e));}
+    });
+    info.appendChild(btn);
   }
   function apply(){
-    if(document.body.dataset.v771Applied==='1') return;
-    document.body.dataset.v771Applied='1';
-    var evaluation=document.getElementById('evaluation');
-    if(evaluation){
-      var h=evaluation.querySelector('h2'); if(h) h.textContent='⭐ ارزشیابی';
-      addShortcuts('evaluation',[
-        {id:'feedback',label:'💬 بازخورد آموزشی'},
-        {id:'grades',label:'📝 ارزشیابی کیفی'}
-      ]);
-    }
-    var monthly=document.getElementById('monthly');
-    if(monthly){
-      var h=monthly.querySelector('h2'); if(h) h.textContent='📊 عملکرد ماهانه و وضعیت تحصیلی';
-      addShortcuts('monthly',[{id:'report',label:'📈 مشاهده وضعیت تحصیلی'}]);
-    }
-    var studentFile=document.getElementById('studentFile');
-    if(studentFile){
-      var h=studentFile.querySelector('h2'); if(h) h.textContent='🗂️ کارتابل دانش‌آموز';
-      addShortcuts('studentFile',[
-        {id:'parents',label:'👨‍👩‍👧 اطلاعات والدین'},
-        {id:'interests',label:'❤️ علاقه‌مندی‌های دانش‌آموز'}
-      ]);
-    }
-    ['feedback','grades'].forEach(hideNav);
-    hideNav('report');
-    hideNav('parents');
-    hideNav('interests');
+    if(document.body.dataset.daftarV78==='1') return;
+    document.body.dataset.daftarV78='1';
+    mergeSections('evaluation',['feedback','grades'],'⭐ ارزشیابی');
+    renameNav('evaluation','⭐ ارزشیابی');
+    mergeSections('monthly',['report'],'📊 عملکرد ماهانه و وضعیت تحصیلی');
+    renameNav('monthly','📊 عملکرد ماهانه و وضعیت تحصیلی');
+    mergeSections('studentFile',['parents','interests'],'🗂️ کارتابل دانش‌آموز');
+    renameNav('studentFile','🗂️ کارتابل دانش‌آموز');
     var backup=document.getElementById('backup');
     if(backup){
-      var bh=backup.querySelector('h2'); if(bh) bh.textContent='📑 گزارش و پشتیبان اطلاعات برنامه';
-      var bi=backup.querySelector('.info-box');
-      if(bi) bi.textContent='از این بخش برای تهیه و بازیابی پشتیبان و مشاهدهٔ اطلاعات قابل گزارش استفاده کنید. محتوای گزارش به اطلاعات ثبت‌شده در برنامه وابسته است.';
+      var h=backup.querySelector('h2'); if(h) h.textContent='📑 گزارش فارسی و پشتیبان اطلاعات برنامه';
+      var note=backup.querySelector('.success-box');
+      if(note) note.textContent='گزارش و پشتیبان اطلاعات برنامه شامل داده‌های کلاس‌ها، دانش‌آموزان، حضور و غیاب، ارزشیابی‌ها، بازخوردهای آموزشی و فایل‌های پیوست قابل بازیابی است. پیش از به‌روزرسانی، پشتیبان تهیه کنید.';
     }
+    addSchoolNameEditor();
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true});
-  else apply();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true}); else apply();
 })();
 </script>
 

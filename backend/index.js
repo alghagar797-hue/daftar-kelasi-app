@@ -115,6 +115,7 @@ class FileStore {
     return this.data.schools.find(s => s.join_code === String(code).toUpperCase()) || null;
   }
   async getSchoolById(id) { return this.data.schools.find(s => s.id === id) || null; }
+  async updateSchoolName(id, name) { const s = await this.getSchoolById(id); if (!s) return null; s.name = name; this._save(); return s; }
   async createTeacher({ username, password_hash, password_salt, role, school_id }) {
     const t = {
       id: newId(), username: normalizeUsername(username),
@@ -610,6 +611,24 @@ async function requireAdmin(req, res) {
  * فقط مدیر فعلی می‌تواند نقش را به معلمِ عضو همین مدرسه بدهد؛
  * پس از انتقال، حساب مدیر قبلی «معلم» می‌شود.
  */
+
+app.post("/api/admin/school/name", async function (req, res) {
+  const auth = authTeacher(req);
+  if (!auth) return fail(res, 401, "UNAUTHORIZED");
+  try {
+    const teacher = await store.getTeacherById(auth.tid);
+    if (!teacher || teacher.role !== "admin" || !teacher.school_id) return fail(res, 403, "ADMIN_REQUIRED");
+    const name = String((req.body || {}).name || "").trim().slice(0,160);
+    if (!name) return fail(res, 400, "SCHOOL_NAME_REQUIRED");
+    const school = await store.updateSchoolName(teacher.school_id, name);
+    if (!school) return fail(res, 404, "SCHOOL_NOT_FOUND");
+    res.json({ ok: true, school: { id: school.id, name: school.name, join_code: school.join_code } });
+  } catch (e) {
+    console.error("[daftar] school name update failed:", e.message);
+    fail(res, 500, "SCHOOL_NAME_UPDATE_FAILED");
+  }
+});
+
 app.post("/api/admin/transfer", rateLimit, async function (req, res) {
   try {
     const auth = await requireAdmin(req, res); if (!auth) return;
