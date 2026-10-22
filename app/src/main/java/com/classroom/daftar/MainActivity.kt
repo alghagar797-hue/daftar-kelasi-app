@@ -119,15 +119,35 @@ class MainActivity : Activity() {
             ): Boolean {
                 fileCallback?.onReceiveValue(null)
                 fileCallback = callback
-                val types = params?.acceptTypes?.filter { it.isNotBlank() } ?: emptyList()
+                // WebView may report file extensions (for example .json) rather than MIME types.
+                // Convert known extensions to MIME types so Android's document picker can find backups.
+                val rawTypes = params?.acceptTypes?.filter { it.isNotBlank() } ?: emptyList()
+                val types = rawTypes.flatMap { raw ->
+                    raw.split(",").map { it.trim().lowercase() }.filter { it.isNotBlank() }.map { value ->
+                        when (value) {
+                            ".json", "json" -> "application/json"
+                            ".pdf", "pdf" -> "application/pdf"
+                            ".txt", "txt" -> "text/plain"
+                            ".jpg", ".jpeg", "jpg", "jpeg" -> "image/jpeg"
+                            ".png", "png" -> "image/png"
+                            "audio/*", "image/*", "video/*", "application/*", "text/*" -> value
+                            else -> value
+                        }
+                    }
+                }.distinct()
+                val mimeTypes = types.filter { it.contains("/") }
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
-                    type = if (types.size == 1) types[0] else "*/*"
-                    if (types.size > 1) putExtra(Intent.EXTRA_MIME_TYPES, types.toTypedArray())
+                    type = when {
+                        mimeTypes.isEmpty() -> "*/*"
+                        mimeTypes.size == 1 -> mimeTypes[0]
+                        else -> "*/*"
+                    }
+                    if (mimeTypes.size > 1) putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
                     putExtra(Intent.EXTRA_ALLOW_MULTIPLE, params?.mode == FileChooserParams.MODE_OPEN_MULTIPLE)
                 }
                 return try {
-                    startActivityForResult(Intent.createChooser(intent, "انتخاب فایل صوتی"), fileRequest)
+                    startActivityForResult(Intent.createChooser(intent, "انتخاب فایل"), fileRequest)
                     true
                 } catch (e: Exception) {
                     fileCallback?.onReceiveValue(null)
