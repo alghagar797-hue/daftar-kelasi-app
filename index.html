@@ -10468,6 +10468,117 @@ html body .class-multi{background:linear-gradient(130deg,#7541a8,#a15bc7)!import
 @media(prefers-reduced-motion:reduce){html body .class-card{transition:none!important}}
 </style>
 
+
+<script id="v77-merged-sections">
+(function(){
+  function mergeSectionContents(targetId, sourceIds, headingMap){
+    var target=document.getElementById(targetId);
+    if(!target) return;
+    sourceIds.forEach(function(sourceId){
+      var source=document.getElementById(sourceId);
+      if(!source || source===target) return;
+      Array.from(source.children).forEach(function(child){
+        if(child.tagName==='SCRIPT') return;
+        target.appendChild(child);
+      });
+      source.style.display='none';
+      source.setAttribute('aria-hidden','true');
+    });
+    if(headingMap){
+      Object.keys(headingMap).forEach(function(id){
+        var el=document.querySelector('#'+targetId+' h2');
+        if(el && id==='main') el.textContent=headingMap[id];
+      });
+    }
+  }
+  function renameNav(oldLabel,newLabel,sectionId){
+    document.querySelectorAll('[data-nav-label]').forEach(function(btn){
+      var label=btn.getAttribute('data-nav-label')||'';
+      if(label.indexOf(oldLabel)>=0){
+        btn.style.display='none';
+        btn.setAttribute('aria-hidden','true');
+      }
+    });
+    Array.from(document.querySelectorAll('[onclick]')).filter(function(el){return (el.getAttribute('onclick')||'').indexOf("showSection('"+sectionId+"'")>=0;}).forEach(function(el){
+      if(el.classList.contains('capability-card')) el.style.display='none';
+    });
+  }
+  function setNavLabel(sectionId,oldLabel,newLabel){
+    Array.from(document.querySelectorAll('[onclick]')).filter(function(el){return (el.getAttribute('onclick')||'').indexOf("showSection('"+sectionId+"'")>=0;}).forEach(function(el){
+      if(el.hasAttribute('data-nav-label')) el.setAttribute('data-nav-label',newLabel);
+      var label=el.querySelector('.sb-label');
+      if(label) label.textContent=newLabel;
+      var strong=el.querySelector('strong');
+      if(strong) strong.textContent=newLabel;
+    });
+  }
+  function apply(){
+    if(document.body.dataset.v77Merged==='1') return;
+    document.body.dataset.v77Merged='1';
+
+    /* Keep all existing form controls and IDs so saved records and handlers continue to work. */
+    mergeSectionContents('evaluation',['feedback','grades']);
+    mergeSectionContents('monthly',['report']);
+    mergeSectionContents('studentFile',['parents','interests']);
+
+    var eval=document.getElementById('evaluation');
+    if(eval){
+      var h=eval.querySelector('h2');
+      if(h) h.textContent='⭐ ارزشیابی';
+      var info=eval.querySelector('.info-box');
+      if(info) info.textContent='همهٔ ابزارهای ارزشیابی در یک بخش: ثبت ارزشیابی روزانه، ارزشیابی کیفی و بازخورد آموزشی. اطلاعات قبلی حفظ می‌شود.';
+    }
+    var monthly=document.getElementById('monthly');
+    if(monthly){
+      var h2=monthly.querySelector('h2');
+      if(h2) h2.textContent='📊 عملکرد ماهانه و وضعیت تحصیلی';
+      var info2=monthly.querySelector('.info-box');
+      if(info2) info2.textContent='ثبت عملکرد ماهانه و مشاهدهٔ گزارش وضعیت تحصیلی دانش‌آموز در یک بخش واحد.';
+    }
+    var sf=document.getElementById('studentFile');
+    if(sf){
+      var cards=sf.querySelectorAll('.card');
+      if(cards.length>1){
+        cards.forEach(function(c,i){ if(i>0){ c.style.marginTop='18px'; }});
+      }
+      var heads=sf.querySelectorAll('h2');
+      heads.forEach(function(h){
+        if(/اطلاعات والدین/.test(h.textContent)) h.textContent='👨‍👩‍👧 اطلاعات والدین — کارتابل دانش‌آموز';
+        if(/علاقه/.test(h.textContent)) h.textContent='❤️ علاقه‌مندی‌های دانش‌آموز — کارتابل دانش‌آموز';
+      });
+    }
+
+    /* Single visible menu entry for each merged area. */
+    setNavLabel('evaluation','⭐ ارزشیابی','⭐ ارزشیابی');
+    setNavLabel('monthly','📅 عملکرد ماهانه','📊 عملکرد ماهانه و وضعیت تحصیلی');
+    setNavLabel('studentFile','🗂️ کارتابل دانش‌آموز','🗂️ کارتابل دانش‌آموز');
+    renameNav('بازخورد آموزشی','', 'feedback');
+    renameNav('ارزشیابی کیفی','', 'grades');
+    renameNav('وضعیت تحصیلی','', 'report');
+    renameNav('اطلاعات والدین','', 'parents');
+    renameNav('علاقه‌مندی دانش‌آموز','', 'interests');
+
+    /* The backup/export area receives a clearer Persian report title, without changing export behavior. */
+    document.querySelectorAll('[data-nav-label]').forEach(function(btn){
+      var label=btn.getAttribute('data-nav-label')||'';
+      if(/پشتیبان|اطلاعات برنامه|خروجی/.test(label) && /پشتیبان/.test(label)){
+        btn.setAttribute('data-nav-label','📑 گزارش و پشتیبان اطلاعات برنامه');
+        var sl=btn.querySelector('.sb-label'); if(sl) sl.textContent='📑 گزارش و پشتیبان اطلاعات برنامه';
+      }
+    });
+    var backup=document.getElementById('backup');
+    if(backup){
+      var title=backup.querySelector('h2');
+      if(title) title.textContent='📑 گزارش حرفه‌ای و پشتیبان اطلاعات برنامه';
+      var info=backup.querySelector('.info-box');
+      if(info) info.textContent='گزارش و پشتیبان اطلاعات برنامه به زبان فارسی؛ شامل داده‌های کلاس، دانش‌آموزان، حضور و غیاب، ارزشیابی‌ها و اطلاعات ثبت‌شده. پیش از تغییر نسخه، نسخهٔ پشتیبان تهیه کنید.';
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true});
+  else apply();
+})();
+</script>
+
 </body>
         
 
@@ -11014,7 +11125,118 @@ async function exportCompleteReportPDF(){
     let html='<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>گزارش کامل دفتر کلاسی</title><style>body{font-family:Tahoma,Arial,sans-serif;color:#14213d;margin:22px;line-height:1.8}h1{color:#1746c8;border-bottom:3px solid #1746c8;padding-bottom:10px}h2{color:#1746c8;margin-top:28px;background:#edf3ff;padding:8px;border-radius:6px}table{width:100%;border-collapse:collapse;margin:10px 0 20px}th,td{border:1px solid #cbd5e1;padding:7px;text-align:right;font-size:11px}th{background:#edf3ff}.meta{color:#64748b;font-size:12px}.section{break-inside:avoid}@page{size:A4;margin:14mm}@media print{button{display:none}}</style></head><body><h1>گزارش کامل دفتر کلاسی من</h1><p class="meta">تاریخ تهیه: '+escPdf(new Date().toLocaleString('fa-IR'))+' · نام کاربری: '+escPdf(activeAccountUsername||'ثبت نشده')+'</p><p>این گزارش بر اساس اطلاعات ذخیره‌شده در همین دستگاه تهیه شده است. برای اطمینان از بازیابی عکس‌ها و فایل‌های ضمیمه، فایل پشتیبان مستقل را نیز نگه دارید.</p>';
     html+='<h2>خلاصه</h2><p>تعداد کلاس‌های دارای اطلاعات: '+classes.length+' · تعداد دانش‌آموزان: '+classes.reduce((n,x)=>n+x[1].students.length,0)+'</p>';
     for(const [key,cl] of classes){const title=cl.name||cl.className||cl.grade||key;html+='<section class="section"><h2>کلاس: '+escPdf(title)+'</h2><p>تعداد دانش‌آموزان: '+cl.students.length+'</p><table><thead><tr><th>ردیف</th><th>نام دانش‌آموز</th><th>اطلاعات پرونده</th></tr></thead><tbody>';cl.students.forEach((st,i)=>{const name=st.name||[st.firstName,st.lastName].filter(Boolean).join(' ')||st.fullName||st.full_name||'دانش‌آموز';const details=Object.entries(st).filter(([k,v])=>v!==null&&v!==undefined&&typeof v!=='object'&&!/photo|image|avatar|base64/i.test(k)).map(([k,v])=>k+': '+v).join(' · ');html+='<tr><td>'+(i+1)+'</td><td>'+escPdf(name)+'</td><td>'+escPdf(details)+'</td></tr>'});html+='</tbody></table>';const att=Array.isArray(cl.attendance)?cl.attendance:[];if(att.length){html+='<h3>حضور و غیاب ('+att.length+' رکورد)</h3><table><thead><tr><th>تاریخ</th><th>دانش‌آموز</th><th>وضعیت</th><th>توضیحات</th></tr></thead><tbody>';att.forEach(a=>html+='<tr><td>'+escPdf(a.date||'')+'</td><td>'+escPdf(a.studentName||a.name||a.student||'')+'</td><td>'+escPdf(a.status||a.state||'')+'</td><td>'+escPdf(a.note||a.description||'')+'</td></tr>');html+='</tbody></table>'}html+='</section>'}
-    html+='<h2>توضیح</h2><p>این گزارش نمایشی است و جایگزین فایل پشتیبان قابل بازیابی نیست. بخش‌هایی که در برنامه ثبت نشده‌اند در گزارش ظاهر نمی‌شوند.</p><script>window.onload=function(){setTimeout(function(){window.print()},400)}<\/script></body></html>';
+    html+='<h2>توضیح</h2><p>این گزارش نمایشی است و جایگزین فایل پشتیبان قابل بازیابی نیست. بخش‌هایی که در برنامه ثبت نشده‌اند در گزارش ظاهر نمی‌شوند.</p><script>window.onload=function(){setTimeout(function(){window.print()},400)}<\/script>
+<script id="v77-merged-sections">
+(function(){
+  function mergeSectionContents(targetId, sourceIds, headingMap){
+    var target=document.getElementById(targetId);
+    if(!target) return;
+    sourceIds.forEach(function(sourceId){
+      var source=document.getElementById(sourceId);
+      if(!source || source===target) return;
+      Array.from(source.children).forEach(function(child){
+        if(child.tagName==='SCRIPT') return;
+        target.appendChild(child);
+      });
+      source.style.display='none';
+      source.setAttribute('aria-hidden','true');
+    });
+    if(headingMap){
+      Object.keys(headingMap).forEach(function(id){
+        var el=document.querySelector('#'+targetId+' h2');
+        if(el && id==='main') el.textContent=headingMap[id];
+      });
+    }
+  }
+  function renameNav(oldLabel,newLabel,sectionId){
+    document.querySelectorAll('[data-nav-label]').forEach(function(btn){
+      var label=btn.getAttribute('data-nav-label')||'';
+      if(label.indexOf(oldLabel)>=0){
+        btn.style.display='none';
+        btn.setAttribute('aria-hidden','true');
+      }
+    });
+    Array.from(document.querySelectorAll('[onclick]')).filter(function(el){return (el.getAttribute('onclick')||'').indexOf("showSection('"+sectionId+"'")>=0;}).forEach(function(el){
+      if(el.classList.contains('capability-card')) el.style.display='none';
+    });
+  }
+  function setNavLabel(sectionId,oldLabel,newLabel){
+    Array.from(document.querySelectorAll('[onclick]')).filter(function(el){return (el.getAttribute('onclick')||'').indexOf("showSection('"+sectionId+"'")>=0;}).forEach(function(el){
+      if(el.hasAttribute('data-nav-label')) el.setAttribute('data-nav-label',newLabel);
+      var label=el.querySelector('.sb-label');
+      if(label) label.textContent=newLabel;
+      var strong=el.querySelector('strong');
+      if(strong) strong.textContent=newLabel;
+    });
+  }
+  function apply(){
+    if(document.body.dataset.v77Merged==='1') return;
+    document.body.dataset.v77Merged='1';
+
+    /* Keep all existing form controls and IDs so saved records and handlers continue to work. */
+    mergeSectionContents('evaluation',['feedback','grades']);
+    mergeSectionContents('monthly',['report']);
+    mergeSectionContents('studentFile',['parents','interests']);
+
+    var eval=document.getElementById('evaluation');
+    if(eval){
+      var h=eval.querySelector('h2');
+      if(h) h.textContent='⭐ ارزشیابی';
+      var info=eval.querySelector('.info-box');
+      if(info) info.textContent='همهٔ ابزارهای ارزشیابی در یک بخش: ثبت ارزشیابی روزانه، ارزشیابی کیفی و بازخورد آموزشی. اطلاعات قبلی حفظ می‌شود.';
+    }
+    var monthly=document.getElementById('monthly');
+    if(monthly){
+      var h2=monthly.querySelector('h2');
+      if(h2) h2.textContent='📊 عملکرد ماهانه و وضعیت تحصیلی';
+      var info2=monthly.querySelector('.info-box');
+      if(info2) info2.textContent='ثبت عملکرد ماهانه و مشاهدهٔ گزارش وضعیت تحصیلی دانش‌آموز در یک بخش واحد.';
+    }
+    var sf=document.getElementById('studentFile');
+    if(sf){
+      var cards=sf.querySelectorAll('.card');
+      if(cards.length>1){
+        cards.forEach(function(c,i){ if(i>0){ c.style.marginTop='18px'; }});
+      }
+      var heads=sf.querySelectorAll('h2');
+      heads.forEach(function(h){
+        if(/اطلاعات والدین/.test(h.textContent)) h.textContent='👨‍👩‍👧 اطلاعات والدین — کارتابل دانش‌آموز';
+        if(/علاقه/.test(h.textContent)) h.textContent='❤️ علاقه‌مندی‌های دانش‌آموز — کارتابل دانش‌آموز';
+      });
+    }
+
+    /* Single visible menu entry for each merged area. */
+    setNavLabel('evaluation','⭐ ارزشیابی','⭐ ارزشیابی');
+    setNavLabel('monthly','📅 عملکرد ماهانه','📊 عملکرد ماهانه و وضعیت تحصیلی');
+    setNavLabel('studentFile','🗂️ کارتابل دانش‌آموز','🗂️ کارتابل دانش‌آموز');
+    renameNav('بازخورد آموزشی','', 'feedback');
+    renameNav('ارزشیابی کیفی','', 'grades');
+    renameNav('وضعیت تحصیلی','', 'report');
+    renameNav('اطلاعات والدین','', 'parents');
+    renameNav('علاقه‌مندی دانش‌آموز','', 'interests');
+
+    /* The backup/export area receives a clearer Persian report title, without changing export behavior. */
+    document.querySelectorAll('[data-nav-label]').forEach(function(btn){
+      var label=btn.getAttribute('data-nav-label')||'';
+      if(/پشتیبان|اطلاعات برنامه|خروجی/.test(label) && /پشتیبان/.test(label)){
+        btn.setAttribute('data-nav-label','📑 گزارش و پشتیبان اطلاعات برنامه');
+        var sl=btn.querySelector('.sb-label'); if(sl) sl.textContent='📑 گزارش و پشتیبان اطلاعات برنامه';
+      }
+    });
+    var backup=document.getElementById('backup');
+    if(backup){
+      var title=backup.querySelector('h2');
+      if(title) title.textContent='📑 گزارش حرفه‌ای و پشتیبان اطلاعات برنامه';
+      var info=backup.querySelector('.info-box');
+      if(info) info.textContent='گزارش و پشتیبان اطلاعات برنامه به زبان فارسی؛ شامل داده‌های کلاس، دانش‌آموزان، حضور و غیاب، ارزشیابی‌ها و اطلاعات ثبت‌شده. پیش از تغییر نسخه، نسخهٔ پشتیبان تهیه کنید.';
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true});
+  else apply();
+})();
+</script>
+
+</body></html>';
     const w=window.open('','_blank');if(!w){alert('مرورگر بازشدن پنجره گزارش را مسدود کرد. اجازه بازشدن پنجره را بدهید و دوباره تلاش کنید.');return}w.document.open();w.document.write(html);w.document.close();
   }catch(e){console.error(e);alert('ساخت گزارش PDF ناموفق بود: '+(e.message||e))}
 }
@@ -13067,7 +13289,118 @@ window.printSchoolClassReport=function(index){
   const rows=students.map((st,i)=>'<tr><td>'+(i+1)+'</td><td>'+escHtml(st.name||[st.firstName,st.lastName].filter(Boolean).join(' ')||st.fullName||st.full_name||'دانش‌آموز')+'</td><td>'+escHtml(st.studentCode||'—')+'</td></tr>').join('');
   const recent=attendance.slice(-100).map(a=>'<tr><td>'+escHtml(a.date||'—')+'</td><td>'+escHtml(a.studentName||a.name||'—')+'</td><td>'+escHtml(a.status||a.state||'ثبت نشده')+'</td></tr>').join('');
   const w=window.open('','_blank');if(!w){alert('مرورگر بازشدن پنجره گزارش را مسدود کرده است. اجازه بازشدن پنجره را بدهید و دوباره تلاش کنید.');return;}
-  w.document.open();w.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>گزارش کلاس '+escHtml(title)+'</title><style>body{font-family:Tahoma,Arial,sans-serif;color:#172033;margin:24px;line-height:1.8}h1{font-size:22px}h2{font-size:16px;margin-top:24px}.meta{display:flex;gap:20px;flex-wrap:wrap;background:#f2f6ff;padding:12px;border-radius:8px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border:1px solid #ccd5e5;padding:6px;text-align:right;font-size:12px}th{background:#edf3ff}.actions{margin-bottom:18px}button{padding:8px 14px}@media print{.actions{display:none}body{margin:10mm}tr{break-inside:avoid}}</style></head><body><div class="actions"><button onclick="window.print()">چاپ / ذخیره PDF</button></div><h1>گزارش تحلیلی کلاس: '+escHtml(title)+'</h1><div class="meta"><span>مدرسه: '+escHtml((document.getElementById('schoolAdminSubtitle')||{textContent:''}).textContent)+'</span><span>معلم: '+escHtml(teacher)+'</span><span>تاریخ گزارش: '+escHtml(new Date().toLocaleDateString('fa-IR'))+'</span><span>تعداد دانش‌آموز: '+students.length+'</span><span>ثبت حضور و غیاب: '+attendance.length+'</span><span>غیبت: '+absent+'</span><span>تأخیر: '+late+'</span></div><h2>فهرست دانش‌آموزان</h2><table><thead><tr><th>ردیف</th><th>نام دانش‌آموز</th><th>کد دانش‌آموزی</th></tr></thead><tbody>'+rows+'</tbody></table><h2>خلاصه ثبت‌های اخیر حضور و غیاب (حداکثر ۱۰۰ مورد)</h2><table><thead><tr><th>تاریخ</th><th>دانش‌آموز</th><th>وضعیت</th></tr></thead><tbody>'+recent+'</tbody></table><p>این گزارش از داده‌های همگام‌شده معلم تهیه شده است؛ داده‌های ثبت‌شده فقط روی دستگاه معلم در این گزارش دیده نمی‌شوند.</p><script>window.onload=()=>setTimeout(()=>window.print(),300);<\/script></body></html>');w.document.close();
+  w.document.open();w.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>گزارش کلاس '+escHtml(title)+'</title><style>body{font-family:Tahoma,Arial,sans-serif;color:#172033;margin:24px;line-height:1.8}h1{font-size:22px}h2{font-size:16px;margin-top:24px}.meta{display:flex;gap:20px;flex-wrap:wrap;background:#f2f6ff;padding:12px;border-radius:8px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border:1px solid #ccd5e5;padding:6px;text-align:right;font-size:12px}th{background:#edf3ff}.actions{margin-bottom:18px}button{padding:8px 14px}@media print{.actions{display:none}body{margin:10mm}tr{break-inside:avoid}}</style></head><body><div class="actions"><button onclick="window.print()">چاپ / ذخیره PDF</button></div><h1>گزارش تحلیلی کلاس: '+escHtml(title)+'</h1><div class="meta"><span>مدرسه: '+escHtml((document.getElementById('schoolAdminSubtitle')||{textContent:''}).textContent)+'</span><span>معلم: '+escHtml(teacher)+'</span><span>تاریخ گزارش: '+escHtml(new Date().toLocaleDateString('fa-IR'))+'</span><span>تعداد دانش‌آموز: '+students.length+'</span><span>ثبت حضور و غیاب: '+attendance.length+'</span><span>غیبت: '+absent+'</span><span>تأخیر: '+late+'</span></div><h2>فهرست دانش‌آموزان</h2><table><thead><tr><th>ردیف</th><th>نام دانش‌آموز</th><th>کد دانش‌آموزی</th></tr></thead><tbody>'+rows+'</tbody></table><h2>خلاصه ثبت‌های اخیر حضور و غیاب (حداکثر ۱۰۰ مورد)</h2><table><thead><tr><th>تاریخ</th><th>دانش‌آموز</th><th>وضعیت</th></tr></thead><tbody>'+recent+'</tbody></table><p>این گزارش از داده‌های همگام‌شده معلم تهیه شده است؛ داده‌های ثبت‌شده فقط روی دستگاه معلم در این گزارش دیده نمی‌شوند.</p><script>window.onload=()=>setTimeout(()=>window.print(),300);<\/script>
+<script id="v77-merged-sections">
+(function(){
+  function mergeSectionContents(targetId, sourceIds, headingMap){
+    var target=document.getElementById(targetId);
+    if(!target) return;
+    sourceIds.forEach(function(sourceId){
+      var source=document.getElementById(sourceId);
+      if(!source || source===target) return;
+      Array.from(source.children).forEach(function(child){
+        if(child.tagName==='SCRIPT') return;
+        target.appendChild(child);
+      });
+      source.style.display='none';
+      source.setAttribute('aria-hidden','true');
+    });
+    if(headingMap){
+      Object.keys(headingMap).forEach(function(id){
+        var el=document.querySelector('#'+targetId+' h2');
+        if(el && id==='main') el.textContent=headingMap[id];
+      });
+    }
+  }
+  function renameNav(oldLabel,newLabel,sectionId){
+    document.querySelectorAll('[data-nav-label]').forEach(function(btn){
+      var label=btn.getAttribute('data-nav-label')||'';
+      if(label.indexOf(oldLabel)>=0){
+        btn.style.display='none';
+        btn.setAttribute('aria-hidden','true');
+      }
+    });
+    Array.from(document.querySelectorAll('[onclick]')).filter(function(el){return (el.getAttribute('onclick')||'').indexOf("showSection('"+sectionId+"'")>=0;}).forEach(function(el){
+      if(el.classList.contains('capability-card')) el.style.display='none';
+    });
+  }
+  function setNavLabel(sectionId,oldLabel,newLabel){
+    Array.from(document.querySelectorAll('[onclick]')).filter(function(el){return (el.getAttribute('onclick')||'').indexOf("showSection('"+sectionId+"'")>=0;}).forEach(function(el){
+      if(el.hasAttribute('data-nav-label')) el.setAttribute('data-nav-label',newLabel);
+      var label=el.querySelector('.sb-label');
+      if(label) label.textContent=newLabel;
+      var strong=el.querySelector('strong');
+      if(strong) strong.textContent=newLabel;
+    });
+  }
+  function apply(){
+    if(document.body.dataset.v77Merged==='1') return;
+    document.body.dataset.v77Merged='1';
+
+    /* Keep all existing form controls and IDs so saved records and handlers continue to work. */
+    mergeSectionContents('evaluation',['feedback','grades']);
+    mergeSectionContents('monthly',['report']);
+    mergeSectionContents('studentFile',['parents','interests']);
+
+    var eval=document.getElementById('evaluation');
+    if(eval){
+      var h=eval.querySelector('h2');
+      if(h) h.textContent='⭐ ارزشیابی';
+      var info=eval.querySelector('.info-box');
+      if(info) info.textContent='همهٔ ابزارهای ارزشیابی در یک بخش: ثبت ارزشیابی روزانه، ارزشیابی کیفی و بازخورد آموزشی. اطلاعات قبلی حفظ می‌شود.';
+    }
+    var monthly=document.getElementById('monthly');
+    if(monthly){
+      var h2=monthly.querySelector('h2');
+      if(h2) h2.textContent='📊 عملکرد ماهانه و وضعیت تحصیلی';
+      var info2=monthly.querySelector('.info-box');
+      if(info2) info2.textContent='ثبت عملکرد ماهانه و مشاهدهٔ گزارش وضعیت تحصیلی دانش‌آموز در یک بخش واحد.';
+    }
+    var sf=document.getElementById('studentFile');
+    if(sf){
+      var cards=sf.querySelectorAll('.card');
+      if(cards.length>1){
+        cards.forEach(function(c,i){ if(i>0){ c.style.marginTop='18px'; }});
+      }
+      var heads=sf.querySelectorAll('h2');
+      heads.forEach(function(h){
+        if(/اطلاعات والدین/.test(h.textContent)) h.textContent='👨‍👩‍👧 اطلاعات والدین — کارتابل دانش‌آموز';
+        if(/علاقه/.test(h.textContent)) h.textContent='❤️ علاقه‌مندی‌های دانش‌آموز — کارتابل دانش‌آموز';
+      });
+    }
+
+    /* Single visible menu entry for each merged area. */
+    setNavLabel('evaluation','⭐ ارزشیابی','⭐ ارزشیابی');
+    setNavLabel('monthly','📅 عملکرد ماهانه','📊 عملکرد ماهانه و وضعیت تحصیلی');
+    setNavLabel('studentFile','🗂️ کارتابل دانش‌آموز','🗂️ کارتابل دانش‌آموز');
+    renameNav('بازخورد آموزشی','', 'feedback');
+    renameNav('ارزشیابی کیفی','', 'grades');
+    renameNav('وضعیت تحصیلی','', 'report');
+    renameNav('اطلاعات والدین','', 'parents');
+    renameNav('علاقه‌مندی دانش‌آموز','', 'interests');
+
+    /* The backup/export area receives a clearer Persian report title, without changing export behavior. */
+    document.querySelectorAll('[data-nav-label]').forEach(function(btn){
+      var label=btn.getAttribute('data-nav-label')||'';
+      if(/پشتیبان|اطلاعات برنامه|خروجی/.test(label) && /پشتیبان/.test(label)){
+        btn.setAttribute('data-nav-label','📑 گزارش و پشتیبان اطلاعات برنامه');
+        var sl=btn.querySelector('.sb-label'); if(sl) sl.textContent='📑 گزارش و پشتیبان اطلاعات برنامه';
+      }
+    });
+    var backup=document.getElementById('backup');
+    if(backup){
+      var title=backup.querySelector('h2');
+      if(title) title.textContent='📑 گزارش حرفه‌ای و پشتیبان اطلاعات برنامه';
+      var info=backup.querySelector('.info-box');
+      if(info) info.textContent='گزارش و پشتیبان اطلاعات برنامه به زبان فارسی؛ شامل داده‌های کلاس، دانش‌آموزان، حضور و غیاب، ارزشیابی‌ها و اطلاعات ثبت‌شده. پیش از تغییر نسخه، نسخهٔ پشتیبان تهیه کنید.';
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true});
+  else apply();
+})();
+</script>
+
+</body></html>');w.document.close();
 };
 window.dfAdminPrintClass=function(key){
   const list=window._schoolAdminClasses||[];
@@ -13864,5 +14197,116 @@ html body .app-sidebar button.sidebar-collapse:hover{
   html body .card::before{display:none!important}
 }
 </style>
+
+<script id="v77-merged-sections">
+(function(){
+  function mergeSectionContents(targetId, sourceIds, headingMap){
+    var target=document.getElementById(targetId);
+    if(!target) return;
+    sourceIds.forEach(function(sourceId){
+      var source=document.getElementById(sourceId);
+      if(!source || source===target) return;
+      Array.from(source.children).forEach(function(child){
+        if(child.tagName==='SCRIPT') return;
+        target.appendChild(child);
+      });
+      source.style.display='none';
+      source.setAttribute('aria-hidden','true');
+    });
+    if(headingMap){
+      Object.keys(headingMap).forEach(function(id){
+        var el=document.querySelector('#'+targetId+' h2');
+        if(el && id==='main') el.textContent=headingMap[id];
+      });
+    }
+  }
+  function renameNav(oldLabel,newLabel,sectionId){
+    document.querySelectorAll('[data-nav-label]').forEach(function(btn){
+      var label=btn.getAttribute('data-nav-label')||'';
+      if(label.indexOf(oldLabel)>=0){
+        btn.style.display='none';
+        btn.setAttribute('aria-hidden','true');
+      }
+    });
+    Array.from(document.querySelectorAll('[onclick]')).filter(function(el){return (el.getAttribute('onclick')||'').indexOf("showSection('"+sectionId+"'")>=0;}).forEach(function(el){
+      if(el.classList.contains('capability-card')) el.style.display='none';
+    });
+  }
+  function setNavLabel(sectionId,oldLabel,newLabel){
+    Array.from(document.querySelectorAll('[onclick]')).filter(function(el){return (el.getAttribute('onclick')||'').indexOf("showSection('"+sectionId+"'")>=0;}).forEach(function(el){
+      if(el.hasAttribute('data-nav-label')) el.setAttribute('data-nav-label',newLabel);
+      var label=el.querySelector('.sb-label');
+      if(label) label.textContent=newLabel;
+      var strong=el.querySelector('strong');
+      if(strong) strong.textContent=newLabel;
+    });
+  }
+  function apply(){
+    if(document.body.dataset.v77Merged==='1') return;
+    document.body.dataset.v77Merged='1';
+
+    /* Keep all existing form controls and IDs so saved records and handlers continue to work. */
+    mergeSectionContents('evaluation',['feedback','grades']);
+    mergeSectionContents('monthly',['report']);
+    mergeSectionContents('studentFile',['parents','interests']);
+
+    var eval=document.getElementById('evaluation');
+    if(eval){
+      var h=eval.querySelector('h2');
+      if(h) h.textContent='⭐ ارزشیابی';
+      var info=eval.querySelector('.info-box');
+      if(info) info.textContent='همهٔ ابزارهای ارزشیابی در یک بخش: ثبت ارزشیابی روزانه، ارزشیابی کیفی و بازخورد آموزشی. اطلاعات قبلی حفظ می‌شود.';
+    }
+    var monthly=document.getElementById('monthly');
+    if(monthly){
+      var h2=monthly.querySelector('h2');
+      if(h2) h2.textContent='📊 عملکرد ماهانه و وضعیت تحصیلی';
+      var info2=monthly.querySelector('.info-box');
+      if(info2) info2.textContent='ثبت عملکرد ماهانه و مشاهدهٔ گزارش وضعیت تحصیلی دانش‌آموز در یک بخش واحد.';
+    }
+    var sf=document.getElementById('studentFile');
+    if(sf){
+      var cards=sf.querySelectorAll('.card');
+      if(cards.length>1){
+        cards.forEach(function(c,i){ if(i>0){ c.style.marginTop='18px'; }});
+      }
+      var heads=sf.querySelectorAll('h2');
+      heads.forEach(function(h){
+        if(/اطلاعات والدین/.test(h.textContent)) h.textContent='👨‍👩‍👧 اطلاعات والدین — کارتابل دانش‌آموز';
+        if(/علاقه/.test(h.textContent)) h.textContent='❤️ علاقه‌مندی‌های دانش‌آموز — کارتابل دانش‌آموز';
+      });
+    }
+
+    /* Single visible menu entry for each merged area. */
+    setNavLabel('evaluation','⭐ ارزشیابی','⭐ ارزشیابی');
+    setNavLabel('monthly','📅 عملکرد ماهانه','📊 عملکرد ماهانه و وضعیت تحصیلی');
+    setNavLabel('studentFile','🗂️ کارتابل دانش‌آموز','🗂️ کارتابل دانش‌آموز');
+    renameNav('بازخورد آموزشی','', 'feedback');
+    renameNav('ارزشیابی کیفی','', 'grades');
+    renameNav('وضعیت تحصیلی','', 'report');
+    renameNav('اطلاعات والدین','', 'parents');
+    renameNav('علاقه‌مندی دانش‌آموز','', 'interests');
+
+    /* The backup/export area receives a clearer Persian report title, without changing export behavior. */
+    document.querySelectorAll('[data-nav-label]').forEach(function(btn){
+      var label=btn.getAttribute('data-nav-label')||'';
+      if(/پشتیبان|اطلاعات برنامه|خروجی/.test(label) && /پشتیبان/.test(label)){
+        btn.setAttribute('data-nav-label','📑 گزارش و پشتیبان اطلاعات برنامه');
+        var sl=btn.querySelector('.sb-label'); if(sl) sl.textContent='📑 گزارش و پشتیبان اطلاعات برنامه';
+      }
+    });
+    var backup=document.getElementById('backup');
+    if(backup){
+      var title=backup.querySelector('h2');
+      if(title) title.textContent='📑 گزارش حرفه‌ای و پشتیبان اطلاعات برنامه';
+      var info=backup.querySelector('.info-box');
+      if(info) info.textContent='گزارش و پشتیبان اطلاعات برنامه به زبان فارسی؛ شامل داده‌های کلاس، دانش‌آموزان، حضور و غیاب، ارزشیابی‌ها و اطلاعات ثبت‌شده. پیش از تغییر نسخه، نسخهٔ پشتیبان تهیه کنید.';
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true});
+  else apply();
+})();
+</script>
+
 </body>
 </html>
