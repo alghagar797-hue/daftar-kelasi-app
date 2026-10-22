@@ -2,7 +2,7 @@ name: Build Android Release APK
 
 permissions:
   contents: read
-زیزیرمشث.هرنئو ئ
+
 on:
   workflow_dispatch:
   push:
@@ -92,7 +92,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DaftarKelasi-APK-v7.6
+          name: DaftarKelasi-APK-v7.9
           path: release/DaftarKelasi.apk
           retention-days: 30
 
