@@ -18,6 +18,7 @@
 "use strict";
 
 const express = require("express");
+const compression = require("compression");
 const crypto = require("crypto");
 const path = require("path");
 
@@ -210,6 +211,10 @@ class PgStore {
     const r = await this.q("SELECT * FROM dk_schools WHERE id=$1", [id]);
     return this._school(r[0]);
   }
+  async updateSchoolName(id, name) {
+    const r = await this.q("UPDATE dk_schools SET name=$2 WHERE id=$1 RETURNING *", [id, name]);
+    return this._school(r[0]);
+  }
   async createTeacher({ username, password_hash, password_salt, role, school_id }) {
     const r = await this.q(
       "INSERT INTO dk_teachers (id,username,password_hash,password_salt,role,school_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
@@ -271,6 +276,7 @@ else store = new FileStore(process.env.DATA_DIR || require("path").join(__dirnam
 ============================================================ */
 const app = express();
 app.disable("x-powered-by");
+app.use(compression({ threshold: 1024 }));
 app.use(express.json({ limit: "40mb" }));
 
 /* CORS — کلاینت از WebView با origin «null» وصل می‌شود؛ حتماً لازم است */
