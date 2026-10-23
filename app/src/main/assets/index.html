@@ -3,11 +3,11 @@
 <head>
 
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https: http:; font-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: media:; media-src 'self' data: blob:; connect-src 'self' https: http:; font-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>دفتر کلاسی من — Aurora</title>
-<script>window.DAFTAR_CLOUD_ENDPOINT="https://daftar-kelasi-app-2.onrender.com";</script>
+<title>دفتر کلاسی من</title>
+<script>/* حالت آفلاین: اتصال خودکار به سرور عمداً غیرفعال است. */ window.DAFTAR_CLOUD_ENDPOINT=""; window.DAFTAR_SYNC_ENDPOINT="";</script>
 
 <style>
 
@@ -1845,7 +1845,6 @@ td,th{border-color:var(--dk-line)!important}
 
 
 <!-- =====================================================
-     برنامه اصلی<!-- =====================================================
      برنامه اصلی
 ===================================================== -->
 
@@ -1874,7 +1873,7 @@ onclick="goHome()"
      منوی برنامه
 ===================================================== -->
 
-<header class="smart-header" id="smartHeader"><div class="header-context"><button class="mobile-menu-btn" type="button" onclick="toggleSidebar()" aria-label="باز کردن منو">☰</button><div><div class="eyebrow">پنل مدیریت کلاس</div><h1 id="smartPageTitle">داشبورد</h1></div><span id="syncStatusPill" class="sync-pill offline"><i class="sync-dot"></i><span>آفلاین آماده</span></span><span id="schoolNamePill" class="sync-pill" style="display:none" title="مدرسهٔ شما">🏫 <span id="schoolNamePillText"></span></span></div><div class="header-actions"><div class="global-search"><button type="button" aria-label="جست‌وجو" onclick="focusGlobalSearch()" style="border:0;background:transparent;font-size:21px;cursor:pointer;color:#8b98aa;padding:0">⌕</button><input id="globalSearch" type="search" placeholder="جست‌وجو در بخش‌ها و ابزارها..." autocomplete="off" oninput="handleGlobalSearch(this.value)"><kbd>Ctrl K</kbd><div id="searchResults" class="search-results"></div></div><button class="icon-action notification-btn" type="button" onclick="toggleNotifications()">♢<i id="notificationBadge">0</i></button><button class="profile-chip" type="button" onclick="openHeaderProfile()"><span class="profile-avatar">م</span><span><b id="headerTeacherName">معلم</b><small>پروفایل</small></span></button></div><div id="notificationPanel" class="notification-panel"><div class="notification-head"><strong>اعلان‌ها</strong><button onclick="toggleNotifications()">×</button></div><div id="notificationContent" class="notification-content"></div></div></header><div class="page-workspace"><aside class="app-sidebar" id="appSidebar"><div class="sidebar-brand"><div class="brand-mark" aria-hidden="true"><img src="assets/daftar-logo.png" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"></div><div><strong>دفتر کلاسی من</strong><small>Classroom Pro · Pro Edition</small></div></div><div class="sidebar-nav-scroll"><div class="sidebar-caption">مدیریت کلاس</div><nav class="nav" id="mainNav"><button onclick="showSection('teacherProfile',this)" data-nav-label="👨‍🏫 کارتابل معلم"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🏫 کارتابل معلم</span></button><button class="active" onclick="showSection('dashboard',this)" data-nav-label="🏠 داشبورد"><span class="sb-icon">🏠 </span><span class="sb-label">🏠 داشبورد</span></button><button onclick="showSection('students',this)" data-nav-label="👨‍🎓 دانش‌آموزان"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🎓 دانش‌آموزان</span></button><button onclick="showSection('studentFile',this)" data-nav-label="🗂️ کارتابل دانش‌آموز"><span class="sb-icon">🗂️</span><span class="sb-label">🗂️ کارتابل دانش‌آموز</span></button><button onclick="showSection('groups',this)" data-nav-label="👥 گروه‌بندی کلاس"><span class="sb-icon">👥</span><span class="sb-label">👥 گروه‌بندی کلاس</span></button><button onclick="showSection('attendance',this)" data-nav-label="📋 حضور و غیاب"><span class="sb-icon">📋 </span><span class="sb-label">📋 حضور و غیاب</span></button><button onclick="showSection('homework',this)" data-nav-label="📚 تکالیف"><span class="sb-icon">📚 </span><span class="sb-label">📚 تکالیف</span></button><button onclick="showSection('evaluation',this)" data-nav-label="⭐ ارزشیابی"><span class="sb-icon">⭐ </span><span class="sb-label">⭐ ارزشیابی</span></button><button onclick="showSection('feedback',this)" data-nav-label="💬 بازخورد آموزشی"><span class="sb-icon">💬</span><span class="sb-label">💬 بازخورد آموزشی</span></button><button onclick="showSection('grades',this)" data-nav-label="📝 ارزشیابی کیفی"><span class="sb-icon">📝 </span><span class="sb-label">📝 ارزشیابی کیفی</span></button><button onclick="showSection('portfolio',this)" data-nav-label="📁 پوشه‌کار"><span class="sb-icon">📁 </span><span class="sb-label">📁 پوشه‌کار</span></button><button onclick="showSection('experiments',this)" data-nav-label="🔬 آزمایش‌های علوم"><span class="sb-icon">🔬 </span><span class="sb-label">🔬 آزمایش‌های علوم</span></button><button onclick="showSection('monthly',this)" data-nav-label="📅 عملکرد ماهانه"><span class="sb-icon">📅 </span><span class="sb-label">📅 عملکرد ماهانه</span></button><button onclick="showSection('report',this)" data-nav-label="📊 وضعیت تحصیلی"><span class="sb-icon">📊 </span><span class="sb-label">📊 وضعیت تحصیلی</span></button><button onclick="showSection('goals',this)" data-nav-label="🎯 اهداف آموزشی"><span class="sb-icon">🎯 </span><span class="sb-label">🎯 اهداف آموزشی</span></button><button onclick="showSection('parents',this)" data-nav-label="👨‍👩‍👧 اطلاعات والدین"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍👩‍👧 اطلاعات والدین</span></button><button onclick="showSection('interests',this)" data-nav-label="❤️ علاقه‌مندی دانش‌آموز"><span class="sb-icon">❤️</span><span class="sb-label">❤️ علاقه‌مندی دانش‌آموز</span></button><button onclick="showSection('daily',this)" data-nav-label="📖 دفتر روزانه"><span class="sb-icon">📖 </span><span class="sb-label">📖 دفتر روزانه</span></button><button onclick="showSection('weekly',this)" data-nav-label="🗓️ برنامه هفتگی"><span class="sb-icon">🗓️</span><span class="sb-label">🗓️ برنامه هفتگی</span></button><button onclick="showSection('budget',this)" data-nav-label="⏱️ بودجه ساعات تدریس"><span class="sb-icon">📊 </span><span class="sb-label">⏱️ بودجه ساعات تدریس</span></button><button onclick="showSection('bookBudget',this)" data-nav-label="📘 بودجه‌بندی تدریس کتاب"><span class="sb-icon">📘</span><span class="sb-label">📘 بودجه‌بندی تدریس کتاب</span></button><button onclick="showSection('attention',this)" data-nav-label="⚠️ نیازمند توجه"><span class="sb-icon">⚠️</span><span class="sb-label">⚠️ نیازمند توجه</span></button><button onclick="showSection('backup',this)" data-nav-label="💾 پشتیبان"><span class="sb-icon">💾 </span><span class="sb-label">💾 پشتیبان</span></button><button onclick="showSection('designers',this)" data-nav-label="👨‍💻 طراحان برنامه"><span class="sb-icon">👨‍💻</span><span class="sb-label">👨‍💻 طراحان برنامه</span></button></nav></div><div class="sidebar-footer"><button class="nav-logout-btn" type="button" onclick="logoutOfflineAccount()"><span class="sb-icon">🚪</span><span class="sb-label">🚪 خروج از حساب</span></button><button class="sidebar-collapse" type="button" onclick="toggleSidebar()"><span class="sb-icon">‹</span><span class="sb-label">جمع‌کردن منو</span></button></div></aside></div>
+<header class="smart-header" id="smartHeader"><div class="header-context"><button class="mobile-menu-btn" type="button" onclick="toggleSidebar()" aria-label="باز کردن منو">☰</button><div><div class="eyebrow">پنل مدیریت کلاس</div><h1 id="smartPageTitle">داشبورد</h1></div><span id="syncStatusPill" class="sync-pill offline"><i class="sync-dot"></i><span>آفلاین آماده</span></span><span id="schoolNamePill" class="sync-pill" style="display:none" title="مدرسهٔ شما">🏫 <span id="schoolNamePillText"></span></span></div><div class="header-actions"><div class="global-search"><button type="button" aria-label="جست‌وجو" onclick="focusGlobalSearch()" style="border:0;background:transparent;font-size:21px;cursor:pointer;color:#8b98aa;padding:0">⌕</button><input id="globalSearch" type="search" placeholder="جست‌وجو در بخش‌ها و ابزارها..." autocomplete="off" oninput="handleGlobalSearch(this.value)"><kbd>Ctrl K</kbd><div id="searchResults" class="search-results"></div></div><button class="icon-action notification-btn" type="button" onclick="toggleNotifications()">♢<i id="notificationBadge">0</i></button><button class="profile-chip" type="button" onclick="openHeaderProfile()"><span class="profile-avatar">م</span><span><b id="headerTeacherName">معلم</b><small>پروفایل</small></span></button></div><div id="notificationPanel" class="notification-panel"><div class="notification-head"><strong>اعلان‌ها</strong><button onclick="toggleNotifications()">×</button></div><div id="notificationContent" class="notification-content"></div></div></header><div class="page-workspace"><aside class="app-sidebar" id="appSidebar"><div class="sidebar-brand"><div class="brand-mark" aria-hidden="true"><img src="assets/daftar-logo.png" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"></div><div><strong>دفتر کلاسی من</strong><small>دفتر کلاسی من · نسخهٔ حرفه‌ای</small></div></div><div class="sidebar-nav-scroll"><div class="sidebar-caption">مدیریت کلاس</div><nav class="nav" id="mainNav"><button onclick="showSection('teacherProfile',this)" data-nav-label="👨‍🏫 کارتابل معلم"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🏫 کارتابل معلم</span></button><button class="active" onclick="showSection('dashboard',this)" data-nav-label="🏠 داشبورد"><span class="sb-icon">🏠 </span><span class="sb-label">🏠 داشبورد</span></button><button onclick="showSection('students',this)" data-nav-label="👨‍🎓 دانش‌آموزان"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍🎓 دانش‌آموزان</span></button><button onclick="showSection('studentFile',this)" data-nav-label="🗂️ کارتابل دانش‌آموز"><span class="sb-icon">🗂️</span><span class="sb-label">🗂️ کارتابل دانش‌آموز</span></button><button onclick="showSection('groups',this)" data-nav-label="👥 گروه‌بندی کلاس"><span class="sb-icon">👥</span><span class="sb-label">👥 گروه‌بندی کلاس</span></button><button onclick="showSection('attendance',this)" data-nav-label="📋 حضور و غیاب"><span class="sb-icon">📋 </span><span class="sb-label">📋 حضور و غیاب</span></button><button onclick="showSection('homework',this)" data-nav-label="📚 تکالیف"><span class="sb-icon">📚 </span><span class="sb-label">📚 تکالیف</span></button><button onclick="showSection('evaluation',this)" data-nav-label="⭐ ارزشیابی"><span class="sb-icon">⭐ </span><span class="sb-label">⭐ ارزشیابی</span></button><button onclick="showSection('feedback',this)" data-nav-label="💬 بازخورد آموزشی"><span class="sb-icon">💬</span><span class="sb-label">💬 بازخورد آموزشی</span></button><button onclick="showSection('grades',this)" data-nav-label="📝 ارزشیابی کیفی"><span class="sb-icon">📝 </span><span class="sb-label">📝 ارزشیابی کیفی</span></button><button onclick="showSection('portfolio',this)" data-nav-label="📁 پوشه‌کار"><span class="sb-icon">📁 </span><span class="sb-label">📁 پوشه‌کار</span></button><button onclick="showSection('experiments',this)" data-nav-label="🔬 آزمایش‌های علوم"><span class="sb-icon">🔬 </span><span class="sb-label">🔬 آزمایش‌های علوم</span></button><button onclick="showSection('monthly',this)" data-nav-label="📅 عملکرد ماهانه"><span class="sb-icon">📅 </span><span class="sb-label">📅 عملکرد ماهانه</span></button><button onclick="showSection('report',this)" data-nav-label="📊 وضعیت تحصیلی"><span class="sb-icon">📊 </span><span class="sb-label">📊 وضعیت تحصیلی</span></button><button onclick="showSection('goals',this)" data-nav-label="🎯 اهداف آموزشی"><span class="sb-icon">🎯 </span><span class="sb-label">🎯 اهداف آموزشی</span></button><button onclick="showSection('parents',this)" data-nav-label="👨‍👩‍👧 اطلاعات والدین"><span class="sb-icon">👨‍</span><span class="sb-label">👨‍👩‍👧 اطلاعات والدین</span></button><button onclick="showSection('interests',this)" data-nav-label="❤️ علاقه‌مندی دانش‌آموز"><span class="sb-icon">❤️</span><span class="sb-label">❤️ علاقه‌مندی دانش‌آموز</span></button><button onclick="showSection('daily',this)" data-nav-label="📖 دفتر روزانه"><span class="sb-icon">📖 </span><span class="sb-label">📖 دفتر روزانه</span></button><button onclick="showSection('weekly',this)" data-nav-label="🗓️ برنامه هفتگی"><span class="sb-icon">🗓️</span><span class="sb-label">🗓️ برنامه هفتگی</span></button><button onclick="showSection('budget',this)" data-nav-label="⏱️ بودجه ساعات تدریس"><span class="sb-icon">📊 </span><span class="sb-label">⏱️ بودجه ساعات تدریس</span></button><button onclick="showSection('bookBudget',this)" data-nav-label="📘 بودجه‌بندی تدریس کتاب"><span class="sb-icon">📘</span><span class="sb-label">📘 بودجه‌بندی تدریس کتاب</span></button><button onclick="showSection('attention',this)" data-nav-label="⚠️ نیازمند توجه"><span class="sb-icon">⚠️</span><span class="sb-label">⚠️ نیازمند توجه</span></button><button onclick="showSection('backup',this)" data-nav-label="💾 پشتیبان"><span class="sb-icon">💾 </span><span class="sb-label">💾 پشتیبان</span></button><button onclick="showSection('designers',this)" data-nav-label="👨‍💻 طراحان برنامه"><span class="sb-icon">👨‍💻</span><span class="sb-label">👨‍💻 طراحان برنامه</span></button></nav></div><div class="sidebar-footer"><button class="nav-logout-btn" type="button" onclick="logoutOfflineAccount()"><span class="sb-icon">🚪</span><span class="sb-label">🚪 خروج از حساب</span></button><button class="sidebar-collapse" type="button" onclick="toggleSidebar()"><span class="sb-icon">‹</span><span class="sb-label">جمع‌کردن منو</span></button></div></aside></div>
 
 <!-- =====================================================
      کارتابل معلم
@@ -2094,16 +2093,16 @@ onclick="goHome()"
             <div class="capability-card" onclick="showSection('students')"><div class="capability-icon">👨‍🎓</div><strong>دانش‌آموزان</strong><span>ثبت و مدیریت مشخصات دانش‌آموزان</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('attendance')"><div class="capability-icon">📋</div><strong>حضور و غیاب</strong><span>ثبت وضعیت حضور روزانه کلاس</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('homework')"><div class="capability-icon">📚</div><strong>تکالیف</strong><span>مدیریت تکالیف و پیگیری آن‌ها</span><b class="capability-arrow">←</b></div>
-            <div class="capability-card" onclick="showSection('evaluation')"><div class="capability-icon">⭐</div><strong>ارزشیابی</strong><span>ثبت و مشاهده ارزشیابی‌ها</span><b class="capability-arrow">←</b></div><div class="capability-card" onclick="showSection('feedback')"><div class="capability-icon">💬</div><strong>بازخورد آموزشی</strong><span>ثبت بازخورد فارسی با متن و صوت</span><b class="capability-arrow">←</b></div>
-            <div class="capability-card" onclick="showSection('grades')"><div class="capability-icon">📝</div><strong>ارزشیابی کیفی</strong><span>مدیریت ارزیابی کیفی دانش‌آموزان</span><b class="capability-arrow">←</b></div>
+            <div class="capability-card" onclick="showSection('evaluation')"><div class="capability-icon">⭐</div><strong>ارزشیابی</strong><span>ثبت و مشاهده ارزشیابی‌ها</span><b class="capability-arrow">←</b></div><div class="capability-card" onclick="showSection('evaluation')"><div class="capability-icon">💬</div><strong>بازخورد آموزشی</strong><span>ثبت بازخورد فارسی با متن و صوت</span><b class="capability-arrow">←</b></div>
+            <div class="capability-card" onclick="showSection('evaluation')"><div class="capability-icon">📝</div><strong>ارزشیابی کیفی</strong><span>مدیریت ارزیابی کیفی دانش‌آموزان</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('portfolio')"><div class="capability-icon">📁</div><strong>پوشه‌کار</strong><span>ثبت و نگهداری فعالیت‌ها</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('experiments')"><div class="capability-icon">🔬</div><strong>آزمایش‌های علوم</strong><span>ثبت فعالیت‌ها و آزمایش‌های علوم</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('monthly')"><div class="capability-icon">📅</div><strong>عملکرد ماهانه</strong><span>ثبت و بررسی عملکرد ماهانه</span><b class="capability-arrow">←</b></div>
             <div class="capability-card capability-budget-card" onclick="showSection('budget')"><div class="capability-icon">📊</div><strong>بودجه‌بندی ساعات تدریس</strong><span>جدول ساعات هفتگی پایه‌های اول تا ششم</span><b class="capability-arrow">←</b></div>
-            <div class="capability-card" onclick="showSection('report')"><div class="capability-icon">📊</div><strong>وضعیت تحصیلی</strong><span>نمایش وضعیت و گزارش تحصیلی</span><b class="capability-arrow">←</b></div>
+            <div class="capability-card" onclick="showSection('monthly')"><div class="capability-icon">📊</div><strong>وضعیت تحصیلی</strong><span>نمایش وضعیت و گزارش تحصیلی</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('goals')"><div class="capability-icon">🎯</div><strong>اهداف آموزشی</strong><span>ثبت و پیگیری اهداف آموزشی</span><b class="capability-arrow">←</b></div>
-            <div class="capability-card" onclick="showSection('parents')"><div class="capability-icon">👨‍👩‍👧</div><strong>اطلاعات والدین</strong><span>مدیریت اطلاعات ارتباطی والدین</span><b class="capability-arrow">←</b></div>
-            <div class="capability-card" onclick="showSection('interests')"><div class="capability-icon">❤️</div><strong>علاقه‌مندی دانش‌آموز</strong><span>ثبت علایق و زمینه‌های مورد علاقه</span><b class="capability-arrow">←</b></div>
+            <div class="capability-card" onclick="showSection('studentFile')"><div class="capability-icon">👨‍👩‍👧</div><strong>اطلاعات والدین</strong><span>مدیریت اطلاعات ارتباطی والدین</span><b class="capability-arrow">←</b></div>
+            <div class="capability-card" onclick="showSection('studentFile')"><div class="capability-icon">❤️</div><strong>علاقه‌مندی دانش‌آموز</strong><span>ثبت علایق و زمینه‌های مورد علاقه</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('daily')"><div class="capability-icon">📖</div><strong>دفتر روزانه</strong><span>ثبت رویدادها و یادداشت‌های روزانه</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('weekly')"><div class="capability-icon">🗓️</div><strong>برنامه هفتگی</strong><span>مشاهده و مدیریت برنامه تصویری</span><b class="capability-arrow">←</b></div>
             <div class="capability-card" onclick="showSection('budget')"><div class="capability-icon">⏱️</div><strong>بودجه ساعات تدریس</strong><span>مدیریت ساعات هفتگی دروس پایه‌های اول تا ششم</span><b class="capability-arrow">←</b></div><div class="capability-card capability-book-budget-card" onclick="showSection('bookBudget')"><div class="capability-icon">📘</div><strong>بودجه‌بندی تدریس کتاب</strong><span>تقسیم صفحات و مباحث کتاب در طول سال تحصیلی</span><b class="capability-arrow">←</b></div>
@@ -3650,8 +3649,30 @@ onclick="exportData()"
 📥 دریافت فایل پشتیبان
 </button>
 <button class="btn btn-blue" type="button" onclick="exportCompleteReportPDF()" style="margin:8px 0">📄 گزارش کامل اطلاعات به PDF برای اداره</button>
-<p class="muted">این گزارش، اطلاعات ثبت‌شده در همین دستگاه را در پنجره چاپ باز می‌کند؛ در مقصد چاپ، «ذخیره به‌صورت PDF» را انتخاب کنید. برای انتقال و بازیابی کامل اطلاعات، فایل پشتیبان JSON را هم نگه دارید.</p>
+<p class="muted">این گزارش یک فایل PDF واقعی و راست‌به‌چپ می‌سازد (روی اندروید هم ذخیره و اشتراک‌گذاری می‌شود) و شامل خلاصهٔ کلاس‌ها، دانش‌آموزان، حضور و غیاب و ارزشیابی‌های همین دستگاه است. برای انتقال و بازیابی کامل اطلاعات، فایل پشتیبان JSON را هم نگه دارید.</p>
 
+
+<hr>
+
+<h3>🏫 بستهٔ دادهٔ مدرسه — انتقال آفلاین بین گوشی معلم و مدیر</h3>
+<div class="success-box">
+با این ابزار می‌توانید بدون اینترنت و بدون سرور، اطلاعات مجاز مدرسه را به‌صورت یک «بستهٔ رمزنگاری‌شده و امضاشده» بین دستگاه معلم و دستگاه مدیر جابه‌جا کنید (مثلاً با پیام‌رسان یا بلوتوث). بسته با «رمز مشترک مدرسه» قفل شده است؛ مدیر و معلم باید از قبل، حضوری یا تلفنی، بر سر یک رمز مشترک (حداقل ۸ نویسه) توافق کنند.
+<ul style="margin:8px 24px 4px 0;padding:0">
+<li>دستگاه معلم: دکمهٔ «ساخت بستهٔ داده برای مدیر» — اطلاعات کلاس‌ها، دانش‌آموزان، والدین و شمارهٔ تماس، حضور و غیاب و ارزشیابی‌ها در بسته قرار می‌گیرد.</li>
+<li>دستگاه مدیر: فایل بسته را در کادر زیر انتخاب کنید؛ اصالت و سلامت بسته بررسی، رمزگشایی و در فهرست «بسته‌های دریافتی» ذخیره می‌شود. داده‌های واردشده فقط خواندنی‌اند و با کلاس‌های خودتان قاطی نمی‌شوند.</li>
+<li>هر بسته شناسهٔ یکتا دارد؛ ورود دوبارهٔ همان بسته «تکراری» تشخیص داده می‌شود و نسخهٔ قدیمی‌تر جای نسخهٔ جدیدتر را نمی‌گیرد.</li>
+</ul>
+</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0">
+<button class="btn btn-blue" type="button" onclick="exportSchoolPackage()">📦 ساخت بستهٔ داده برای مدیر</button>
+<button class="btn btn-green" type="button" onclick="refreshSchoolPackagesUI()">🔄 به‌روزرسانی فهرست بسته‌های دریافتی</button>
+</div>
+<label class="btn btn-primary" style="display:inline-block;cursor:pointer;margin-bottom:8px">📥 دریافت بستهٔ داده از معلم (فایل dkshare)
+<input type="file" accept=".dkshare.json,.json,application/json" style="display:none" onchange="importSchoolPackage(event)">
+</label>
+<div id="schoolPackageImportStatus" class="info-box" role="status" style="margin:10px 0;display:none"></div>
+<div id="schoolPackagesBox" style="margin-top:8px"></div>
+<p class="muted">نکتهٔ امنیتی: متن بسته با AES-256-GCM رمزنگاری می‌شود و اصالت آن با HMAC-SHA256 تأیید می‌شود؛ اما اگر رمز مشترک مدرسه فاش شود، دارندگان آن می‌توانند بسته بسازند. رمز مشترک را محرمانه نگه دارید و در صورت لو رفتن، رمز جدید را با همهٔ طرف‌ها هماهنگ کنید. گزارش‌های مدیر از «آخرین به‌روزرسانی ثبت‌شده در بسته» ساخته می‌شوند و دادهٔ زندهٔ لحظه‌ای نیستند.</p>
 
 <hr>
 
@@ -3664,7 +3685,7 @@ onclick="exportData()"
 
 <input
 type="file"
-accept=".json,application/json"
+accept=".json"
 onchange="importData(event)"
 >
 
@@ -3688,7 +3709,7 @@ onchange="importData(event)"
 
 <div class="footer">
 
-📚 دفتر کلاسی من | نسخه 5.4.1
+📚 دفتر کلاسی من | نسخه 8.3.0
 
 </div>
 
@@ -3913,12 +3934,67 @@ function normalizeAccountUsername(value){ return String(value||"").trim()
 function validAccountUsername(value){ return /^[^\s]{3,32}$/.test(value); }
 function validAccountPassword(value){ return String(value||"").length >= 6; }
 async function hashAccountPassword(password){
+    /* هش قدیمی: SHA-256 ساده (بدون نمک) — فقط برای سازگاری با حساب‌های قبلی نگه داشته شده. */
     const data=new TextEncoder().encode(String(password));
     if(window.crypto && window.crypto.subtle){
         const digest=await window.crypto.subtle.digest("SHA-256",data);
         return Array.from(new Uint8Array(digest)).map(function(b){return b.toString(16).padStart(2,"0")}).join("");
     }
     let h=2166136261; for(let i=0;i<String(password).length;i++){h^=String(password).charCodeAt(i);h=Math.imul(h,16777619);} return "fallback-"+(h>>>0).toString(16);
+}
+/* قالب جدید: PBKDF2-SHA256 با ۱۵۰هزار دور و نمک اختصاصی هر حساب.
+   خروجی: "pbkdf2-sha256$150000$<saltHex>$<hashHex>" */
+const PASSWORD_KDF_ITERATIONS=150000;
+function bytesToHex(bytes){ return Array.from(new Uint8Array(bytes)).map(function(b){return b.toString(16).padStart(2,"0")}).join(""); }
+function hexToBytes(hex){
+    const out=new Uint8Array(hex.length/2);
+    for(let i=0;i<out.length;i++) out[i]=parseInt(hex.substr(i*2,2),16);
+    return out;
+}
+async function hashAccountPasswordStrong(password,saltHex){
+    const salt=saltHex || bytesToHex(window.crypto.getRandomValues(new Uint8Array(16)));
+    if(!(window.crypto && window.crypto.subtle && window.crypto.subtle.importKey && window.crypto.subtle.deriveBits)){
+        // محیط بدون WebCrypto: نمک‌دار با چند دور FNV (ضعیف‌تر از PBKDF2 اما بهتر از هش بدون نمک)
+        let h=2166136261;
+        const s=String(salt)+String(password);
+        for(let round=0;round<2048;round++){ for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);} }
+        return "fnv2$2048$"+salt+"$"+(h>>>0).toString(16);
+    }
+    const key=await window.crypto.subtle.importKey("raw",new TextEncoder().encode(String(password)),"PBKDF2",false,["deriveBits"]);
+    const bits=await window.crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:hexToBytes(salt),iterations:PASSWORD_KDF_ITERATIONS},key,256);
+    return "pbkdf2-sha256$"+PASSWORD_KDF_ITERATIONS+"$"+salt+"$"+bytesToHex(bits);
+}
+/* رمز را هم با قالب جدید و هم (برای حساب‌های قدیمی) با قالب قدیمی بررسی می‌کند. */
+async function verifyAccountPassword(password,stored){
+    const storedValue=String(stored||"");
+    try{
+        if(storedValue.indexOf("pbkdf2-sha256$")===0 || storedValue.indexOf("fnv2$")===0){
+            const parts=storedValue.split("$");
+            const iterations=Number(parts[1]);
+            const salt=parts[2];
+            const expected=parts[3];
+            if(!(window.crypto && window.crypto.subtle && window.crypto.subtle.deriveBits)){
+                // همان مسیر جایگزین FNV
+                let h=2166136261; const s=String(salt)+String(password);
+                for(let round=0;round<2048;round++){ for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);} }
+                return ("fnv2$2048$"+salt+"$"+(h>>>0).toString(16))===storedValue;
+            }
+            if(storedValue.indexOf("pbkdf2-sha256$")===0){
+                const key=await window.crypto.subtle.importKey("raw",new TextEncoder().encode(String(password)),"PBKDF2",false,["deriveBits"]);
+                const bits=await window.crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:hexToBytes(salt),iterations:iterations},key,256);
+                const actual=bytesToHex(bits);
+                if(actual.length!==expected.length) return false;
+                let diff=0; for(let i=0;i<actual.length;i++) diff|=actual.charCodeAt(i)^expected.charCodeAt(i);
+                return diff===0;
+            }
+            return false;
+        }
+        // قالب قدیمی (SHA-256 ساده یا fallback)
+        const legacy=await hashAccountPassword(password);
+        if(legacy.length!==storedValue.length) return false;
+        let diff=0; for(let i=0;i<legacy.length;i++) diff|=legacy.charCodeAt(i)^storedValue.charCodeAt(i);
+        return diff===0;
+    }catch(e){ console.warn("Password verify failed",e); return false; }
 }
 function accountDataKey(username){ return ACCOUNT_STORAGE_PREFIX+encodeURIComponent(username); }
 function setAuthMessage(id,text,type){const el=document.getElementById(id);if(!el)return;el.textContent=text||"";el.className="auth-message"+(type?" "+type:"");}
@@ -4369,7 +4445,7 @@ async function registerOfflineAccount(){
         acc.role=activeCloudRole||acc.role||"teacher";
         acc.schoolId=activeSchoolId||null;
         acc.authMode="cloud";
-        acc.passwordHash=await hashAccountPassword(password);
+        acc.passwordHash=await hashAccountPasswordStrong(password);
         acc.updatedAt=Date.now();
         await saveAuthAccounts(accounts);
         activeAccountUsername=username; rememberSession(username);
@@ -4383,11 +4459,33 @@ async function registerOfflineAccount(){
         enterAuthenticatedApp();
         return;
     }
-    const hash=await hashAccountPassword(password);
+    const hash=await hashAccountPasswordStrong(password);
     // اگر نسخه قدیمی برنامه روی گوشی داده داشته باشد، آن داده‌ها به اولین حساب منتقل می‌شوند.
     let accountDatabase=database;
     if(accounts.length===0 && localStorage.getItem(STORAGE_KEY)){try{accountDatabase=JSON.parse(localStorage.getItem(STORAGE_KEY))||database;}catch(e){}}
-    localStorage.setItem(accountDataKey(username),JSON.stringify(accountDatabase));
+    /* عکس‌ها به‌صورت dataURL حجیم هستند و می‌توانند سهمیه localStorage را پر کنند.
+       ابتدا نسخه کامل (همراه عکس‌ها برای مهاجرت داده قدیمی) ذخیره می‌شود؛
+       اگر سهمیه پر بود، نسخه بدون عکس ذخیره می‌شود تا ثبت‌نام هرگز با خطا متوقف نشود. */
+    try{
+        localStorage.setItem(accountDataKey(username),JSON.stringify(accountDatabase));
+    }catch(quotaErr){
+        console.warn("Full account snapshot exceeded quota; retrying without photos:",quotaErr);
+        try{
+            const snapshotForLocal=JSON.parse(JSON.stringify(accountDatabase||{}));
+            (function stripMedia(node,depth){
+                if(!node || typeof node!=="object" || depth>6) return;
+                for(const k of Object.keys(node)){
+                    const v=node[k];
+                    if(typeof v==="string" && v.length>4096 && v.slice(0,11)==="data:image/") node[k]="";
+                    else if(v && typeof v==="object") stripMedia(v,depth+1);
+                }
+            })(snapshotForLocal,0);
+            localStorage.setItem(accountDataKey(username),JSON.stringify(snapshotForLocal));
+        }catch(err2){
+            console.warn("Local account snapshot skipped (storage quota):",err2);
+            /* داده کامل در حافظه و سپس IndexedDB ذخیره می‌شود؛ ادامه ثبت‌نام مجاز است. */
+        }
+    }
     accounts.push({username:username,passwordHash:hash,createdAt:Date.now(),authMode:cloudAccount?"cloud":"offline",role:cloudAccount?.teacher?.role||"teacher",schoolId:cloudAccount?.teacher?.schoolId||null});
     await saveAuthAccounts(accounts);
     await loadDatabaseForAccount(username);
@@ -4422,20 +4520,24 @@ async function loginOfflineAccount(){
             if(joinCode && !cloudNetworkProblem){try{await cloudRegister(username,password,joinCode); account.role=activeCloudRole; account.schoolId=activeSchoolId; account.authMode="cloud"; await saveAuthAccounts(accounts);}catch(regErr){setAuthMessage("authLoginMessage","❌ اتصال حساب قبلی به مدرسه انجام نشد: "+String(regErr.message||regErr),"error");return;}}
             else {
                 /* ورود آفلاین فقط با رمز درست ذخیره‌شده روی همین دستگاه؛ کد مدرسه هنگام قطعی شبکه نباید ثبت‌نام تازه بسازد. */
-                const localHash=await hashAccountPassword(password);
-                if(localHash!==account.passwordHash){
+                const localOk=await verifyAccountPassword(password,account.passwordHash);
+                if(!localOk){
                     setAuthMessage("authLoginMessage", cloudNetworkProblem
                         ? "⚠️ هم سرور در دسترس نیست و هم این رمز با رمز ذخیره‌شده روی این دستگاه یکسان نیست. با وصل‌شدن اینترنت دوباره تلاش کنید."
                         : "❌ نام کاربری یا رمز عبور نادرست است. اگر رمز را روی دستگاه دیگری عوض کرده‌اید، با اینترنت فعال وارد شوید تا رمز این دستگاه هم به‌روز شود.","error");
                     return;
                 }
                 setCloudToken("");activeCloudRole=account.role||"teacher";activeSchoolId=account.schoolId||null;try{localStorage.setItem(CLOUD_ROLE_KEY,activeCloudRole);}catch(e){}
+                /* ارتقای خودکار هش‌های قدیمی (SHA-256 بدون نمک) به PBKDF2 نمک‌دار پس از ورود موفق. */
+                if(String(account.passwordHash||"").indexOf("pbkdf2-sha256$")!==0){
+                    try{ account.passwordHash=await hashAccountPasswordStrong(password); account.updatedAt=Date.now(); await saveAuthAccounts(accounts); }catch(e){}
+                }
             }
         }
         if(cloudToken() && account){
             /* ورود ابری موفق شد؛ هش محلی با رمز سرور هماهنگ می‌شود تا ورود آفلاین بعدی هم کار کند. */
             try{
-                const nh=await hashAccountPassword(password);
+                const nh=await hashAccountPasswordStrong(password);
                 if(nh!==account.passwordHash || account.authMode!=="cloud"){ account.passwordHash=nh; account.authMode="cloud"; account.updatedAt=Date.now(); await saveAuthAccounts(accounts); }
             }catch(e){}
         }
@@ -4448,7 +4550,7 @@ async function loginOfflineAccount(){
     }
     if(!account){
         if(CLOUD_ENDPOINT && cloudToken()){
-            account={username:username,passwordHash:await hashAccountPassword(password),createdAt:Date.now(),authMode:"cloud",role:activeCloudRole,schoolId:activeSchoolId};
+            account={username:username,passwordHash:await hashAccountPasswordStrong(password),createdAt:Date.now(),authMode:"cloud",role:activeCloudRole,schoolId:activeSchoolId};
             accounts.push(account); await saveAuthAccounts(accounts);
         } else { setAuthMessage("authLoginMessage", cloudNetworkProblem
             ? "⚠️ اتصال به سرور مدرسه برقرار نشد. اینترنت را بررسی کنید و دوباره تلاش کنید."
@@ -4456,8 +4558,11 @@ async function loginOfflineAccount(){
     }
     if(!CLOUD_ENDPOINT){
         activeCloudRole=account.role||"teacher"; activeSchoolId=account.schoolId||null; try{localStorage.setItem(CLOUD_ROLE_KEY,activeCloudRole);}catch(e){}
-        const hash=await hashAccountPassword(password);
-        if(hash!==account.passwordHash){setAuthMessage("authLoginMessage","❌ نام کاربری یا رمز عبور نادرست است.","error");return;}
+        const ok=await verifyAccountPassword(password,account.passwordHash);
+        if(!ok){setAuthMessage("authLoginMessage","❌ نام کاربری یا رمز عبور نادرست است.","error");return;}
+        if(String(account.passwordHash||"").indexOf("pbkdf2-sha256$")!==0){
+            try{ account.passwordHash=await hashAccountPasswordStrong(password); account.updatedAt=Date.now(); await saveAuthAccounts(accounts); }catch(e){}
+        }
     }
     await loadDatabaseForAccount(account.username);
     if(CLOUD_ENDPOINT && cloudToken()) await cloudInitialSync(account.username);
@@ -4569,7 +4674,7 @@ async function changeCurrentAccountCredentials(){
             return;
         }
     }
-    const hash=newPassword ? await hashAccountPassword(newPassword) : current.passwordHash;
+    const hash=newPassword ? await hashAccountPasswordStrong(newPassword) : current.passwordHash;
     await saveDatabase();
     try{ await writeAccountDatabase(newUsername,database); if(newUsername!==activeAccountUsername) await deleteAccountDatabase(activeAccountUsername); }catch(e){
         setAuthMessage("accountSecurityMessage","❌ تغییر حساب ذخیره نشد؛ فضای ذخیره‌سازی دستگاه را بررسی کنید.","error");
@@ -4629,6 +4734,8 @@ async function initializeOfflineAuth(){
 ===================================================== */
 
 const APP_DATA_SCHEMA_VERSION = 5;
+/* نسخهٔ قالب فایل پشتیبان (backupMetadata.version) که این نسخه از برنامه می‌شناسد. */
+const SUPPORTED_BACKUP_VERSION = 1;
 let currentClass = null;
 let dailyPendingImage = "";
 let dailyPendingImages = [];
@@ -4940,6 +5047,9 @@ function cloneForSync(value){
 }
 function queueSyncSnapshot(username,snapshot){
     if(!username || !snapshot) return Promise.resolve();
+    /* وقتی سرور همگام‌سازی پیکربندی نشده است، هر ذخیره‌سازی نباید در صف
+       ثبت‌های همگام‌سازی بنویسد؛ این کار فقط فضای IndexedDB را مصرف می‌کند. */
+    if(!SYNC_ENDPOINT) return Promise.resolve();
     return openAccountDB().then(function(db){
         return new Promise(function(resolve,reject){
             const tx=db.transaction("syncQueue","readwrite");
@@ -4995,6 +5105,27 @@ function setSyncStatus(label,kind){
     pill.classList.toggle("offline",kind==="offline");
     pill.classList.toggle("syncing",kind==="syncing");
 }
+/* نشانگر وضعیت داده: صادقانه می‌گوید اطلاعات کجاست (محلی/همگام‌شده/در انتظار ارسال). */
+let lastLocalSaveAt=0;
+function updateDataStatusPill(){
+    const pill=document.getElementById("syncStatusPill"); if(!pill) return;
+    const text=pill.querySelector("span:last-child"); if(!text) return;
+    const online=navigator.onLine;
+    if(!SYNC_ENDPOINT){
+        pill.classList.add("offline"); pill.classList.remove("syncing");
+        text.textContent=online?"ذخیره محلی · بدون سرور":"آفلاین · ذخیره محلی فعال";
+        pill.title="این نسخه به سرور متصل نیست؛ همهٔ اطلاعات فقط روی همین دستگاه ذخیره می‌شود. برای انتقال از «بخش پشتیبان» استفاده کنید.";
+        return;
+    }
+    if(!online){ pill.classList.add("offline"); pill.classList.remove("syncing"); text.textContent="آفلاین · ذخیره محلی فعال"; return; }
+    pill.classList.remove("offline");
+    getPendingSyncItems(activeAccountUsername||"").then(function(items){
+        if(items && items.length){ setSyncStatus("آنلاین · "+items.length+" مورد در انتظار همگام‌سازی","online"); }
+        else if(lastLocalSaveAt){ setSyncStatus("همگام‌شده · ذخیره محلی "+new Date(lastLocalSaveAt).toLocaleTimeString("fa-IR"),"online"); }
+        else{ setSyncStatus("آنلاین · همگام‌سازی آماده","online"); }
+    }).catch(function(){ setSyncStatus("آنلاین · همگام‌سازی آماده","online"); });
+}
+window.updateDataStatusPill=updateDataStatusPill;
 async function flushSyncQueue(){
     if(syncRunning || !activeAccountUsername || !navigator.onLine || !SYNC_ENDPOINT)return;
     syncRunning=true; setSyncStatus("در حال همگام‌سازی…","syncing");
@@ -5056,8 +5187,8 @@ function saveDatabase(){
             .catch(function(){})
             .then(function(){ return Promise.all(jobs); })
             .then(function(){ return writeAccountDatabase(username,frozenSnapshot); })
-            .then(function(){ return queueSyncSnapshot(username,frozenSnapshot); })
-            .then(function(){ scheduleSyncFlush(); })
+            .then(function(){ lastLocalSaveAt=Date.now(); return queueSyncSnapshot(username,frozenSnapshot); })
+            .then(function(){ if(typeof updateDataStatusPill==="function") updateDataStatusPill(); scheduleSyncFlush(); })
             .catch(function(error){
                 console.error("Account save error",error);
                 // canonical roster و localStorage قبلاً تلاش شده‌اند؛ خطای صف اصلی نباید داده را پنهان کند.
@@ -6502,11 +6633,24 @@ const DF_PDF_FONT = '"Vazirmatn","IRANSansX","IRANSans","Noto Naskh Arabic","Not
 
 function dfLoadImage(src){
     return new Promise(function(resolve){
-        if(!src || !/^(data:image|blob:)/.test(String(src))){ resolve(null); return; }
+        const value = String(src || "");
+        if(!value){ resolve(null); return; }
+        /* ارجاع‌های media:// باید قبل از رسم روی بوم، از انبار IndexedDB خوانده شوند. */
+        if(/^media:\/\//.test(value)){
+            getMedia(value.slice("media://".length)).then(function(dataUrl){
+                if(!dataUrl){ resolve(null); return; }
+                const img = new Image();
+                img.onload = function(){ resolve(img); };
+                img.onerror = function(){ resolve(null); };
+                img.src = dataUrl;
+            }).catch(function(){ resolve(null); });
+            return;
+        }
+        if(!/^(data:image|blob:)/.test(value)){ resolve(null); return; }
         const img = new Image();
         img.onload = function(){ resolve(img); };
         img.onerror = function(){ resolve(null); };
-        img.src = src;
+        img.src = value;
     });
 }
 
@@ -10415,136 +10559,23 @@ function printTeacherCard(){
                 .teacher-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
                 .teacher-info-item{background:#f8fbfb;border:1px solid #e5eeee;border-radius:13px;padding:10px;}
                 .teacher-info-item strong{display:block;color:#087f8c;font-size:12px;margin-bottom:3px;}
+                .voice-panel{margin-top:14px;padding:15px;border:1px solid #dbeaea;border-radius:16px;background:linear-gradient(135deg,#f5fffd,#f5f8ff);}
+                .voice-title{font-weight:900;color:#087f8c;margin-bottom:8px}
+                .voice-actions{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+                .voice-status{font-size:12px;color:#607d8b;margin-top:8px;min-height:22px}
+                .voice-status.listening{color:#8e44ad;font-weight:800}
+                .voice-status.success{color:#18794e;font-weight:800}
+                .voice-player{width:min(420px,100%);margin-top:8px}
+                .voice-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:#eef6ff;color:#1769aa;font-size:11px}
                 @media(max-width:650px){.teacher-card-body{grid-template-columns:1fr}.teacher-info-grid{grid-template-columns:1fr}}
-            
-
-/* =====================================================
-   ابزار صوتی فارسی
-===================================================== */
-.voice-panel{
-  margin-top:14px;
-  padding:15px;
-  border:1px solid #dbeaea;
-  border-radius:16px;
-  background:linear-gradient(135deg,#f5fffd,#f5f8ff);
-}
-.voice-title{font-weight:900;color:#087f8c;margin-bottom:8px}
-.voice-actions{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
-.voice-status{font-size:12px;color:#607d8b;margin-top:8px;min-height:22px}
-.voice-status.listening{color:#8e44ad;font-weight:800}
-.voice-status.success{color:#18794e;font-weight:800}
-.voice-player{width:min(420px,100%);margin-top:8px}
-.voice-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:#eef6ff;color:#1769aa;font-size:11px}
-@media(max-width:600px){.voice-actions .btn{width:100%;margin:2px 0}}
-</style>
+                @media print{body{padding:10mm}.teacher-card-preview{border-radius:14px}}
+            </style>
         </head>
         <body>
             ${card.outerHTML}
             <script>window.onload=function(){window.print();}<\/script>
-        
-
-<style id="student-report-v63">
-/* پرونده و گزارش کیفی یکپارچه */
-html body .sf-report-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:18px 0 12px;padding:20px 22px;border:1px solid #dcebe9;border-radius:22px;background:linear-gradient(125deg,#f0fbf9 0%,#fff 58%,#f1f5ff 100%);box-shadow:0 10px 28px rgba(15,118,110,.07)}
-html body .sf-report-hero h3{margin:4px 0;font-size:18px;color:#153d48}html body .sf-report-hero p{margin:0;color:#647985;font-size:12px}html body .sf-report-kicker{font-size:11px;font-weight:800;letter-spacing:.2px;color:#0f9388}html body .sf-report-total{min-width:86px;min-height:86px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#087f78;color:#fff;box-shadow:0 8px 18px rgba(8,127,120,.18)}html body .sf-report-total b{font-size:28px;line-height:1.3}html body .sf-report-total small{font-size:10px;color:#e0fffb}
-html body .sf-level-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:10px 0 18px}html body .sf-level-item{display:flex;flex-direction:column;gap:4px;min-width:0;padding:13px 10px;border:1px solid #e7edf2;border-radius:16px;background:#fff}html body .sf-level-item span{font-size:11px;line-height:1.7;color:#536574}html body .sf-level-item b{font-size:23px;line-height:1.2;color:#173b4b}html body .sf-level-item small{font-size:10px;color:#8493a0}html body .sf-level-0{border-top:3px solid #159a79}html body .sf-level-1{border-top:3px solid #4388d9}html body .sf-level-2{border-top:3px solid #d5a02d}html body .sf-level-3{border-top:3px solid #e58b45}html body .sf-level-4{border-top:3px solid #d86a75}
-@media(max-width:700px){html body .sf-report-hero{padding:15px;border-radius:17px}html body .sf-level-summary{grid-template-columns:repeat(2,minmax(0,1fr))}html body .sf-level-item:last-child{grid-column:1/-1}html body .sf-level-item{padding:10px}html body .sf-report-total{min-width:70px;min-height:70px;border-radius:16px}}
-</style>
-
-
-<style id="daftar-home-redesign-v712">
-/* نسخه ۷.۱.۲ — بازطراحی صفحه انتخاب کلاس؛ بدون تغییر منطق یا داده‌ها */
-:root{--home-ink:#172b4d;--home-muted:#60718b;--home-line:#e4eaf2;--home-teal:#087f8c;--home-bg:#f5f7fb}
-html body{background:radial-gradient(ellipse at 85% 0%,rgba(19,168,157,.10),transparent 34%),radial-gradient(ellipse at 0% 30%,rgba(93,113,235,.08),transparent 30%),#f5f7fb!important;color:var(--home-ink)}
-html body .header{position:relative;isolation:isolate;overflow:hidden;text-align:right;padding:28px clamp(18px,4vw,56px)!important;background:linear-gradient(115deg,#102b4e 0%,#135d70 55%,#0c948f 100%)!important;border-radius:0 0 30px 30px;box-shadow:0 16px 38px rgba(20,54,85,.18)!important}
-html body .header:before{content:"";position:absolute;z-index:-1;width:260px;height:260px;border:1px solid rgba(255,255,255,.14);border-radius:50%;left:-65px;top:-145px;box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025)}
-html body .header:after{content:"✦";position:absolute;left:9%;top:25%;font-size:38px;color:rgba(255,255,255,.20)}
-html body .header h1{font-size:clamp(25px,4vw,38px)!important;letter-spacing:-.5px;margin:0 0 5px!important;font-weight:900;text-shadow:0 2px 12px rgba(0,0,0,.12)}
-html body .header p{font-size:clamp(13px,1.6vw,16px)!important;color:rgba(255,255,255,.82)!important;margin:0!important}
-html body .container{width:min(1200px,calc(100% - 32px))!important;max-width:1200px!important;margin:28px auto 54px!important}
-html body #home{display:block}
-html body #home .teacher-home-card{position:relative;overflow:hidden;padding:24px clamp(18px,3vw,32px)!important;border:1px solid rgba(13,148,136,.16)!important;border-radius:24px!important;background:linear-gradient(115deg,#fff 0%,#f0fbf9 100%)!important;box-shadow:0 12px 34px rgba(29,61,87,.07)!important;margin-bottom:22px!important}
-html body #home .teacher-home-card:after{content:"📘";position:absolute;left:24px;bottom:-20px;font-size:94px;opacity:.07;pointer-events:none}
-html body #home .teacher-home-card .image-section-title{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-html body #home .teacher-home-card h2{color:#123b55!important;font-size:clamp(20px,2.5vw,27px)!important;font-weight:900!important;margin:0!important}
-html body #home .teacher-home-card p{color:#5a7184!important;font-size:14px!important}
-html body #home .teacher-home-card .btn{border:0!important;border-radius:14px!important;padding:12px 19px!important;background:linear-gradient(120deg,#087f8c,#0b9b91)!important;box-shadow:0 7px 16px rgba(8,127,140,.20)!important;font-weight:800!important;white-space:nowrap}
-html body #home>.card:not(.teacher-home-card){padding:clamp(18px,3vw,32px)!important;border:1px solid var(--home-line)!important;border-radius:26px!important;background:rgba(255,255,255,.94)!important;box-shadow:0 14px 36px rgba(27,50,78,.065)!important}
-html body #home>.card:not(.teacher-home-card)>h2{display:flex;align-items:center;gap:10px;color:#183653!important;font-size:clamp(21px,2.5vw,28px)!important;font-weight:900!important;margin:0 0 8px!important}
-html body #home>.card:not(.teacher-home-card)>p{color:#63748b!important;line-height:1.9!important;font-size:14px!important;margin:0 0 16px!important}
-html body #home .info-box{border:1px solid #d6eee9!important;border-right:4px solid #0e9b8d!important;border-radius:14px!important;padding:12px 16px!important;background:#f0fbf8!important;color:#285b60!important;margin:16px 0 24px!important}
-html body .class-grid{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))!important;gap:16px!important}
-html body .class-card{position:relative!important;isolation:isolate;overflow:hidden!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;min-height:158px!important;padding:24px 22px!important;text-align:right!important;border:1px solid rgba(255,255,255,.32)!important;border-radius:22px!important;color:#fff!important;box-shadow:0 12px 25px rgba(26,49,78,.13)!important;cursor:pointer!important;transition:transform .2s ease,box-shadow .2s ease,filter .2s ease!important}
-html body .class-card:before{content:"";position:absolute;z-index:-1;width:140px;height:140px;border:1px solid rgba(255,255,255,.22);border-radius:50%;left:-32px;bottom:-67px;box-shadow:0 0 0 18px rgba(255,255,255,.055),0 0 0 38px rgba(255,255,255,.035)}
-html body .class-card:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.08),transparent 62%);pointer-events:none}
-html body .class-card:hover{transform:translateY(-4px)!important;box-shadow:0 18px 34px rgba(26,49,78,.20)!important;filter:saturate(1.08)}
-html body .class-card h2{position:relative;margin:0 0 7px!important;color:#fff!important;font-size:23px!important;line-height:1.5!important;font-weight:900!important;text-shadow:0 1px 5px rgba(0,0,0,.12)!important}
-html body .class-card p{position:relative;margin:0!important;color:rgba(255,255,255,.91)!important;font-size:13px!important;line-height:1.8!important}
-html body .class-third{background:linear-gradient(130deg,#087f8c,#10a89a)!important;border-top:0!important}
-html body .class-fourth{background:linear-gradient(130deg,#3657b7,#6379e8)!important;border-top:0!important}
-html body .class-multi{background:linear-gradient(130deg,#7541a8,#a15bc7)!important;border-top:0!important}
-@media(max-width:600px){html body .header{border-radius:0 0 23px 23px;padding:24px 20px!important}html body .container{width:calc(100% - 22px)!important;margin:18px auto 32px!important}html body #home .teacher-home-card{padding:18px!important;border-radius:20px!important}html body #home .teacher-home-card .image-section-title{align-items:flex-start}html body #home .teacher-home-card .btn{width:100%;justify-content:center}html body #home>.card:not(.teacher-home-card){padding:17px!important;border-radius:21px!important}html body .class-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:11px!important}html body .class-card{min-height:132px!important;padding:17px 14px!important;border-radius:18px!important}html body .class-card h2{font-size:18px!important}html body .class-card p{font-size:11px!important}}
-@media(max-width:360px){html body .class-grid{grid-template-columns:1fr!important}html body .class-card{min-height:110px!important}}
-@media(prefers-reduced-motion:reduce){html body .class-card{transition:none!important}}
-</style>
-
-</body>
-        
-
-
-
-<style id="daftar-signature-theme-v730">
-/* نسخه ۷.۳ — هویت بصری اختصاصی «دفتر کلاسی من»: سبز یشمی، کرم کاغذی و طلایی */
-:root{
- --ds-brand:#116b62;--ds-brand-strong:#0b4945;--ds-brand-soft:#e3f2ec;
- --ds-gold:#c49a50;--ds-gold-soft:#fbf2df;--ds-ink:#193b38;
- --ds-muted:#6c817c;--ds-bg:#f3f6f1;--ds-surface:#fffefa;
- --ds-line:#dfe8df;--ds-shadow:0 10px 28px rgba(20,67,58,.075);
-}
-html{scroll-behavior:smooth;background:var(--ds-bg)}
-html body{background:radial-gradient(ellipse at 95% 2%,rgba(196,154,80,.12),transparent 25%),radial-gradient(ellipse at 0% 42%,rgba(30,139,119,.07),transparent 29%),linear-gradient(160deg,#f7f8f3 0%,#eef4ef 100%)!important;color:var(--ds-ink);letter-spacing:0}
-html body .smart-header{background:rgba(255,254,250,.91)!important;border-bottom:1px solid rgba(213,226,215,.9)!important;box-shadow:0 7px 24px rgba(25,59,56,.055)!important;backdrop-filter:blur(18px)}
-html body .smart-header h1,html body #smartPageTitle{color:#164a43!important;font-weight:900!important;letter-spacing:-.4px}
-html body .app-sidebar{background:linear-gradient(165deg,#124f49 0%,#103c39 56%,#0c302f 100%)!important;box-shadow:-12px 0 34px rgba(12,48,47,.13)!important}
-html body .sidebar-brand{border-bottom:1px solid rgba(255,255,255,.13)!important}
-html body .brand-mark{background:linear-gradient(145deg,#f0d99f,#c49a50)!important;color:#164740!important;border-radius:16px!important;box-shadow:0 7px 18px rgba(0,0,0,.13)!important}
-html body .app-sidebar .nav button{border-radius:14px!important;margin:4px 8px!important;transition:background .2s ease,transform .2s ease,box-shadow .2s ease!important}
-html body .app-sidebar .nav button:hover{background:rgba(255,255,255,.09)!important;transform:translateX(-2px)}
-html body .app-sidebar .nav button.active{background:linear-gradient(100deg,rgba(236,207,142,.22),rgba(255,255,255,.075))!important;color:#fff!important;box-shadow:inset -3px 0 #e5c47e!important}
-html body .card,html body .teacher-home-card,html body .dashboard-showcase-main,html body .dashboard-showcase-side{background:rgba(255,254,250,.94)!important;border:1px solid rgba(220,231,220,.95)!important;border-radius:22px!important;box-shadow:var(--ds-shadow)!important}
-html body .card h2,html body .card h3{color:#20544b;font-weight:850}
-html body .btn-primary,html body .btn-blue,html body button.primary{background:linear-gradient(125deg,#126b61,#208b79)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:14px!important;box-shadow:0 7px 17px rgba(17,107,98,.18)!important;font-weight:800!important;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease!important}
-html body .btn-primary:hover,html body .btn-blue:hover,html body button.primary:hover{filter:brightness(1.04);transform:translateY(-1px);box-shadow:0 10px 22px rgba(17,107,98,.23)!important}
-html body input,html body select,html body textarea{border:1px solid #dce7dd!important;border-radius:14px!important;background:#fffefa!important;color:#193b38!important;min-height:42px}
-html body input:focus,html body select:focus,html body textarea:focus{outline:0!important;border-color:#40988b!important;box-shadow:0 0 0 3px rgba(23,128,112,.12)!important}
-html body .dashboard-hero{border-radius:24px!important;overflow:hidden!important;box-shadow:0 14px 30px rgba(13,67,60,.14)!important}
-html body .dashboard-quick .dashboard-mini,html body .dashboard-capabilities .capability-card{position:relative;overflow:hidden;border-radius:19px!important;border:1px solid #e0e9df!important;background:linear-gradient(145deg,#fffefa,#f7faf5)!important;box-shadow:0 6px 17px rgba(29,61,54,.055)!important;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease!important}
-html body .dashboard-quick .dashboard-mini:before,html body .dashboard-capabilities .capability-card:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,#d9b66d,#278d7c);opacity:.8}
-html body .dashboard-quick .dashboard-mini:hover,html body .dashboard-capabilities .capability-card:hover{transform:translateY(-3px);border-color:#c9dfd1!important;box-shadow:0 12px 24px rgba(29,61,54,.10)!important}
-html body .dashboard-mini .mini-icon,html body .dashboard-capabilities .capability-icon{background:linear-gradient(145deg,#e6f4ed,#d6ece2)!important;color:#176b61!important;border:1px solid #d7eade!important;border-radius:14px!important}
-html body .dash-section-title{color:#1c5148!important;font-weight:900!important}
-html body .dash-more{border:1px solid #dfe8df!important;border-radius:18px!important;background:rgba(255,254,250,.9)!important;overflow:hidden;box-shadow:0 4px 15px rgba(29,61,54,.035)!important}
-html body .dash-more>summary{padding:15px 17px!important;color:#20544b!important;font-weight:850!important;cursor:pointer}
-html body .dash-more[open]>summary{background:linear-gradient(90deg,#edf6ef,#fbf5e8)!important;border-bottom:1px solid #dfe8df}
-html body .dash-more-body{padding:15px!important}
-html body table{border-radius:14px;overflow:hidden}html body table th{background:#e7f3eb!important;color:#20584e!important}
-html body .mobile-quickbar{background:rgba(15,65,59,.97)!important;border:1px solid rgba(224,195,126,.35)!important;border-radius:22px!important;box-shadow:0 13px 32px rgba(15,43,38,.25)!important;backdrop-filter:blur(16px)}
-html body .mobile-quickbar button{border-radius:13px!important}html body .mobile-quickbar button.active{background:rgba(229,196,126,.2)!important;color:#fff!important}
-html body .info-box{background:linear-gradient(135deg,#edf7ef,#f8f5e9)!important;border:1px solid #d6e9dc!important;border-radius:15px!important;color:#315d50!important}
-html body .header{background:linear-gradient(120deg,#103e3a 0%,#14685f 58%,#278a79 100%)!important;position:relative;overflow:hidden}
-html body .header:before{border-color:rgba(229,196,126,.24)!important;box-shadow:0 0 0 28px rgba(229,196,126,.04),0 0 0 58px rgba(255,255,255,.025)!important}
-html body .class-card{border-radius:21px!important;box-shadow:0 11px 26px rgba(20,49,44,.14)!important;transition:transform .18s ease,box-shadow .18s ease!important}
-html body .class-card:hover{transform:translateY(-2px);box-shadow:0 15px 30px rgba(20,49,44,.18)!important}
-html body .class-third{background:linear-gradient(135deg,#116b62,#2a9a86)!important}
-html body .class-fourth{background:linear-gradient(135deg,#365d73,#6197a0)!important}
-html body .class-multi{background:linear-gradient(135deg,#78613d,#c49a50)!important}
-html body .auth-card{border-radius:24px!important;border:1px solid #e0e9df!important;box-shadow:0 18px 45px rgba(20,67,58,.12)!important}
-html body button,html body .showcase-link{transition:transform .18s ease,box-shadow .18s ease}
-@media(max-width:600px){html body .card,html body .teacher-home-card{border-radius:18px!important}html body .dash-more-body{padding:11px!important}html body .dashboard-quick .dashboard-mini,html body .dashboard-capabilities .capability-card{box-shadow:0 4px 13px rgba(29,61,54,.05)!important}}
-@media(prefers-reduced-motion:reduce){html body *,html body *:before,html body *:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
-</style>
-
-</html>
+        </body>
+        </html>
     `);
 
     win.document.close();
@@ -11008,23 +11039,114 @@ function dataURLToBlob(dataURL){
 }
 
 async function exportData(){
-    const backup=JSON.parse(JSON.stringify(database));
-    try{ await hydrateMedia(backup); }catch(e){}
-    backup.voiceClips=[];
-    try{
-        const ids=await collectAllVoiceIds();
-        for(const id of ids){
-            const blob=await getVoiceBlob(id);
-            if(blob) backup.voiceClips.push({id:id,data:await blobToDataURL(blob)});
-        }
-    }catch(e){}
+    /* پشتیبان دستی از همان سازندهٔ پشتیبان خودکار استفاده می‌کند تا هر دو فایل
+       ساختار و «backupMetadata» یکسان داشته باشند (اعتبارسنجی در زمان بازیابی). */
+    const backup=await createCompleteBackupObject();
     const data=JSON.stringify(backup,null,2);
     const blob=new Blob([data],{type:"application/json"});
     await deliverFile("پشتیبان-دفتر-کلاسی.json", blob);
-    alert("پشتیبان اطلاعات تهیه شد. صوت‌های ثبت‌شده نیز در صورت پشتیبانی دستگاه داخل فایل قرار گرفتند.");
+    alert("پشتیبان اطلاعات تهیه شد. عکس‌ها و صوت‌های ثبت‌شده نیز داخل فایل قرار گرفتند. این فایل را در جای امن نگه دارید.");
 }
 
 
+/* ===== رندرکنندهٔ عمومی گزارش‌های خلاصه روی بوم (برای PDF واقعی، حتی روی اندروید) =====
+   opts: {title, subtitle, meta, chips:[[label,value]], columns:[{label,w}], rows:[[text,...]], note} */
+async function dfRenderSummaryReportPages(opts){
+    try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+    const W = 1240, H = 1754, M = 70;
+    const columns = opts.columns || [];
+    const rows = opts.rows || [];
+    const tableW = W - 2*M;
+    const ROW_H = 74, HEAD_H = 58;
+
+    const pages = [];
+    let canvas, ctx, y;
+
+    function drawTableHead(){
+        ctx.fillStyle = "#1746c8"; dfRoundRect(ctx, M, y, tableW, HEAD_H, 12); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.font = "700 24px " + DF_PDF_FONT; ctx.textAlign = "center"; ctx.direction = "rtl";
+        let x = W - M;
+        columns.forEach(function(col){
+            ctx.fillText(col.label, x - col.w/2, y + HEAD_H/2);
+            x -= col.w;
+        });
+        y += HEAD_H + 6;
+    }
+    function drawFooter(n,total){
+        ctx.fillStyle = "#94a3b8"; ctx.font = "400 21px " + DF_PDF_FONT; ctx.textAlign = "center"; ctx.direction = "rtl";
+        ctx.fillText("دفتر کلاسی من  •  صفحهٔ " + toPersianNumber(n) + " از " + toPersianNumber(total), W/2, H - 38);
+    }
+    function newPage(first){
+        canvas = document.createElement("canvas"); canvas.width = W; canvas.height = H;
+        ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(0,0,W,H);
+        ctx.direction = "rtl"; ctx.textBaseline = "middle";
+        pages.push(canvas);
+        if(first){
+            const g = ctx.createLinearGradient(0,0,W,0);
+            g.addColorStop(0,"#102a75"); g.addColorStop(.55,"#1746c8"); g.addColorStop(1,"#315fe8");
+            ctx.fillStyle = g; ctx.fillRect(0,0,W,240);
+            ctx.fillStyle = "#fff"; ctx.textAlign = "right";
+            ctx.font = "800 52px " + DF_PDF_FONT; ctx.fillText(opts.title, W-M, 84);
+            if(opts.subtitle){ ctx.font = "500 27px " + DF_PDF_FONT; ctx.fillText(opts.subtitle, W-M, 144); }
+            if(opts.meta){ ctx.font = "400 23px " + DF_PDF_FONT; ctx.globalAlpha = .92; ctx.fillText(opts.meta, W-M, 194); ctx.globalAlpha = 1; }
+            y = 274;
+            if(opts.chips && opts.chips.length){
+                let cx = W - M; const cw = Math.min(230, Math.floor((tableW - 18*(opts.chips.length-1)) / opts.chips.length));
+                opts.chips.forEach(function(c){
+                    ctx.fillStyle = "#eef3ff"; dfRoundRect(ctx, cx-cw, y, cw, 84, 16); ctx.fill();
+                    ctx.fillStyle = "#1746c8"; ctx.textAlign = "center";
+                    ctx.font = "800 34px " + DF_PDF_FONT; ctx.fillText(toPersianNumber(c[1]), cx-cw/2, y+30);
+                    ctx.font = "500 21px " + DF_PDF_FONT; ctx.fillStyle = "#3b5aa0"; ctx.fillText(c[0], cx-cw/2, y+62);
+                    cx -= cw + 18;
+                });
+                y += 84 + 30;
+            }
+        }else{
+            y = M;
+        }
+        drawTableHead();
+    }
+
+    newPage(true);
+    for(let i=0;i<rows.length;i++){
+        if(y + ROW_H > H - 100){ newPage(false); }
+        const r = rows[i];
+        ctx.fillStyle = (i % 2 === 0) ? "#f6f9ff" : "#ffffff";
+        ctx.fillRect(M, y, tableW, ROW_H);
+        ctx.strokeStyle = "#e3eaf8"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(M, y+ROW_H); ctx.lineTo(M+tableW, y+ROW_H); ctx.stroke();
+        const cy = y + ROW_H/2;
+        let x = W - M;
+        columns.forEach(function(col,ci){
+            const cellText = String(r[ci]==null?"":r[ci]);
+            ctx.fillStyle = "#263238";
+            ctx.font = (ci===0 ? "700 25px " : "500 24px ") + DF_PDF_FONT;
+            ctx.textAlign = "center";
+            const lines = dfWrapText(ctx, cellText, col.w - 20, 2);
+            lines.forEach(function(t,k){ ctx.fillText(t, x - col.w/2, cy + (k - (lines.length-1)/2)*30); });
+            x -= col.w;
+        });
+        y += ROW_H;
+    }
+    if(opts.note){
+        if(y + 100 > H - 90){ newPage(false); }
+        ctx.fillStyle = "#f3f6ff"; dfRoundRect(ctx, M, y, tableW, 64, 12); ctx.fill();
+        ctx.fillStyle = "#45536e"; ctx.font = "400 21px " + DF_PDF_FONT; ctx.textAlign = "right"; ctx.direction = "rtl";
+        const nl = dfWrapText(ctx, opts.note, tableW - 40, 2);
+        nl.forEach(function(t,k){ ctx.fillText(t, W - M - 20, y + 20 + k*28); });
+        y += 64;
+    }
+    const total = pages.length;
+    pages.forEach(function(c,i){
+        ctx = c.getContext("2d"); ctx.direction = "rtl"; ctx.textBaseline = "middle";
+        drawFooter(i+1, total);
+    });
+    return pages;
+}
+
+/* گزارش ماهانهٔ مدرسه: اکنون PDF واقعی می‌سازد (روی اندروید هم ذخیره/اشتراک‌گذاری می‌شود)
+   و دیگر به پنجرهٔ چاپ مرورگر وابسته نیست. */
 async function exportCompleteReportPDF(){
   try{
     const snap=JSON.parse(JSON.stringify(database||{}));
@@ -11034,28 +11156,33 @@ async function exportCompleteReportPDF(){
     const faDigits=s=>String(s??'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
     const norm=s=>faDigits(s).replace(/[-.]/g,'/').replace(/\s/g,'');
     const matchesMonth=date=>!month || norm(date).includes(norm(month));
-    const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const classes=Object.entries(snap).filter(([k,v])=>v&&typeof v==='object'&&Array.isArray(v.students));
     const schoolName=(()=>{try{return localStorage.getItem('دفتر_کلاسی_school_name_v1')||''}catch(e){return ''}})();
     let totalStudents=0,totalAttendance=0,totalAbsent=0,totalLate=0;
     const rows=[];
     for(const [key,cl] of classes){
-      const title=cl.name||cl.className||cl.grade||key, students=cl.students||[];totalStudents+=students.length;
+      const title=cl.name||cl.className||cl.grade||((snap.classNames||{})[key])||("کلاس "+key), students=cl.students||[];totalStudents+=students.length;
       const att=(Array.isArray(cl.attendance)?cl.attendance:[]).filter(a=>matchesMonth(a.date||a.day||a.createdAt||a.created_at||''));
       const absent=att.filter(a=>/غایب|غیبت|absent/i.test(String(a.status||a.state||''))).length;
       const late=att.filter(a=>/تأخیر|تاخیر|late/i.test(String(a.status||a.state||''))).length;
       totalAttendance+=att.length;totalAbsent+=absent;totalLate+=late;
       const evaluations=Array.isArray(cl.evaluations)?cl.evaluations.filter(x=>matchesMonth(x.date||x.createdAt||x.created_at||'')):[];
       const homework=Array.isArray(cl.homework)?cl.homework.filter(x=>matchesMonth(x.date||x.createdAt||x.created_at||'')):[];
-      const monthly=Array.isArray(cl.monthly)?cl.monthly.filter(x=>matchesMonth(x.date||x.month||x.createdAt||'')):[];
-      rows.push({title,students:students.length,attendance:att.length,absent,late,evaluations:evaluations.length,homework:homework.length,monthly:monthly.length});
+      rows.push([title,students.length,att.length,absent,late,evaluations.length,homework.length]);
     }
-    let html='<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>گزارش ماهانه مدرسه</title><style>body{font-family:Tahoma,Arial,sans-serif;color:#172033;margin:18px;line-height:1.65}h1{font-size:21px;color:#1746c8;margin:0 0 8px}.sub{color:#64748b;font-size:11px;margin-bottom:14px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{border:1px solid #d8e2f4;border-radius:8px;padding:9px;background:#f7f9ff}.stat b{display:block;font-size:18px;color:#1746c8}.stat span{font-size:10px;color:#64748b}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #cbd5e1;padding:7px;text-align:right;font-size:10px}th{background:#edf3ff}p{font-size:11px}.actions{margin-bottom:12px}@page{size:A4;margin:12mm}@media print{.actions{display:none}body{margin:0}.stat{break-inside:avoid}}</style></head><body><div class="actions"><button onclick="window.print()">چاپ / ذخیره PDF</button></div><h1>گزارش ماهانه و خلاصه عملکرد تحصیلی</h1><div class="sub">مدرسه: '+esc(schoolName||'ثبت نشده')+' · حساب: '+esc(activeAccountUsername||'ثبت نشده')+' · ماه گزارش: '+esc(month||'تمام ثبت‌های موجود')+' · تاریخ تهیه: '+esc(new Date().toLocaleDateString('fa-IR'))+'</div>';
-    html+='<div class="stats"><div class="stat"><span>کلاس‌های دارای داده</span><b>'+classes.length+'</b></div><div class="stat"><span>کل دانش‌آموزان</span><b>'+totalStudents+'</b></div><div class="stat"><span>ثبت حضور و غیاب در بازه</span><b>'+totalAttendance+'</b></div><div class="stat"><span>غیبت‌های ثبت‌شده</span><b>'+totalAbsent+'</b></div><div class="stat"><span>تأخیرهای ثبت‌شده</span><b>'+totalLate+'</b></div><div class="stat"><span>ارزشیابی‌ها و تکالیف</span><b>'+rows.reduce((n,r)=>n+r.evaluations+r.homework,0)+'</b></div></div>';
-    html+='<table><thead><tr><th>کلاس</th><th>دانش‌آموز</th><th>حضور و غیاب</th><th>غیبت</th><th>تأخیر</th><th>ارزشیابی</th><th>تکلیف</th></tr></thead><tbody>';
-    for(const r of rows)html+='<tr><td>'+esc(r.title)+'</td><td>'+r.students+'</td><td>'+r.attendance+'</td><td>'+r.absent+'</td><td>'+r.late+'</td><td>'+r.evaluations+'</td><td>'+r.homework+'</td></tr>';
-    html+='</tbody></table><p>این گزارش خلاصه‌ای از داده‌های موجود روی همین دستگاه است و فقط ثبت‌هایی را که تاریخ آن‌ها با ماه انتخاب‌شده مطابقت دارد در شمارش ماهانه می‌آورد. برای گزارش اداره، اطلاعات ثبت‌نشده یا داده‌های همگام‌نشدهٔ دستگاه‌های دیگر در این فایل دیده نمی‌شوند.</p><p>این PDF جایگزین پشتیبان کامل نیست؛ برای حفظ عکس‌ها، صوت‌ها و جزئیات پرونده‌ها، فایل پشتیبان JSON را نیز جداگانه ذخیره کنید.</p><script>window.onload=function(){setTimeout(function(){window.print()},350)}<\/script></body></html>';
-    const w=window.open('','_blank');if(!w){alert('مرورگر بازشدن پنجره گزارش را مسدود کرده است. اجازه بازشدن پنجره را بدهید و دوباره تلاش کنید.');return}w.document.open();w.document.write(html);w.document.close();
+    if(!rows.length){ alert('هیچ کلاسی دارای داده برای گزارش نیست. ابتدا دانش‌آموز و ثبت‌ها را وارد کنید.'); return; }
+    const teacherName=(()=>{try{const t=getTeacherData();return [t.firstName,t.lastName].filter(Boolean).join(" ").trim();}catch(e){return ""}})();
+    const pages=await dfRenderSummaryReportPages({
+      title:'گزارش ماهانه و خلاصه عملکرد تحصیلی',
+      subtitle:'مدرسه: '+(schoolName||'ثبت نشده')+'   ·   ماه گزارش: '+(month||'تمام ثبت‌های موجود'),
+      meta:'حساب: '+(activeAccountUsername||'ثبت نشده')+(teacherName?'   ·   معلم: '+teacherName:'')+'   ·   تاریخ تهیه: '+toPersianNumber(new Date().toLocaleDateString('fa-IR')),
+      chips:[['کلاس‌های دارای داده',classes.length],['کل دانش‌آموزان',totalStudents],['ثبت حضور و غیاب',totalAttendance],['غیبت',totalAbsent],['تأخیر',totalLate]],
+      columns:[{label:'کلاس',w:300},{label:'دانش‌آموز',w:130},{label:'حضور و غیاب',w:170},{label:'غیبت',w:120},{label:'تأخیر',w:120},{label:'ارزشیابی',w:150},{label:'تکلیف',w:130}],
+      rows:rows,
+      note:'این گزارش خلاصه‌ای از داده‌های موجود روی همین دستگاه است و فقط ثبت‌هایی را که تاریخشان با ماه انتخاب‌شده مطابقت دارد می‌شمارد. این PDF جایگزین پشتیبان کامل نیست؛ برای حفظ عکس‌ها و صوت‌ها، فایل پشتیبان JSON را جداگانه ذخیره کنید.'
+    });
+    const stamp=String(month||'همه-ثبت‌ها').replace(/[\\/:*?"<>|\s]+/g,'-');
+    await dfDeliverPdf('گزارش-ماهانه-مدرسه-'+stamp+'.pdf', pages);
   }catch(e){console.error(e);alert('ساخت گزارش ماهانه ناموفق بود: '+(e.message||e))}
 }
 
@@ -11112,6 +11239,40 @@ async function runDailyAutoBackup(){
 }
 
 
+function summarizeDatabaseForPreview(db){
+    const summary={students:0,attendance:0,homework:0,evaluations:0,grades:0,parents:0,portfolio:0,classes:0};
+    ["1","2","3","4","5","6","multi"].forEach(function(c){
+        const d=db && db[c];
+        if(!d || typeof d!=="object") return;
+        summary.classes++;
+        ["students","attendance","homework","evaluations","grades","parents","portfolio"].forEach(function(k){
+            if(Array.isArray(d[k])) summary[k]+=d[k].length;
+        });
+    });
+    return summary;
+}
+
+/* قبل از جایگزینی کامل داده‌ها، یک نسخهٔ ایمنی در IndexedDB نگه می‌داریم تا
+   اگر بازیابی ناتمام ماند یا خطا رخ داد، بتوان به وضعیت قبل برگشت. */
+async function writePreRestoreSafetySnapshot(username){
+    try{
+        const snapshot=cloneForSync(database||{});
+        if(!snapshot) return;
+        const db=await openAccountDB();
+        await new Promise(function(resolve,reject){
+            const tx=db.transaction("migrationBackups","readwrite");
+            tx.objectStore("migrationBackups").put({
+                username:username,
+                reason:"pre-restore",
+                fromVersion:databaseSchemaVersion(database),
+                createdAt:Date.now(),
+                data:snapshot
+            });
+            tx.oncomplete=resolve; tx.onerror=function(){reject(tx.error)};
+        });
+    }catch(e){ console.warn("Pre-restore safety snapshot skipped:",e); }
+}
+
 async function importData(event){
     const input=event && event.target;
     const file=input && input.files && input.files[0];
@@ -11121,13 +11282,9 @@ async function importData(event){
         if(input) input.value="";
         return;
     }
-    const confirmed=confirm(
-        "فایل پشتیبان برای اکانت «"+activeAccountUsername+"» بازیابی می‌شود. اطلاعات فعلی این اکانت با اطلاعات فایل جایگزین خواهد شد.\n\n"+
-        "اگر اطلاعات فعلی مهم است، ابتدا از آن پشتیبان بگیرید. ادامه می‌دهید؟"
-    );
-    if(!confirmed){ if(input) input.value=""; return; }
     try{
         const text=await file.text();
+        if(text.length>80*1024*1024) throw new Error("حجم فایل پشتیبان بیش از حد مجاز است (بیش از ۸۰ مگابایت).");
         let imported=JSON.parse(text);
         // پشتیبانی از فایل مستقیم و فایل‌هایی که اطلاعات را داخل data قرار داده‌اند.
         if(imported && imported.data && typeof imported.data==="object" && !imported["1"] && !imported["2"] && !imported["3"] && !imported["4"] && !imported["5"] && !imported["6"]){
@@ -11137,6 +11294,38 @@ async function importData(event){
            !["1","2","3","4","5","6","multi"].some(function(k){return imported[k] && typeof imported[k]==="object";})){
             throw new Error("این فایل ساختار پشتیبان دفتر کلاسی را ندارد.");
         }
+        /* اعتبارسنجی نسخهٔ قالب پشتیبان؛ نسخه‌های ناشناختهٔ خیلی جدید با هشدار و تأیید صریح پذیرفته می‌شوند. */
+        const meta=imported.backupMetadata;
+        if(meta){
+            if(meta.format && meta.format!=="daftar-kelasi-backup"){
+                throw new Error("این فایل پشتیبانِ برنامهٔ دیگری است (قالب: "+String(meta.format).slice(0,40)+").");
+            }
+            const fileVersion=Number(meta.version||1);
+            if(!Number.isFinite(fileVersion) || fileVersion<1 || fileVersion>SUPPORTED_BACKUP_VERSION){
+                const goOn=confirm("نسخهٔ قالب این پشتیبان ("+fileVersion+") با نسخهٔ پشتیبانی این برنامه ("+SUPPORTED_BACKUP_VERSION+") متفاوت است.\n"+
+                    "تلاش برای بازیابی ممکن است کامل نباشد. ادامه می‌دهید؟");
+                if(!goOn){ if(input) input.value=""; return; }
+            }
+        }
+        /* پیش‌نمایش محتوا + هشدار جایگزینی؛ تصمیم با معلم است. */
+        const incomingSummary=summarizeDatabaseForPreview(imported);
+        const currentSummary=summarizeDatabaseForPreview(database);
+        const metaLine=meta ? ("\nتاریخ ساخت فایل: "+(meta.createdAt?new Date(meta.createdAt).toLocaleString("fa-IR"):"نامشخص")+(meta.username?"\nاکانت سازندهٔ فایل: "+meta.username:"")) : "\nاین فایل بدون شناسنامهٔ پشتیبان است (احتمالاً از نسخهٔ قدیمی‌تر برنامه)؛ در صورت مشکل، دوباره از نسخهٔ جدید پشتیبان بگیرید.";
+        const previewMsg=
+            "پیش‌نمایش فایل پشتیبان:"+metaLine+
+            "\n\n— محتوای فایل: کلاس‌ها: "+incomingSummary.classes+
+            " | دانش‌آموزان: "+incomingSummary.students+
+            " | حضور و غیاب: "+incomingSummary.attendance+
+            " | تکالیف: "+incomingSummary.homework+
+            " | ارزشیابی: "+incomingSummary.evaluations+
+            " | والدین: "+incomingSummary.parents+
+            "\n— دادهٔ فعلی اکانت «"+activeAccountUsername+"»: کلاس‌ها: "+currentSummary.classes+
+            " | دانش‌آموزان: "+currentSummary.students+
+            " | حضور و غیاب: "+currentSummary.attendance+
+            "\n\nاطلاعات فعلی این اکانت کامل با اطلاعات فایل جایگزین می‌شود و یک نسخهٔ ایمنی از وضعیت فعلی ذخیره خواهد شد.\n"+
+            "اگر اطلاعات فعلی مهم است، ابتدا از آن پشتیبان بگیرید. بازیابی انجام شود؟";
+        if(!confirm(previewMsg)){ if(input) input.value=""; return; }
+        await writePreRestoreSafetySnapshot(activeAccountUsername);
         const importedVoiceClips=Array.isArray(imported.voiceClips)?imported.voiceClips:[];
         // داده را با ساختار نسخه جاری مهاجرت می‌دهیم؛ کلیدهای کلاس و رکوردهای موجود حفظ می‌شوند.
         delete imported.voiceClips;
@@ -11179,10 +11368,12 @@ async function importData(event){
         if(input) input.value="";
         alert("بازیابی اطلاعات با موفقیت انجام شد.\nاکانت مقصد: "+activeAccountUsername+"\nاطلاعات کلاس‌ها، عکس‌ها و سوابق موجود در فایل به این اکانت وارد شد."+
               (restoredVoices?"\nتعداد فایل‌های صوتی بازیابی‌شده: "+restoredVoices:"\nدر فایل، صوت قابل بازیابی وجود نداشت.")+
-              (failedVoices?"\nتعداد صوت‌های ناموفق: "+failedVoices:""));
+              (failedVoices?"\nتعداد صوت‌های ناموفق: "+failedVoices:"")+
+              "\n\nیک نسخهٔ ایمنی از داده‌های قبلی در همین دستگاه ذخیره شد (پوشهٔ دادهٔ برنامه).");
     }catch(error){
         console.error("Backup import failed",error);
         if(input) input.value="";
+        /* اگر خطا در میانهٔ کار رخ داد، دادهٔ پیش از بازیابی در نسخهٔ ایمنی محفوظ مانده است. */
         alert("بازیابی انجام نشد. فایل پشتیبان معتبر نیست یا ذخیره اطلاعات با خطا روبه‌رو شد.\n"+(error && error.message?error.message:"لطفاً فایل دیگری را بررسی کنید."));
     }
 }
@@ -11253,12 +11444,19 @@ function addPersianSpeechButtonsToTextFields(){
 }
 
 let speechFieldObserver=null;
+let speechFieldSweepTimer=null;
+function scheduleSpeechFieldSweep(){
+    /* پوشش DOM باعث جهش جدید می‌شود؛ بدون جمع‌کردن (debounce) هر کلید/رندر
+       یک پیمایش کامل صفحه رقم می‌خورد. */
+    clearTimeout(speechFieldSweepTimer);
+    speechFieldSweepTimer=setTimeout(function(){
+        try{ addPersianSpeechButtonsToTextFields(); }catch(e){ console.warn("speech fields sweep failed",e); }
+    },300);
+}
 function enableAutomaticPersianSpeechFields(){
     addPersianSpeechButtonsToTextFields();
     if(speechFieldObserver) return;
-    speechFieldObserver=new MutationObserver(function(){
-        addPersianSpeechButtonsToTextFields();
-    });
+    speechFieldObserver=new MutationObserver(scheduleSpeechFieldSweep);
     speechFieldObserver.observe(document.body,{childList:true,subtree:true});
 }
 
@@ -11424,34 +11622,27 @@ document.addEventListener(
 
 
 
-// لایه پایدار رابط حرفه‌ای: آیکون‌های برداری و وضعیت اتصال بدون وابستگی به اینترنت
+// لایه پایدار رابط حرفه‌ای: وضعیت اتصال و ذخیره‌سازی، بدون وابستگی به اینترنت
 (function(){
-  const ICONS={
-    "کارتابل معلم":"👤","کارتابل دانش‌آموز":"▣","داشبورد":"⌂","دانش‌آموزان":"♟","گروه‌بندی کلاس":"♣","حضور و غیاب":"✓","تکالیف":"▤","ارزشیابی":"★","بازخورد آموزشی":"◌","ارزشیابی کیفی":"▣","پوشه‌کار":"▱","آزمایش‌های علوم":"⚗","عملکرد ماهانه":"◷","وضعیت تحصیلی":"▥","اهداف آموزشی":"◎","اطلاعات والدین":"♧","علاقه‌مندی دانش‌آموز":"♡","دفتر روزانه":"▥","برنامه هفتگی":"▦","بودجه ساعات تدریس":"◫","بودجه‌بندی تدریس کتاب":"▤","نیازمند توجه":"!","پشتیبان":"↥","خروج از حساب":"↪"
-  };
-  function setIcon(el,key){ if(!el) return; el.textContent=ICONS[key]||"•"; el.setAttribute("aria-hidden","true"); }
-  function refreshIcons(){
-    document.querySelectorAll("#mainNav button").forEach(function(btn){
-      const label=(btn.querySelector(".sb-label")?.textContent||"").trim().replace(/^[^؀-ۿA-Za-z0-9]+/u,"").trim();
-      setIcon(btn.querySelector(".sb-icon"),label);
-    });
-    document.querySelectorAll(".capability-card").forEach(function(card){
-      const label=(card.querySelector("strong")?.textContent||"").trim();
-      setIcon(card.querySelector(".capability-icon"),label);
-    });
-  }
+  /* آیکون‌های برداری «آورورا» جایگزین نقاشی ایموجی شده‌اند؛ نقاشی دوباره حذف شد تا
+     آیکون‌ها دو بار رندر نشوند. فقط وضعیت اتصال/ذخیره‌سازی اینجا نگه داشته شده است. */
   function updateConnection(){
-    const pill=document.getElementById("syncStatusPill"); if(!pill)return;
-    const text=pill.querySelector("span:last-child");
-    const online=navigator.onLine;
-    pill.classList.toggle("offline",!online);
-    if(text) text.textContent=online?"آنلاین · آماده همگام‌سازی":"آفلاین · ذخیره محلی فعال"; if(online) scheduleSyncFlush();
+    if(typeof window.updateDataStatusPill==="function"){ window.updateDataStatusPill(); }
+    else{
+      const pill=document.getElementById("syncStatusPill"); if(!pill)return;
+      const text=pill.querySelector("span:last-child");
+      const online=navigator.onLine;
+      pill.classList.toggle("offline",!online);
+      if(text) text.textContent=online?"آنلاین":"آفلاین · ذخیره محلی فعال";
+    }
+    if(navigator.onLine && typeof scheduleSyncFlush==="function") scheduleSyncFlush();
   }
   window.addEventListener("online",updateConnection,{passive:true});
   window.addEventListener("offline",updateConnection,{passive:true});
-  window.addEventListener("error",function(e){ console.warn("UI error",e.error||e.message); });
-  document.addEventListener("DOMContentLoaded",function(){ refreshIcons(); updateConnection(); });
-  window.refreshProfessionalIcons=refreshIcons;
+  document.addEventListener("DOMContentLoaded",function(){ updateConnection(); });
+  window.refreshProfessionalIcons=function(){
+    if(typeof window.refreshAuroraIcons==="function") window.refreshAuroraIcons();
+  };
 })();
 </script>
 
@@ -13356,13 +13547,31 @@ async function refreshAdminEntry(){
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(refreshAdminEntry,900),{once:true});
 else setTimeout(refreshAdminEntry,900);
-const observer=new MutationObserver(()=>{if(token()) refreshAdminEntry()});
-observer.observe(document.documentElement,{childList:true,subtree:true});
+/* ناظر DOM فقط تا زمانی فعال است که دکمهٔ مدیر هنوز نصب نشده باشد؛ پس از نصب
+   قطع می‌شود تا هر تغییر DOM کل برنامه را بی‌دلیل اسکن نکند (مصرف CPU/حافظه). */
+let adminEntryObserver=null;
+function stopAdminEntryObserver(){
+    if(adminEntryObserver){ adminEntryObserver.disconnect(); adminEntryObserver=null; }
+}
+function ensureAdminEntryObserver(){
+    if(adminEntryObserver || !token()) return;
+    try{
+        if(localStorage.getItem(roleKey)==='admin' && document.getElementById('schoolAdminLaunch')){ stopAdminEntryObserver(); return; }
+    }catch(e){}
+    adminEntryObserver=new MutationObserver(()=>{ if(!token()){ stopAdminEntryObserver(); return; } refreshAdminEntry().then(function(){
+        // اگر دکمهٔ مدیر نصب شد، ناظر دیگر لازم نیست.
+        try{ if(localStorage.getItem(roleKey)==='admin' && document.getElementById('schoolAdminLaunch')) stopAdminEntryObserver(); }catch(e){}
+    }); });
+    adminEntryObserver.observe(document.documentElement,{childList:true,subtree:true});
+    // به هر حال پس از دو دقیقه خودکار قطع می‌شود تا ناظر ابدی باقی نماند.
+    setTimeout(stopAdminEntryObserver,120000);
+}
 // چند تلاش زمان‌بندی‌شده برای شرایطی که سرویس رایگان سرور دیر آماده می‌شود.
 setTimeout(refreshAdminEntry,3000);
 setTimeout(refreshAdminEntry,8000);
 setTimeout(refreshAdminEntry,15000);
 setTimeout(refreshAdminEntry,30000);
+setTimeout(ensureAdminEntryObserver,100);
 setTimeout(refreshAdminEntry,60000);
 })();
 </script>
@@ -13916,6 +14125,431 @@ html body .app-sidebar button.sidebar-collapse:hover{
 </style>
 
 
+<script id="daftar-school-package">
+/* =====================================================================
+   بستهٔ دادهٔ مدرسه — انتقال امن آفلاین بین دستگاه معلم و دستگاه مدیر
+   ساختار فایل (dkshare): فرمت + فرستنده + مدرسه + رمزنگاری + امضای HMAC + متن رمزشده
+   - رمزنگاری: AES-256-GCM با کلید مشتق‌شده از «رمز مشترک مدرسه» (PBKDF2-SHA256، ۲۰۰هزار دور)
+   - اصالت: HMAC-SHA256 روی پاکت؛ فقط دارندهٔ رمز مشترک می‌تواند بسته بسازد/تأیید کند
+   - تشخیص تکرار/قدیمی بودن: شناسهٔ یکتای بسته + تاریخ ساخت + اثر محتوایی
+   - دفتر رویداد روی دستگاه مدیر: زنجیرهٔ هش برای شواهد تغییرات
+===================================================================== */
+(function(){
+"use strict";
+
+const SPACK_DB_NAME = "DaftarKelasiSchoolPackages";
+const SPACK_DB_VERSION = 1;
+const SPACK_FORMAT = "daftar-kelasi-school-package";
+const SPACK_VERSION = 1;
+const SPACK_PBKDF2_ITERATIONS = 200000;
+
+/* ---------- ابزارهای عمومی ---------- */
+function spHexToBytes(hex){
+    const out = new Uint8Array(hex.length/2);
+    for(let i=0;i<out.length;i++) out[i]=parseInt(hex.substr(i*2,2),16);
+    return out;
+}
+function spBytesToHex(bytes){ return Array.from(new Uint8Array(bytes)).map(function(b){return b.toString(16).padStart(2,"0");}).join(""); }
+function spB64(bytes){
+    let s=""; const u=new Uint8Array(bytes); const step=0x8000;
+    for(let i=0;i<u.length;i+=step) s+=String.fromCharCode.apply(null,u.subarray(i,i+step));
+    return btoa(s);
+}
+function spUnb64(b64){
+    const bin=atob(String(b64||"").replace(/\s+/g,""));
+    const out=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
+    return out;
+}
+/* JSON پایدار برای امضا/هش (ترتیب کلیدها ثابت) */
+function spCanonical(value){
+    if(value===null || typeof value!=="object") return JSON.stringify(value===undefined?null:value);
+    if(Array.isArray(value)) return "["+value.map(spCanonical).join(",")+"]";
+    const keys=Object.keys(value).filter(function(k){return value[k]!==undefined;}).sort();
+    return "{"+keys.map(function(k){return JSON.stringify(k)+":"+spCanonical(value[k]);}).join(",")+"}";
+}
+async function spSha256Hex(textOrBytes){
+    const data = typeof textOrBytes==="string" ? new TextEncoder().encode(textOrBytes) : textOrBytes;
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    return spBytesToHex(new Uint8Array(digest));
+}
+function spRandomId(){
+    if(crypto.randomUUID) return crypto.randomUUID();
+    return "pkg-"+Date.now().toString(36)+"-"+spBytesToHex(crypto.getRandomValues(new Uint8Array(8)));
+}
+function spSubtle(){ return (window.crypto && window.crypto.subtle) ? window.crypto.subtle : null; }
+async function spDeriveKeys(passphrase, saltBytes, iterations){
+    const subtle=spSubtle();
+    if(!subtle) throw new Error("مرورگر/WebView این دستگاه از رمزنگاری استاندارد (WebCrypto) پشتیبانی نمی‌کند.");
+    const base = await subtle.importKey("raw", new TextEncoder().encode(String(passphrase)), "PBKDF2", false, ["deriveBits"]);
+    const bits = await subtle.deriveBits({name:"PBKDF2", hash:"SHA-256", salt:saltBytes, iterations:iterations}, base, 512);
+    const encBits = new Uint8Array(bits);
+    const aesRaw = encBits.slice(0,32), hmacRaw = encBits.slice(32,64);
+    const aesKey = await subtle.importKey("raw", aesRaw, {name:"AES-GCM"}, false, ["encrypt","decrypt"]);
+    const hmacKey = await subtle.importKey("raw", hmacRaw, {name:"HMAC", hash:"SHA-256"}, false, ["sign","verify"]);
+    return {aesKey:aesKey, hmacKey:hmacKey};
+}
+
+/* ---------- پایگاه دادهٔ بسته‌های دریافتی ---------- */
+function spOpenDB(){
+    return new Promise(function(resolve,reject){
+        const req=indexedDB.open(SPACK_DB_NAME, SPACK_DB_VERSION);
+        req.onupgradeneeded=function(){
+            const db=req.result;
+            if(!db.objectStoreNames.contains("packages")){
+                const store=db.createObjectStore("packages",{keyPath:"packageId"});
+                store.createIndex("teacher","sender.username",{unique:false});
+                store.createIndex("createdAt","createdAt",{unique:false});
+            }
+            if(!db.objectStoreNames.contains("history")){
+                db.createObjectStore("history",{autoIncrement:true});
+            }
+        };
+        req.onsuccess=function(){resolve(req.result)};
+        req.onerror=function(){reject(req.error||new Error("بازکردن پایگاه دادهٔ بسته‌ها ناموفق بود."))};
+    });
+}
+function spDbPut(storeName,value){
+    return spOpenDB().then(function(db){
+        return new Promise(function(resolve,reject){
+            const tx=db.transaction(storeName,"readwrite");
+            tx.objectStore(storeName).put(value);
+            tx.oncomplete=function(){resolve(true)};
+            tx.onerror=function(){reject(tx.error||new Error("ذخیره در پایگاه دادهٔ بسته‌ها ناموفق بود."))};
+        });
+    });
+}
+function spDbGetAll(storeName){
+    return spOpenDB().then(function(db){
+        return new Promise(function(resolve,reject){
+            const tx=db.transaction(storeName,"readonly");
+            const req=tx.objectStore(storeName).getAll();
+            req.onsuccess=function(){resolve(req.result||[])};
+            req.onerror=function(){reject(req.error)};
+        });
+    });
+}
+function spDbDelete(storeName,key){
+    return spOpenDB().then(function(db){
+        return new Promise(function(resolve,reject){
+            const tx=db.transaction(storeName,"readwrite");
+            tx.objectStore(storeName).delete(key);
+            tx.oncomplete=function(){resolve(true)};
+            tx.onerror=function(){reject(tx.error)};
+        });
+    });
+}
+async function spAppendHistory(entry){
+    try{
+        const db=await spOpenDB();
+        await new Promise(function(resolve,reject){
+            const tx=db.transaction("history","readwrite");
+            tx.objectStore("history").add(entry);
+            tx.oncomplete=resolve; tx.onerror=function(){reject(tx.error)};
+        });
+    }catch(e){ console.warn("school package history append failed",e); }
+}
+async function spGetHistory(){
+    try{ return await spDbGetAll("history"); }catch(e){ return []; }
+}
+
+/* ---------- ساخت بسته (سمت معلم) ---------- */
+function spCollectPayload(){
+    const payload={generatedAt:new Date().toISOString(), classes:{}, counts:{students:0,parents:0,attendance:0,evaluations:0,grades:0,homework:0,attention:0,daily:0,feedback:0}, teacher:null, schoolName:""};
+    try{ payload.teacher=JSON.parse(JSON.stringify(database && database.teacher || {})); }catch(e){ payload.teacher={}; }
+    try{ payload.schoolName=localStorage.getItem("دفتر_کلاسی_school_name_v1")||""; }catch(e){}
+    try{ if(database && database.classNames) payload.classNames=JSON.parse(JSON.stringify(database.classNames)); }catch(e){}
+    ["1","2","3","4","5","6","multi"].forEach(function(c){
+        const d=database && database[c];
+        if(!d || typeof d!=="object") return;
+        const clean={
+            name:String(d.name||d.className||d.grade||""),
+            students:Array.isArray(d.students)?JSON.parse(JSON.stringify(d.students)):[],
+            parents:Array.isArray(d.parents)?JSON.parse(JSON.stringify(d.parents)):[],
+            attendance:Array.isArray(d.attendance)?JSON.parse(JSON.stringify(d.attendance)):[],
+            evaluations:Array.isArray(d.evaluations)?JSON.parse(JSON.stringify(d.evaluations)):[],
+            grades:Array.isArray(d.grades)?JSON.parse(JSON.stringify(d.grades)):[],
+            homework:Array.isArray(d.homework)?JSON.parse(JSON.stringify(d.homework)):[],
+            attention:Array.isArray(d.attention)?JSON.parse(JSON.stringify(d.attention)):[],
+            daily:Array.isArray(d.daily)?JSON.parse(JSON.stringify(d.daily)):[],
+            feedback:Array.isArray(d.feedback)?JSON.parse(JSON.stringify(d.feedback)):[]
+        };
+        /* ارجاع‌های media:// عکس‌ها به dataURL برمی‌گردند تا بسته خودبسنده باشد. */
+        clean.students.forEach(function(st){ if(st && typeof st.photo==="string" && st.photo.indexOf("media://")===0){ st.__photoRef=st.photo; } });
+        payload.classes[c]=clean;
+        payload.counts.students+=clean.students.length;
+        payload.counts.parents+=clean.parents.length;
+        payload.counts.attendance+=clean.attendance.length;
+        payload.counts.evaluations+=clean.evaluations.length;
+        payload.counts.grades+=clean.grades.length;
+        payload.counts.homework+=clean.homework.length;
+        payload.counts.attention+=clean.attention.length;
+        payload.counts.daily+=clean.daily.length;
+        payload.counts.feedback+=clean.feedback.length;
+    });
+    return payload;
+}
+async function spHydratePhotos(payload){
+    const jobs=[];
+    Object.keys(payload.classes||{}).forEach(function(c){
+        (payload.classes[c].students||[]).forEach(function(st){
+            if(st && st.__photoRef && typeof getMedia==="function"){
+                jobs.push(getMedia(String(st.__photoRef).slice("media://".length)).then(function(dataUrl){ if(dataUrl) st.photo=dataUrl; }).catch(function(){}));
+            }
+        });
+    });
+    await Promise.all(jobs);
+}
+window.exportSchoolPackage=async function(){
+    if(!activeAccountUsername || !database){ alert("ابتدا وارد حساب کاربری شوید."); return; }
+    const hasData=Object.keys(database).some(function(k){ const d=database[k]; return d && typeof d==="object" && ((d.students||[]).length || (d.attendance||[]).length || (d.parents||[]).length); });
+    if(!hasData){ alert("هنوز داده‌ای (دانش‌آموز، والدین یا حضور و غیاب) برای قرار دادن در بسته وجود ندارد."); return; }
+    const pass1=prompt("«رمز مشترک مدرسه» را وارد کنید (حداقل ۸ نویسه).\nاین رمز باید بین شما و مدیر مدرسه توافق‌شده و محرمانه باشد:");
+    if(pass1===null) return;
+    const pass=String(pass1);
+    if(pass.length<8){ alert("رمز مشترک باید حداقل ۸ نویسه باشد."); return; }
+    const pass2=prompt("رمز مشترک را دوباره وارد کنید:");
+    if(pass2===null) return;
+    if(String(pass2)!==pass){ alert("دو رمز یکسان نیستند."); return; }
+    const statusBox=document.getElementById("schoolPackageImportStatus");
+    function setStatus(t){ if(statusBox){ statusBox.style.display="block"; statusBox.textContent=t; } }
+    try{
+        setStatus("در حال آماده‌سازی بستهٔ داده…");
+        const payload=spCollectPayload();
+        await spHydratePhotos(payload);
+        const payloadText=JSON.stringify(payload);
+        payload.audit={recordCount:payload.counts.students+payload.counts.attendance+payload.counts.parents, contentHash:await spSha256Hex(spCanonical(JSON.parse(payloadText)))};
+        const salt=crypto.getRandomValues(new Uint8Array(16));
+        const iv=crypto.getRandomValues(new Uint8Array(12));
+        const keys=await spDeriveKeys(pass,salt,SPACK_PBKDF2_ITERATIONS);
+        const cipherBuf=await spSubtle().encrypt({name:"AES-GCM",iv:iv},keys.aesKey,new TextEncoder().encode(JSON.stringify(payload)));
+        const cipherB64=spB64(cipherBuf);
+        let schoolIdentity={name:payload.schoolName||"", joinCodeHash:""};
+        try{
+            const joinCode=String(localStorage.getItem("دفتر_کلاسی_join_code_v1")||"").trim();
+            if(joinCode) schoolIdentity.joinCodeHash=await spSha256Hex(joinCode);
+        }catch(e){}
+        const sender=(function(){ try{ const t=database.teacher||{}; return {username:activeAccountUsername, displayName:[t.firstName,t.lastName].filter(Boolean).join(" ").trim(), role:(localStorage.getItem("دفتر_کلاسی_cloud_role_v1")||"teacher")}; }catch(e){ return {username:activeAccountUsername, displayName:"", role:"teacher"}; } })();
+        const envelope={format:SPACK_FORMAT, packageVersion:SPACK_VERSION, packageId:spRandomId(), createdAt:new Date().toISOString(), sender:sender, school:schoolIdentity,
+            crypto:{algorithm:"AES-GCM-256", kdf:"PBKDF2-SHA256", iterations:SPACK_PBKDF2_ITERATIONS, salt:spBytesToHex(salt), iv:spBytesToHex(iv)},
+            ciphertext:cipherB64};
+        const sigBuf=await spSubtle().sign("HMAC",keys.hmacKey,new TextEncoder().encode(spCanonical(envelope)));
+        envelope.signature=spBytesToHex(new Uint8Array(sigBuf));
+        const blob=new Blob([JSON.stringify(envelope,null,2)],{type:"application/json"});
+        const schoolSlug=String(schoolIdentity.name||"مدرسه").replace(/[\\/:*?"<>|\s]+/g,"-").slice(0,40);
+        const stamp=new Date().toLocaleDateString("fa-IR").replace(/\//g,"-");
+        await deliverFile("بسته-مدرسه-"+schoolSlug+"-"+stamp+".dkshare.json", blob);
+        setStatus("✅ بستهٔ داده ساخته شد. فایل آن را با روش امن (پیام‌رسان، بلوتوث یا حضوری) برای مدیر مدرسه بفرستید.");
+        await spAppendHistory({type:"export", packageId:envelope.packageId, createdAt:envelope.createdAt, at:Date.now(), username:activeAccountUsername, previousHash:null, entryHash:await spSha256Hex(spCanonical({t:"export",packageId:envelope.packageId,createdAt:envelope.createdAt,username:activeAccountUsername}))});
+    }catch(e){
+        console.error("school package export failed",e);
+        setStatus("❌ ساخت بسته انجام نشد: "+(e.message||e));
+        alert("ساخت بستهٔ داده انجام نشد: "+(e.message||e));
+    }
+};
+
+/* ---------- خواندن و تأیید بسته (سمت مدیر) ---------- */
+async function spVerifyEnvelope(envelope,passphrase){
+    if(!envelope || typeof envelope!=="object") throw new Error("فایل بسته معتبر نیست.");
+    if(envelope.format!==SPACK_FORMAT) throw new Error("این فایل «بستهٔ دادهٔ مدرسه» دفتر کلاسی من نیست.");
+    const ver=Number(envelope.packageVersion||1);
+    if(ver<1 || ver>SPACK_VERSION) throw new Error("نسخهٔ بسته ("+ver+") توسط این نسخهٔ برنامه پشتیبانی نمی‌شود.");
+    if(!envelope.ciphertext || !envelope.crypto || !envelope.crypto.salt || !envelope.crypto.iv) throw new Error("ساختار رمزنگاری بسته ناقص است.");
+    const receivedSig=String(envelope.signature||"");
+    const envelopeForSig=JSON.parse(JSON.stringify(envelope)); delete envelopeForSig.signature;
+    const keys=await spDeriveKeys(passphrase,spHexToBytes(envelope.crypto.salt),Number(envelope.crypto.iterations)||SPACK_PBKDF2_ITERATIONS);
+    const sigBuf=await spSubtle().sign("HMAC",keys.hmacKey,new TextEncoder().encode(spCanonical(envelopeForSig)));
+    const expectedSig=spBytesToHex(new Uint8Array(sigBuf));
+    if(receivedSig.length!==expectedSig.length) throw new Error("امضای بسته نامعتبر است (رمز مشترک اشتباه یا فایل دستکاری‌شده).");
+    let diff=0; for(let i=0;i<expectedSig.length;i++) diff|=expectedSig.charCodeAt(i)^receivedSig.charCodeAt(i);
+    if(diff!==0) throw new Error("امضای بسته تأیید نشد. رمز مشترک اشتباه است یا فایل تغییر کرده است.");
+    let plainBuf;
+    try{
+        plainBuf=await spSubtle().decrypt({name:"AES-GCM",iv:spHexToBytes(envelope.crypto.iv)},keys.aesKey,spUnb64(envelope.ciphertext));
+    }catch(e){ throw new Error("رمزگشایی بسته ممکن نشد (رمز مشترک اشتباه یا فایل خراب است)."); }
+    const payload=JSON.parse(new TextDecoder().decode(plainBuf));
+    if(!payload || typeof payload!=="object" || !payload.classes) throw new Error("محتوای بسته ساختار معتبر ندارد.");
+    const contentHash=await spSha256Hex(spCanonical((function(){const c=JSON.parse(JSON.stringify(payload)); delete c.audit; return c;})()));
+    if(payload.audit && payload.audit.contentHash && payload.audit.contentHash!==contentHash) throw new Error("اثر محتوای بسته با امضای داخلی آن نمی‌خواند؛ فایل خراب یا دستکاری‌شده است.");
+    return {payload:payload, contentHash:contentHash};
+}
+
+window.importSchoolPackage=async function(event){
+    const input=event && event.target;
+    const file=input && input.files && input.files[0];
+    if(!file) return;
+    const statusBox=document.getElementById("schoolPackageImportStatus");
+    function setStatus(t,isErr){ if(statusBox){ statusBox.style.display="block"; statusBox.textContent=t; statusBox.style.background=isErr?"#fdecec":""; } }
+    try{
+        setStatus("در حال بررسی فایل بسته…");
+        const text=await file.text();
+        if(text.length>120*1024*1024) throw new Error("حجم فایل بسته بیش از حد مجاز است.");
+        const envelope=JSON.parse(text);
+        const pass=prompt("برای باز کردن بستهٔ مدرسه، «رمز مشترک مدرسه» را وارد کنید:");
+        if(pass===null){ if(input) input.value=""; return; }
+        setStatus("در حال تأیید امضا و رمزگشایی… (ممکن است چند ثانیه طول بکشد)");
+        const verified=await spVerifyEnvelope(envelope,String(pass));
+        const payload=verified.payload;
+        /* شناسهٔ مدرسه: اگر مدیر کد عضویت مدرسهٔ خودش را ذخیره کرده باشد، بستهٔ مدرسهٔ دیگر رد می‌شود. */
+        try{
+            const myJoin=String(localStorage.getItem("دفتر_کلاسی_join_code_v1")||"").trim();
+            if(myJoin && envelope.school && envelope.school.joinCodeHash){
+                const myHash=await spSha256Hex(myJoin);
+                if(myHash!==envelope.school.joinCodeHash){
+                    throw new Error("این بسته متعلق به مدرسهٔ شما نیست (مدرسهٔ مبدأ: "+String(envelope.school.name||"نامشخص")+").");
+                }
+            }
+        }catch(e){ if(String(e.message||"").indexOf("متعلق به مدرسهٔ شما نیست")>=0) throw e; }
+        /* تشخیص تکرار و قدیمی بودن */
+        const existing=await spDbGetAll("packages");
+        const sameId=existing.find(function(p){return p.packageId===envelope.packageId;});
+        if(sameId){ setStatus("⚠️ این بسته قبلاً دریافت و ذخیره شده است (شناسهٔ تکراری). دادهٔ جدیدی اضافه نشد.",true); alert("این بسته قبلاً دریافت شده است و دوباره ذخیره نشد."); if(input) input.value=""; return; }
+        const teacherKey=String(envelope.sender && envelope.sender.username || "");
+        const fromSameTeacher=existing.filter(function(p){return String(p.sender&&p.sender.username||"")===teacherKey;});
+        const newerExisting=fromSameTeacher.find(function(p){return String(p.createdAt||"")>String(envelope.createdAt||"");});
+        const stale=newerExisting?true:false;
+        const identical=fromSameTeacher.find(function(p){return p.contentHash===verified.contentHash;});
+        const record={packageId:envelope.packageId, packageVersion:envelope.packageVersion, createdAt:envelope.createdAt, receivedAt:new Date().toISOString(),
+            sender:envelope.sender||{}, school:envelope.school||{}, payload:payload, contentHash:verified.contentHash,
+            staleWarning:stale, revoked:false};
+        await spDbPut("packages",record);
+        const prev=fromSameTeacher.sort(function(a,b){return String(b.createdAt||"").localeCompare(String(a.createdAt||""));})[0];
+        const entryHash=await spSha256Hex(spCanonical({t:"import",packageId:envelope.packageId,createdAt:envelope.createdAt,receiver:activeAccountUsername||"principal",previous:prev?prev.entryHash:null}));
+        record.entryHash=entryHash; await spDbPut("packages",record);
+        await spAppendHistory({type:"import", packageId:envelope.packageId, teacher:teacherKey, createdAt:envelope.createdAt, at:Date.now(), contentHash:verified.contentHash, previousHash:prev?prev.entryHash:null, entryHash:entryHash});
+        let msg="✅ بسته با موفقیت تأیید و ذخیره شد.\n"+
+            "مدرسه: "+String(envelope.school&&envelope.school.name||"نامشخص")+"\n"+
+            "معلم: "+String(envelope.sender&&envelope.sender.displayName||teacherKey||"نامشخص")+"\n"+
+            "آخرین به‌روزرسانی داده‌ها در دستگاه معلم: "+new Date(payload.generatedAt||envelope.createdAt).toLocaleString("fa-IR")+"\n"+
+            "دانش‌آموزان: "+(payload.counts?payload.counts.students:"—")+" | حضور و غیاب: "+(payload.counts?payload.counts.attendance:"—")+" | والدین: "+(payload.counts?payload.counts.parents:"—");
+        if(identical) msg+="\n\nنکته: محتوای این بسته با بستهٔ قبلی همین معلم یکسان بود (فقط تاریخ ساخت تازه است).";
+        if(stale) msg+="\n\n⚠️ هشدار: از این معلم بستهٔ جدیدتری قبلاً دریافت شده است؛ این بسته قدیمی است و دادهٔ زنده نیست.";
+        msg+="\n\nاین داده‌ها فقط خواندنی‌اند و با کلاس‌های خودتان قاطی نمی‌شوند.";
+        setStatus(msg);
+        alert(msg);
+        if(input) input.value="";
+        refreshSchoolPackagesUI();
+    }catch(e){
+        console.error("school package import failed",e);
+        setStatus("❌ دریافت بسته انجام نشد: "+(e.message||e),true);
+        alert("دریافت بسته انجام نشد:\n"+(e.message||e));
+    }
+};
+
+/* ---------- فهرست و گزارش بسته‌های دریافتی (سمت مدیر) ---------- */
+window.refreshSchoolPackagesUI=async function(){
+    const box=document.getElementById("schoolPackagesBox");
+    if(!box) return;
+    let items=[];
+    try{ items=await spDbGetAll("packages"); }catch(e){ box.innerHTML='<p class="muted">خواندن فهرست بسته‌ها ناموفق بود: '+escapeHtmlText(String(e.message||e))+'</p>'; return; }
+    if(!items.length){
+        box.innerHTML='<p class="muted">هنوز بسته‌ای دریافت نشده است. پس از دریافت فایل بسته از معلم، آن را با کادر بالا وارد کنید.</p>';
+        return;
+    }
+    items.sort(function(a,b){return String(b.receivedAt||"").localeCompare(String(a.receivedAt||""));});
+    box.innerHTML=items.map(function(p){
+        const st=p.payload && p.payload.counts || {};
+        const stale=p.staleWarning?'<span style="background:#fff4e0;color:#b45309;border-radius:999px;padding:3px 10px;font-size:11px;margin-inline-start:6px">قدیمی‌تر از آخرین بسته</span>':'';
+        const revoked=p.revoked?'<span style="background:#fdecec;color:#b91c1c;border-radius:999px;padding:3px 10px;font-size:11px;margin-inline-start:6px">دسترسی لغو شده</span>':'';
+        return '<div style="border:1px solid #dce5f7;border-radius:14px;padding:14px;margin-top:10px;background:#fbfdff">'+
+            '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">'+
+            '<div><b>'+escapeHtmlText(String(p.sender&&p.sender.displayName||p.sender&&p.sender.username||"نامشخص"))+'</b> <span class="muted">('+escapeHtmlText(String(p.sender&&p.sender.username||""))+')</span> '+stale+revoked+'<br>'+
+            '<small class="muted">مدرسه: '+escapeHtmlText(String(p.school&&p.school.name||"نامشخص"))+' · داده‌های معلم تا: '+escapeHtmlText(new Date(p.createdAt||"").toLocaleString("fa-IR"))+' · دریافت: '+escapeHtmlText(new Date(p.receivedAt||"").toLocaleString("fa-IR"))+'</small><br>'+
+            '<small class="muted">دانش‌آموزان: '+(st.students||0)+' · والدین: '+(st.parents||0)+' · حضور و غیاب: '+(st.attendance||0)+' · ارزشیابی: '+(st.evaluations||0)+'</small></div>'+
+            '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+            '<button class="btn btn-blue" type="button" onclick="viewSchoolPackage(\''+String(p.packageId).replace(/'/g,"")+'\')">مشاهده</button>'+
+            '<button class="btn btn-green" type="button" onclick="printSchoolPackageReport(\''+String(p.packageId).replace(/'/g,"")+'\')">📄 گزارش PDF</button>'+
+            (p.revoked
+              ? '<button class="btn btn-gray" type="button" onclick="toggleSchoolPackageRevocation(\''+String(p.packageId).replace(/'/g,"")+'\',false)">بازگرداندن دسترسی</button>'
+              : '<button class="btn btn-danger" type="button" onclick="toggleSchoolPackageRevocation(\''+String(p.packageId).replace(/'/g,"")+'\',true)">لغو دسترسی</button>')+
+            '</div></div></div>';
+    }).join("");
+};
+window.viewSchoolPackage=async function(packageId){
+    const items=await spDbGetAll("packages");
+    const p=items.find(function(x){return x.packageId===packageId;});
+    if(!p){ alert("بسته پیدا نشد."); return; }
+    const w=window.open("","_blank");
+    if(!w){ alert("پنجرهٔ مشاهده مسدود شد؛ از دکمهٔ «گزارش PDF» استفاده کنید."); return; }
+    const esc=function(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+    const rows=(function(){
+        let out="";
+        Object.keys(p.payload.classes||{}).forEach(function(c){
+            const cl=p.payload.classes[c];
+            if(!cl.name && !(cl.students||[]).length) return;
+            out+='<tr><td colspan="4" style="background:#eef3ff;font-weight:bold">'+esc(cl.name||("کلاس "+c))+'</td></tr>';
+            (cl.students||[]).forEach(function(st,i){
+                const pr=(cl.parents||[]).find(function(x){return String(x.studentId||"")===String(st.id||"");})||{};
+                out+='<tr><td>'+(i+1)+'</td><td>'+esc([st.firstName,st.lastName].filter(Boolean).join(" "))+'</td><td>'+esc(pr.fatherName||pr.motherName||pr.name||pr.fullName||"—")+'</td><td dir="ltr">'+esc(pr.phone||pr.mobile||pr.tel||"—")+'</td></tr>';
+            });
+        });
+        return out;
+    })();
+    w.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>مشاهدهٔ بستهٔ دادهٔ مدرسه</title><style>body{font-family:Tahoma,Arial,sans-serif;margin:20px;color:#172033}h1{font-size:20px;color:#1746c8}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #ccd5e5;padding:7px;text-align:right;font-size:12px}th{background:#edf3ff}.meta{background:#f2f6ff;padding:12px;border-radius:8px;line-height:1.9;font-size:13px}</style></head><body><h1>بستهٔ دادهٔ دریافتی (آفلاین)</h1><div class="meta">مدرسه: '+esc(p.school&&p.school.name)+' · معلم: '+esc(p.sender&&p.sender.displayName||p.sender&&p.sender.username)+'<br>داده‌های معلم تا: '+esc(new Date(p.createdAt).toLocaleString("fa-IR"))+' · دریافت روی این دستگاه: '+esc(new Date(p.receivedAt).toLocaleString("fa-IR"))+'<br><b>این داده‌ها عکسِ لحظه‌ای آفلاین هستند و لزوماً وضعیت زندهٔ امروز را نشان نمی‌دهند.</b></div><table><thead><tr><th>ردیف</th><th>دانش‌آموز</th><th>والد/سرپرست</th><th>شمارهٔ تماس</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');
+    w.document.close();
+};
+window.toggleSchoolPackageRevocation=async function(packageId,revoke){
+    const items=await spDbGetAll("packages");
+    const p=items.find(function(x){return x.packageId===packageId;});
+    if(!p){ alert("بسته پیدا نشد."); return; }
+    if(revoke && !confirm("دسترسی این بسته لغو شود؟\nبسته از فهرست فعال حذف نمی‌شود اما با برچسب «دسترسی لغو شده» نشان داده می‌شود و در گزارش‌های پیش‌فرض ظاهر نمی‌شود.")) return;
+    p.revoked=!!revoke; p.revokedAt=revoke?new Date().toISOString():null;
+    await spDbPut("packages",p);
+    await spAppendHistory({type:revoke?"revoke":"restore", packageId:packageId, at:Date.now(), receiver:activeAccountUsername||"principal"});
+    refreshSchoolPackagesUI();
+};
+/* گزارش PDF مدیر: دانش‌آموزان + والدین + خلاصهٔ حضور و غیاب */
+window.printSchoolPackageReport=async function(packageId){
+    const items=await spDbGetAll("packages");
+    const p=items.find(function(x){return x.packageId===packageId;});
+    if(!p){ alert("بسته پیدا نشد."); return; }
+    const payload=p.payload||{};
+    const counts=payload.counts||{};
+    const rows=[];
+    let absentTotal=0,lateTotal=0,presentTotal=0;
+    Object.keys(payload.classes||{}).forEach(function(c){
+        const cl=payload.classes[c];
+        const className=cl.name||((payload.classNames||{})[c])||("کلاس "+c);
+        const parentByStudent={};
+        (cl.parents||[]).forEach(function(pr){ if(pr && pr.studentId!=null) parentByStudent[String(pr.studentId)]=pr; });
+        (cl.students||[]).forEach(function(st,i){
+            const pr=parentByStudent[String(st.id)]||{};
+            let present=0,absent=0,late=0;
+            (cl.attendance||[]).forEach(function(a){
+                if(String(a.studentId||"")!==String(st.id)) return;
+                const s=String(a.status||a.state||"");
+                if(/غایب|غائب|absent/i.test(s)) absent++;
+                else if(/تأخیر|تاخیر|late/i.test(s)) late++;
+                else if(/حاضر|present/i.test(s)) present++;
+            });
+            presentTotal+=present; absentTotal+=absent; lateTotal+=late;
+            rows.push([className,[st.firstName,st.lastName].filter(Boolean).join(" "),toPersianNumber(st.studentCode||st.code||"—"),
+                pr.fatherName||pr.motherName||pr.name||pr.fullName||"—",toPersianNumber(pr.phone||pr.mobile||pr.tel||"—"),
+                toPersianNumber(present)+" / "+toPersianNumber(absent)+" / "+toPersianNumber(late)]);
+        });
+    });
+    if(!rows.length){ alert("در این بسته فهرست دانش‌آموزی برای گزارش وجود ندارد."); return; }
+    const pages=await dfRenderSummaryReportPages({
+        title:"گزارش مدرسه از بستهٔ دادهٔ معلم",
+        subtitle:"مدرسه: "+String(p.school&&p.school.name||"نامشخص")+"   ·   معلم: "+String(p.sender&&p.sender.displayName||p.sender&&p.sender.username||"نامشخص"),
+        meta:"داده‌های معلم تا: "+new Date(p.createdAt||"").toLocaleString("fa-IR")+"   ·   دریافت روی این دستگاه: "+new Date(p.receivedAt||"").toLocaleString("fa-IR")+"   ·   تاریخ گزارش: "+toPersianNumber(new Date().toLocaleDateString("fa-IR")),
+        chips:[["دانش‌آموزان",counts.students||rows.length],["والدین ثبت‌شده",counts.parents||0],["حاضر",presentTotal],["غایب",absentTotal],["تأخیر",lateTotal]],
+        columns:[{label:"کلاس",w:150},{label:"دانش‌آموز",w:250},{label:"کد",w:110},{label:"والد/سرپرست",w:210},{label:"شمارهٔ تماس",w:210},{label:"حاضر/غایب/تأخیر",w:190}],
+        rows:rows,
+        note:"این گزارش از بستهٔ آفلاین وارد‌شده ساخته شده است و وضعیت داده‌ها را تا «آخرین به‌روزرسانی معلم» نشان می‌دهد؛ دادهٔ زندهٔ پس از آن تاریخ در این گزارش نیست. اطلاعات حساس (نام و تماس خانواده‌ها) را فقط در اختیار افراد مجاز قرار دهید."
+    });
+    await dfDeliverPdf("گزارش-بسته-مدرسه-"+String(p.sender&&p.sender.username||"معلم").replace(/[\\/:*?"<>|\s]+/g,"-")+".pdf",pages);
+};
+
+/* ورود به بخش پشتیبان: فهرست را تازه کن */
+const _origRefreshAll=window.refreshAll;
+window.refreshAll=function(){
+    try{ if(typeof refreshSchoolPackagesUI==="function") refreshSchoolPackagesUI(); }catch(e){}
+    return _origRefreshAll?_origRefreshAll.apply(this,arguments):undefined;
+};
+})();
+</script>
+
 <script id="daftar-v78-integration">
 (function(){
   "use strict";
@@ -13990,6 +14624,1000 @@ html body .app-sidebar button.sidebar-collapse:hover{
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true}); else apply();
 })();
+</script>
+
+<!-- df-section-pdf v8.3.0 -->
+<script>
+/* =====================================================
+   خروجی PDF برای همهٔ بخش‌ها — رندرکنندهٔ عمومی
+   از همان پایپ‌لاین تست‌شدهٔ حضور و غیاب استفاده می‌کند:
+   فونت DF_PDF_FONT، راست‌به‌چپ، اعداد فارسی، شمارهٔ صفحه
+   ===================================================== */
+
+const DF_SEC_W = 1240, DF_SEC_H = 1754, DF_SEC_M = 70;
+
+function dfSecMeasureCtx(){
+    if(!window.__dfSecMeasureCtx){
+        const c = document.createElement("canvas"); c.width = 10; c.height = 10;
+        window.__dfSecMeasureCtx = c.getContext("2d");
+    }
+    const m = window.__dfSecMeasureCtx; m.direction = "rtl"; return m;
+}
+
+function dfSecPill(text){
+    const t = String(text || "");
+    const MAP = {
+        "حاضر":{bg:"#dcfce7",fg:"#15803d"}, "غایب":{bg:"#fee2e2",fg:"#b91c1c"}, "تأخیر":{bg:"#fef3c7",fg:"#b45309"},
+        "انجام شد":{bg:"#dcfce7",fg:"#15803d"}, "انجام نشده":{bg:"#fee2e2",fg:"#b91c1c"}, "ناقص":{bg:"#fef3c7",fg:"#b45309"},
+        "ثبت نشده":{bg:"#e5e7eb",fg:"#475569"},
+        "خیلی خوب":{bg:"#dcfce7",fg:"#15803d"}, "خوب":{bg:"#dbeafe",fg:"#1d4ed8"},
+        "قابل قبول":{bg:"#fef3c7",fg:"#b45309"}, "نیاز به تلاش بیشتر":{bg:"#ffedd5",fg:"#c2410c"},
+        "نیازمند توجه":{bg:"#fee2e2",fg:"#b91c1c"}
+    };
+    return MAP[t] || {bg:"#e5e7eb",fg:"#334155"};
+}
+
+function dfSecMeta(){
+    let teacher = "", school = "";
+    try{
+        const t = getTeacherData();
+        teacher = [t.firstName, t.lastName].filter(Boolean).join(" ").trim();
+        school = String(t.school || "").trim();
+    }catch(e){}
+    const parts = [];
+    if(teacher) parts.push("معلم: " + teacher);
+    if(school) parts.push("مدرسه: " + school);
+    parts.push("کلاس: " + getClassTitleForKey(currentClass));
+    try{ parts.push("تاریخ گزارش: " + toPersianNumber(persianToday())); }catch(e){}
+    return parts.join("  •  ");
+}
+
+function dfSecDate(d){
+    try{ return toPersianNumber(formatPersianDate(normalizePersianDate(d))); }catch(e){ return String(d || "—"); }
+}
+
+/* اندازه‌گیری و کش تصاویر قبل از رندر */
+async function dfSecLoadImages(spec){
+    const srcs = [];
+    (spec.blocks || []).forEach(function(b){
+        if(b.type === "table") (b.rows || []).forEach(function(r){ (r || []).forEach(function(c){ if(c && typeof c === "object" && c.img) srcs.push(c.img); }); });
+        if(b.type === "cards") (b.items || []).forEach(function(it){ (it.photos || []).forEach(function(s){ srcs.push(s); }); });
+        if(b.type === "gallery") (b.images || []).forEach(function(g){ srcs.push(typeof g === "string" ? g : g.src); });
+    });
+    const cache = {};
+    const uniq = Array.from(new Set(srcs)).slice(0, 80);
+    for(let i = 0; i < uniq.length; i++){ cache[uniq[i]] = await dfLoadImage(uniq[i]); }
+    return cache;
+}
+
+async function dfRenderSectionPages(spec){
+    try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+    const W = DF_SEC_W, H = DF_SEC_H, M = DF_SEC_M;
+    const tableW = W - 2 * M;
+    const imgCache = await dfSecLoadImages(spec);
+    const pages = [];
+    let canvas, ctx, y;
+
+    function measure(font, text, maxW, maxLines){
+        const m = dfSecMeasureCtx(); m.font = font;
+        const lines = dfWrapText(m, String(text == null ? "" : text), maxW, maxLines || 99);
+        return Math.max(1, lines.length);
+    }
+
+    function newPage(first){
+        canvas = document.createElement("canvas"); canvas.width = W; canvas.height = H;
+        ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, W, H);
+        ctx.direction = "rtl"; ctx.textBaseline = "middle";
+        pages.push(canvas);
+        if(first){
+            const g = ctx.createLinearGradient(0, 0, W, 0);
+            g.addColorStop(0, "#102a75"); g.addColorStop(.55, "#1746c8"); g.addColorStop(1, "#315fe8");
+            ctx.fillStyle = g; ctx.fillRect(0, 0, W, 240);
+            ctx.fillStyle = "#fff"; ctx.textAlign = "right";
+            ctx.font = "800 52px " + DF_PDF_FONT; ctx.fillText(spec.title, W - M, 84);
+            if(spec.subtitle){ ctx.font = "500 27px " + DF_PDF_FONT; ctx.fillText(spec.subtitle, W - M, 144); }
+            if(spec.meta){ ctx.font = "400 23px " + DF_PDF_FONT; ctx.globalAlpha = .92; ctx.fillText(spec.meta, W - M, 194); ctx.globalAlpha = 1; }
+            y = 274;
+            if(spec.chips && spec.chips.length){
+                let cx = W - M; const cw = Math.min(240, Math.floor((tableW - 18 * (spec.chips.length - 1)) / spec.chips.length));
+                spec.chips.forEach(function(c){
+                    ctx.fillStyle = "#eef3ff"; dfRoundRect(ctx, cx - cw, y, cw, 84, 16); ctx.fill();
+                    ctx.fillStyle = "#1746c8"; ctx.textAlign = "center";
+                    ctx.font = "800 34px " + DF_PDF_FONT; ctx.fillText(toPersianNumber(c[1]), cx - cw / 2, y + 30);
+                    ctx.font = "500 21px " + DF_PDF_FONT; ctx.fillStyle = "#3b5aa0"; ctx.fillText(c[0], cx - cw / 2, y + 62);
+                    cx -= cw + 18;
+                });
+                y += 84 + 30;
+            }
+        }else{
+            y = M;
+            ctx.fillStyle = "#eef3ff"; dfRoundRect(ctx, M, y, tableW, 50, 12); ctx.fill();
+            ctx.fillStyle = "#1746c8"; ctx.font = "700 24px " + DF_PDF_FONT; ctx.textAlign = "right";
+            ctx.fillText(spec.title + " — ادامه", W - M - 18, y + 25);
+            y += 50 + 22;
+        }
+    }
+
+    function need(h){ if(y + h > H - 90) newPage(false); }
+
+    /* ---------- جدول ---------- */
+    function normCols(b){
+        let sum = 0; b.columns.forEach(function(c){ sum += c.w; });
+        if(sum <= 0) return;
+        const k = tableW / sum;
+        b.columns.forEach(function(c){ c.w = c.w * k; });
+    }
+    function rowHeight(b, r){
+        let h = b.minRowH || 74;
+        b.columns.forEach(function(col, ci){
+            const cell = r[ci];
+            if(cell && typeof cell === "object" && cell.img != null){ h = Math.max(h, 92); return; }
+            let text;
+            if(cell && typeof cell === "object") text = (cell.pill != null) ? String(cell.pill) : String(cell.text == null ? "" : cell.text);
+            else text = String(cell == null ? "" : cell);
+            const n = measure("500 23px " + DF_PDF_FONT, text, col.w - 20, Math.min(b.maxLines || 8, 8));
+            h = Math.max(h, n * 29 + 26);
+        });
+        return Math.min(h, 260);
+    }
+    function drawHead(b){
+        const HEAD_H = 58;
+        ctx.fillStyle = "#1746c8"; dfRoundRect(ctx, M, y, tableW, HEAD_H, 12); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.font = "700 24px " + DF_PDF_FONT; ctx.textAlign = "center"; ctx.direction = "rtl";
+        let x = W - M;
+        b.columns.forEach(function(col){
+            ctx.fillText(col.label, x - col.w / 2, y + HEAD_H / 2);
+            x -= col.w;
+        });
+        y += HEAD_H + 6;
+    }
+    function drawCellImg(src, cx, cy){
+        const img = imgCache[src];
+        const pr = 30, pcx = cx;
+        ctx.save();
+        ctx.beginPath(); ctx.arc(pcx, cy, pr, 0, Math.PI * 2); ctx.closePath(); ctx.clip();
+        if(img){
+            const side = Math.min(img.naturalWidth, img.naturalHeight);
+            const sx = (img.naturalWidth - side) / 2, sy = (img.naturalHeight - side) / 2;
+            ctx.drawImage(img, sx, sy, side, side, pcx - pr, cy - pr, pr * 2, pr * 2);
+        }else{
+            ctx.fillStyle = "#e5ebfa"; ctx.fillRect(pcx - pr, cy - pr, pr * 2, pr * 2);
+            ctx.fillStyle = "#8fa3c8";
+            ctx.beginPath(); ctx.arc(pcx, cy - 9, 10, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(pcx, cy + 21, 18, 14, 0, Math.PI, 0); ctx.fill();
+        }
+        ctx.restore();
+        ctx.strokeStyle = "#c3d2ef"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(pcx, cy, pr, 0, Math.PI * 2); ctx.stroke();
+    }
+    function drawTable(b){
+        if(!b.rows || !b.rows.length) return;
+        normCols(b);
+        need(58 + 10 + rowHeight(b, b.rows[0]));
+        drawHead(b);
+        b.rows.forEach(function(r, i){
+            const rh = rowHeight(b, r);
+            if(y + rh > H - 90){ newPage(false); drawHead(b); }
+            ctx.fillStyle = (i % 2 === 0) ? "#f6f9ff" : "#ffffff";
+            ctx.fillRect(M, y, tableW, rh);
+            ctx.strokeStyle = "#e3eaf8"; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(M, y + rh); ctx.lineTo(M + tableW, y + rh); ctx.stroke();
+            const cy = y + rh / 2;
+            let x = W - M;
+            b.columns.forEach(function(col, ci){
+                const cell = r[ci];
+                if(cell && typeof cell === "object" && cell.img != null){
+                    drawCellImg(cell.img, x - col.w / 2, cy);
+                }else if(cell && typeof cell === "object" && cell.pill != null){
+                    const st = dfSecPill(cell.pill);
+                    const bw = Math.max(60, col.w - 36), bh = Math.min(46, rh - 14);
+                    ctx.fillStyle = st.bg; dfRoundRect(ctx, x - col.w / 2 - bw / 2, cy - bh / 2, bw, bh, bh / 2); ctx.fill();
+                    ctx.fillStyle = st.fg; ctx.font = "700 23px " + DF_PDF_FONT; ctx.textAlign = "center"; ctx.direction = "rtl";
+                    ctx.fillText(String(cell.pill), x - col.w / 2, cy);
+                }else{
+                    const isObj = cell && typeof cell === "object";
+                    const text = isObj ? String(cell.text == null ? "" : cell.text) : String(cell == null ? "" : cell);
+                    const align = (isObj && cell.align) ? cell.align : "center";
+                    ctx.font = ((isObj && cell.bold) ? "700 24px " : "500 23px ") + DF_PDF_FONT;
+                    ctx.fillStyle = (isObj && cell.color) || "#263238";
+                    ctx.textAlign = align; ctx.direction = "rtl";
+                    const lines = dfWrapText(ctx, text, col.w - 20, Math.min(b.maxLines || 8, 8));
+                    lines.forEach(function(t, k){
+                        ctx.fillText(t, align === "right" ? x - 12 : x - col.w / 2, cy + (k - (lines.length - 1) / 2) * 29);
+                    });
+                    if(!lines.length) ctx.fillText("—", x - col.w / 2, cy);
+                }
+                x -= col.w;
+            });
+            y += rh;
+        });
+        y += 18;
+    }
+
+    /* ---------- کارت ---------- */
+    function cardHeight(b, it){
+        const pad = 16, inner = tableW - 2 * pad;
+        let h = pad;
+        h += measure("700 26px " + DF_PDF_FONT, it.head || "", inner - 10, 2) * 34 + 8;
+        if(it.meta) h += 28;
+        (it.fields || []).forEach(function(f){
+            if(f[1] == null || f[1] === "") return;
+            const txt = String(f[0]) + ": " + String(f[1]);
+            h += measure("400 23px " + DF_PDF_FONT, txt, inner - 10, 5) * 29 + 6;
+        });
+        const photos = (it.photos || []).filter(function(s){ return imgCache[s]; });
+        if(photos.length){
+            const size = 170, per = Math.max(1, Math.floor((inner - 10) / (size + 12)));
+            h += Math.ceil(photos.length / per) * (size + 12) + 8;
+        }
+        return Math.min(h + pad, 940);
+    }
+    function drawCard(b, it, ch){
+        const pad = 16, inner = tableW - 2 * pad;
+        ctx.fillStyle = "#fbfcff"; dfRoundRect(ctx, M, y, tableW, ch, 14); ctx.fill();
+        ctx.strokeStyle = "#dbe4f6"; ctx.lineWidth = 1.5;
+        dfRoundRect(ctx, M, y, tableW, ch, 14); ctx.stroke();
+        let cy = y + pad;
+        ctx.fillStyle = "#1746c8"; ctx.font = "700 26px " + DF_PDF_FONT; ctx.textAlign = "right"; ctx.direction = "rtl";
+        dfWrapText(ctx, it.head || "", inner - 10, 2).forEach(function(t, k){ ctx.fillText(t, W - M - pad, cy + 17 + k * 34); });
+        cy += measure("700 26px " + DF_PDF_FONT, it.head || "", inner - 10, 2) * 34 + 8;
+        if(it.meta){
+            ctx.fillStyle = "#5b6b8c"; ctx.font = "400 22px " + DF_PDF_FONT; ctx.textAlign = "right";
+            ctx.fillText(it.meta, W - M - pad, cy + 14); cy += 28;
+        }
+        (it.fields || []).forEach(function(f){
+            if(f[1] == null || f[1] === "") return;
+            const txt = String(f[0]) + ": " + String(f[1]);
+            ctx.fillStyle = "#33475f"; ctx.font = "400 23px " + DF_PDF_FONT; ctx.textAlign = "right";
+            const lines = dfWrapText(ctx, txt, inner - 10, 5);
+            lines.forEach(function(t, k){ ctx.fillText(t, W - M - pad, cy + 15 + k * 29); });
+            cy += lines.length * 29 + 6;
+        });
+        const photos = (it.photos || []).filter(function(s){ return imgCache[s]; });
+        if(photos.length){
+            const size = 170, per = Math.max(1, Math.floor((inner - 10) / (size + 12)));
+            let px = W - M - pad;
+            photos.forEach(function(s, idx){
+                const img = imgCache[s];
+                const gx = px - size, gy = cy + 4;
+                ctx.save(); dfRoundRect(ctx, gx, gy, size, size, 12); ctx.clip();
+                const iw = img.naturalWidth, ih = img.naturalHeight;
+                const side = Math.min(iw, ih);
+                ctx.drawImage(img, (iw - side) / 2, (ih - side) / 2, side, side, gx, gy, size, size);
+                ctx.restore();
+                ctx.strokeStyle = "#c3d2ef"; ctx.lineWidth = 2; dfRoundRect(ctx, gx, gy, size, size, 12); ctx.stroke();
+                if((idx + 1) % per === 0){ px = W - M - pad; cy += size + 12; }
+                else px -= size + 12;
+            });
+            const rows = Math.ceil(photos.length / per);
+            if(photos.length % per !== 0) cy += size + 12;
+            cy += rows * 0;
+        }
+        y += ch + 14;
+    }
+
+    /* ---------- کلید/مقدار ---------- */
+    function drawKv(b){
+        const items = (b.items || []).filter(function(f){ return f[1] != null && f[1] !== ""; });
+        if(!items.length) return;
+        const bw = (tableW - 16) / 2;
+        for(let i = 0; i < items.length; i += 2){
+            const pair = items.slice(i, i + 2);
+            let bh = 74;
+            pair.forEach(function(f){
+                const n = measure("500 23px " + DF_PDF_FONT, String(f[1]), bw - 30, 3);
+                bh = Math.max(bh, n * 26 + 48);
+            });
+            need(bh + 10);
+            if(pair.length === 2 && y + bh + 10 > H - 90){ newPage(false); }
+            pair.forEach(function(f, j){
+                const bx = W - M - bw - j * (bw + 16);
+                ctx.fillStyle = "#f3f6ff"; dfRoundRect(ctx, bx, y, bw, bh, 12); ctx.fill();
+                ctx.fillStyle = "#5b6b8c"; ctx.font = "400 20px " + DF_PDF_FONT; ctx.textAlign = "right"; ctx.direction = "rtl";
+                ctx.fillText(String(f[0]), bx + bw - 16, y + 20);
+                ctx.fillStyle = "#1c2b4a"; ctx.font = "500 23px " + DF_PDF_FONT; ctx.textAlign = "right";
+                dfWrapText(ctx, String(f[1]), bw - 30, 3).forEach(function(t, k){ ctx.fillText(t, bx + bw - 16, y + 46 + k * 26); });
+            });
+            y += bh + 10;
+        }
+        y += 8;
+    }
+
+    /* ---------- گالری ---------- */
+    function drawGallery(b){
+        const imgs = (b.images || []).map(function(g){ return typeof g === "string" ? {src:g} : g; }).filter(function(g){ return imgCache[g.src]; });
+        if(!imgs.length) return;
+        const size = b.size || 280, gap = 14;
+        const per = Math.max(1, Math.floor((tableW - gap * 3) / (size + gap)));
+        for(let i = 0; i < imgs.length; i += per){
+            const rh = size + (b.captions === false ? 8 : 34) + 10;
+            need(rh);
+            const rowItems = imgs.slice(i, i + per);
+            rowItems.forEach(function(g, j){
+                const gx = W - M - size - j * (size + gap);
+                const img = imgCache[g.src];
+                ctx.save(); dfRoundRect(ctx, gx, y, size, size, 12); ctx.clip();
+                const iw = img.naturalWidth, ih = img.naturalHeight;
+                const side = Math.min(iw, ih);
+                ctx.drawImage(img, (iw - side) / 2, (ih - side) / 2, side, side, gx, y, size, size);
+                ctx.restore();
+                ctx.strokeStyle = "#c3d2ef"; ctx.lineWidth = 2; dfRoundRect(ctx, gx, y, size, size, 12); ctx.stroke();
+                if(b.captions !== false && g.caption){
+                    ctx.fillStyle = "#5b6b8c"; ctx.font = "400 21px " + DF_PDF_FONT; ctx.textAlign = "center"; ctx.direction = "rtl";
+                    dfWrapText(ctx, g.caption, size, 1).forEach(function(t){ ctx.fillText(t, gx + size / 2, y + size + 18); });
+                }
+            });
+            y += rh;
+        }
+        y += 8;
+    }
+
+    function drawHeading(b){
+        need(56 + 12);
+        ctx.fillStyle = "#eef3ff"; dfRoundRect(ctx, M, y, tableW, 56, 12); ctx.fill();
+        ctx.fillStyle = "#1746c8"; ctx.font = "700 25px " + DF_PDF_FONT; ctx.textAlign = "right"; ctx.direction = "rtl";
+        ctx.fillText(b.text, W - M - 18, y + 28);
+        y += 56 + 12;
+    }
+    function drawNote(b){
+        need(80);
+        ctx.fillStyle = "#f3f6ff"; dfRoundRect(ctx, M, y, tableW, 64, 12); ctx.fill();
+        ctx.fillStyle = "#45536e"; ctx.font = "400 21px " + DF_PDF_FONT; ctx.textAlign = "right"; ctx.direction = "rtl";
+        dfWrapText(ctx, b.text, tableW - 40, 2).forEach(function(t, k){ ctx.fillText(t, W - M - 20, y + 20 + k * 28); });
+        y += 64 + 10;
+    }
+
+    newPage(true);
+    (spec.blocks || []).forEach(function(b){
+        if(!b) return;
+        if(b.type === "heading") drawHeading(b);
+        else if(b.type === "table") drawTable(b);
+        else if(b.type === "kv") drawKv(b);
+        else if(b.type === "gallery") drawGallery(b);
+        else if(b.type === "note") drawNote(b);
+        else if(b.type === "cards") (b.items || []).forEach(function(it){
+            const ch = cardHeight(b, it);
+            need(ch);
+            drawCard(b, it, ch);
+        });
+    });
+
+    const total = pages.length;
+    pages.forEach(function(c, i){
+        ctx = c.getContext("2d"); ctx.direction = "rtl"; ctx.textBaseline = "middle";
+        ctx.fillStyle = "#94a3b8"; ctx.font = "400 21px " + DF_PDF_FONT; ctx.textAlign = "center";
+        ctx.fillText("دفتر کلاسی من  •  صفحهٔ " + toPersianNumber(i + 1) + " از " + toPersianNumber(total), W / 2, H - 38);
+    });
+    return pages;
+}
+
+/* =====================================================
+   سازندهٔ گزارش هر بخش (spec) — بدون داده پیام می‌دهد و null برمی‌گرداند
+   ===================================================== */
+
+const DF_SECTION_SPECS = {
+
+students: function(){
+    const d = getClassData();
+    const list = (d.students || []).slice();
+    if(!list.length){ alert("ابتدا دانش‌آموزان را ثبت کنید."); return null; }
+    const rows = list.map(function(s, i){
+        return [
+            toPersianNumber(i + 1),
+            {img: s.photo},
+            {text: ((s.firstName || "") + " " + (s.lastName || "")).trim(), align: "right", bold: true},
+            s.studentCode ? toPersianNumber(s.studentCode) : "—",
+            s.birthDate ? toPersianNumber(s.birthDate) : "—",
+            s.fatherName || "—",
+            {text: s.notes || "—", align: "right"}
+        ];
+    });
+    const crows = list.map(function(s, i){
+        return [
+            toPersianNumber(i + 1),
+            {text: ((s.firstName || "") + " " + (s.lastName || "")).trim(), align: "right", bold: true},
+            s.fatherPhone ? toPersianNumber(s.fatherPhone) : "—",
+            s.motherPhone ? toPersianNumber(s.motherPhone) : "—"
+        ];
+    });
+    return {
+        title: "گزارش فهرست دانش‌آموزان",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(list.length) + " دانش‌آموز",
+        meta: dfSecMeta(),
+        chips: [["تعداد دانش‌آموزان", list.length]],
+        blocks: [
+            {type:"table", columns:[{label:"ردیف",w:60},{label:"عکس",w:90},{label:"نام و نام خانوادگی",w:240},{label:"کد دانش‌آموزی",w:130},{label:"تاریخ تولد",w:150},{label:"نام پدر",w:120},{label:"توضیحات",w:310}], rows: rows},
+            {type:"heading", text:"شماره‌های تماس والدین"},
+            {type:"table", columns:[{label:"ردیف",w:60},{label:"دانش‌آموز",w:260},{label:"تلفن پدر",w:390},{label:"تلفن مادر",w:390}], rows: crows}
+        ]
+    };
+},
+
+homework: function(){
+    const d = getClassData();
+    const recs = (d.homework || []).filter(function(r){ return r && (r.status || r.feedback); });
+    if(!recs.length){ alert("هنوز تکلیفی ثبت نشده است."); return null; }
+    const nameOf = function(r){ return getStudentName(r.studentId); };
+    recs.sort(function(a, b){ return String(a.date).localeCompare(String(b.date)) || nameOf(a).localeCompare(nameOf(b)); });
+    const cnt = {"انجام شد":0, "انجام نشده":0, "ناقص":0};
+    recs.forEach(function(r){ if(cnt[r.status] != null) cnt[r.status]++; });
+    const rows = recs.map(function(r){
+        return [
+            dfSecDate(r.date),
+            {text: nameOf(r), align: "right", bold: true},
+            {pill: r.status || "ثبت نشده"},
+            {text: r.feedback || "—", align: "right"}
+        ];
+    });
+    return {
+        title: "گزارش وضعیت تکالیف",
+        subtitle: getClassTitleForKey(currentClass),
+        meta: dfSecMeta(),
+        chips: [["کل رکوردها", recs.length], ["انجام شد", cnt["انجام شد"]], ["انجام نشده", cnt["انجام نشده"]], ["ناقص", cnt["ناقص"]]],
+        blocks: [
+            {type:"table", columns:[{label:"تاریخ",w:150},{label:"دانش‌آموز",w:240},{label:"وضعیت",w:180},{label:"بازخورد معلم",w:530}], rows: rows}
+        ]
+    };
+},
+
+evaluation: function(){
+    const d = getClassData();
+    const recs = (d.evaluations || []).slice();
+    if(!recs.length){ alert("هنوز ارزشیابی‌ای ثبت نشده است."); return null; }
+    const nameOf = function(r){ return getStudentName(r.studentId); };
+    recs.sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); });
+    const rows = recs.map(function(r){
+        const notes = (r.notes || "") + (r.voiceId ? "  (دارای فایل صوتی)" : "");
+        return [
+            dfSecDate(r.date),
+            {text: nameOf(r), align: "right", bold: true},
+            r.subject || "—",
+            r.level ? {pill: r.level} : "—",
+            {text: notes || "—", align: "right"}
+        ];
+    });
+    return {
+        title: "گزارش ارزشیابی‌ها",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(recs.length) + " رکورد",
+        meta: dfSecMeta(),
+        chips: [["تعداد ارزشیابی", recs.length]],
+        blocks: [
+            {type:"table", columns:[{label:"تاریخ",w:140},{label:"دانش‌آموز",w:210},{label:"درس",w:150},{label:"سطح",w:180},{label:"توضیحات",w:420}], rows: rows}
+        ]
+    };
+},
+
+grades: function(){
+    const d = getClassData();
+    const recs = (d.grades || []).slice();
+    if(!recs.length){ alert("هنوز ارزشیابی کیفی‌ای ثبت نشده است."); return null; }
+    recs.sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); });
+    const rows = recs.map(function(r){
+        const notes = (r.notes || "") + (r.voiceId ? "  (دارای فایل صوتی)" : "");
+        return [
+            dfSecDate(r.date),
+            {text: getStudentName(r.studentId), align: "right", bold: true},
+            r.subject || "—",
+            r.level ? {pill: r.level} : "—",
+            {text: notes || "—", align: "right"}
+        ];
+    });
+    return {
+        title: "گزارش ارزشیابی کیفی",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(recs.length) + " رکورد",
+        meta: dfSecMeta(),
+        chips: [["تعداد رکورد", recs.length]],
+        blocks: [
+            {type:"table", columns:[{label:"تاریخ",w:140},{label:"دانش‌آموز",w:210},{label:"درس",w:150},{label:"سطح",w:180},{label:"توضیحات",w:420}], rows: rows}
+        ]
+    };
+},
+
+feedback: function(){
+    const d = getClassData();
+    const recs = (d.feedback || []).slice();
+    if(!recs.length){ alert("هنوز بازخوردی ثبت نشده است."); return null; }
+    recs.sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); });
+    const rows = recs.map(function(r){
+        const notes = (r.notes || "") + (r.voiceId ? "  (دارای فایل صوتی)" : "");
+        return [
+            dfSecDate(r.date),
+            {text: getStudentName(r.studentId), align: "right", bold: true},
+            r.subject || "—",
+            {text: notes || "—", align: "right"}
+        ];
+    });
+    return {
+        title: "گزارش بازخوردهای آموزشی",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(recs.length) + " بازخورد",
+        meta: dfSecMeta(),
+        chips: [["تعداد بازخورد", recs.length]],
+        blocks: [
+            {type:"table", columns:[{label:"تاریخ",w:140},{label:"دانش‌آموز",w:210},{label:"موضوع",w:180},{label:"بازخورد",w:570}], rows: rows}
+        ]
+    };
+},
+
+monthly: function(){
+    const d = getClassData();
+    const recs = (d.monthlyPerformance || []).slice();
+    if(!recs.length){ alert("هنوز عملکرد ماهانه‌ای ثبت نشده است."); return null; }
+    const items = recs.map(function(r){
+        return {
+            head: getStudentName(r.studentId) + "  —  ماه " + (r.month || "—"),
+            fields: [
+                ["عملکرد تحصیلی", r.academic], ["فعالیت کلاسی", r.classActivity],
+                ["انجام تکلیف", r.homework], ["مشارکت", r.participation],
+                ["نقاط قوت", r.strengths], ["نقاط ضعف", r.weaknesses],
+                ["یادداشت", (r.notes || "") + (r.voiceId ? "  (دارای فایل صوتی)" : "")]
+            ]
+        };
+    });
+    return {
+        title: "گزارش عملکرد ماهانه دانش‌آموزان",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(recs.length) + " رکورد",
+        meta: dfSecMeta(),
+        chips: [["تعداد رکورد", recs.length]],
+        blocks: [{type:"cards", items: items}]
+    };
+},
+
+attention: function(){
+    const d = getClassData();
+    const recs = (d.attention || []).slice();
+    if(!recs.length){ alert("هنوز موردی در بخش نیازمند توجه ثبت نشده است."); return null; }
+    const rows = recs.map(function(r){
+        return [
+            {text: getStudentName(r.studentId), align: "right", bold: true},
+            {text: r.reason || "—", align: "right"},
+            {text: r.notes || "—", align: "right"}
+        ];
+    });
+    return {
+        title: "گزارش دانش‌آموزان نیازمند توجه",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(recs.length) + " مورد",
+        meta: dfSecMeta(),
+        chips: [["تعداد موارد", recs.length]],
+        blocks: [
+            {type:"table", columns:[{label:"دانش‌آموز",w:260},{label:"دلیل",w:320},{label:"یادداشت",w:520}], rows: rows},
+            {type:"note", text:"این گزارش حساس است و فقط برای خودتان و مدیر مدرسه قابل استفاده است."}
+        ]
+    };
+},
+
+parents: function(){
+    const d = getClassData();
+    const students = (d.students || []);
+    const pRecs = (d.parents || []).slice();
+    const phoneRows = students.map(function(s, i){
+        return [
+            toPersianNumber(i + 1),
+            {text: ((s.firstName || "") + " " + (s.lastName || "")).trim(), align: "right", bold: true},
+            s.fatherName || "—",
+            s.fatherPhone ? toPersianNumber(s.fatherPhone) : "—",
+            s.motherPhone ? toPersianNumber(s.motherPhone) : "—"
+        ];
+    });
+    const guardianRows = pRecs.map(function(p, i){
+        return [
+            toPersianNumber(i + 1),
+            {text: getStudentName(p.studentId), align: "right", bold: true},
+            p.name || "—",
+            p.relation || "—",
+            p.phone ? toPersianNumber(p.phone) : "—"
+        ];
+    });
+    if(!phoneRows.length && !guardianRows.length){ alert("ابتدا دانش‌آموز یا ولی را ثبت کنید."); return null; }
+    const blocks = [];
+    if(phoneRows.length){
+        blocks.push({type:"heading", text:"اطلاعات والدین از ثبت‌نام"});
+        blocks.push({type:"table", columns:[{label:"ردیف",w:60},{label:"دانش‌آموز",w:230},{label:"نام پدر",w:140},{label:"تلفن پدر",w:330},{label:"تلفن مادر",w:340}], rows: phoneRows});
+    }
+    if(guardianRows.length){
+        blocks.push({type:"heading", text:"ولی‌های ثبت‌شده در بخش اطلاعات والدین"});
+        blocks.push({type:"table", columns:[{label:"ردیف",w:60},{label:"دانش‌آموز",w:230},{label:"نام ولی",w:220},{label:"نسبت",w:130},{label:"شماره تماس",w:460}], rows: guardianRows});
+    }
+    return {
+        title: "گزارش اطلاعات والدین",
+        subtitle: getClassTitleForKey(currentClass),
+        meta: dfSecMeta(),
+        chips: [["دانش‌آموز", students.length], ["ولی ثبت‌شده", pRecs.length]],
+        blocks: blocks,
+        sensitive: true
+    };
+},
+
+interests: function(){
+    const d = getClassData();
+    const recs = (d.interests || []).filter(function(r){ return r && (r.text || r.interest); });
+    if(!recs.length){ alert("هنوز علاقه‌مندی‌ای ثبت نشده است."); return null; }
+    const rows = recs.map(function(r, i){
+        return [
+            toPersianNumber(i + 1),
+            {text: getStudentName(r.studentId), align: "right", bold: true},
+            {text: r.text || r.interest || "—", align: "right"}
+        ];
+    });
+    return {
+        title: "گزارش علاقه‌مندی دانش‌آموزان",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(recs.length) + " رکورد",
+        meta: dfSecMeta(),
+        chips: [["تعداد رکورد", recs.length]],
+        blocks: [
+            {type:"table", columns:[{label:"ردیف",w:70},{label:"دانش‌آموز",w:260},{label:"علاقه‌مندی",w:770}], rows: rows}
+        ]
+    };
+},
+
+groups: function(){
+    const d = getClassData();
+    if(!Array.isArray(d.groups) || !d.groups.length){ alert("هنوز گروهی ساخته نشده است."); return null; }
+    const rows = d.groups.map(function(g, i){
+        const names = (g || []).map(function(id){ return getStudentName(id); }).join("، ");
+        return [
+            {text: (typeof groupTitle === "function" ? groupTitle(d, i) : ("گروه " + toPersianNumber(i + 1))), align: "right", bold: true},
+            toPersianNumber((g || []).length),
+            {text: names || "—", align: "right"}
+        ];
+    });
+    return {
+        title: "گزارش گروه‌بندی کلاس",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(d.groups.length) + " گروه",
+        meta: dfSecMeta(),
+        chips: [["تعداد گروه", d.groups.length]],
+        blocks: [
+            {type:"table", columns:[{label:"گروه",w:200},{label:"تعداد اعضا",w:140},{label:"اعضا",w:760}], rows: rows}
+        ]
+    };
+},
+
+daily: function(){
+    const d = getClassData();
+    const recs = (d.daily || []).slice();
+    if(!recs.length){ alert("هنوز موردی در دفتر روزانه ثبت نشده است."); return null; }
+    recs.sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); });
+    const days = {};
+    recs.forEach(function(r){ days[r.date] = 1; });
+    const items = recs.map(function(r){
+        return {
+            head: dfSecDate(r.date) + "  —  " + (r.subject || "بدون درس"),
+            fields: [
+                ["موضوع درس", r.topic],
+                ["فعالیت انجام‌شده", r.activity],
+                ["یادداشت", (r.notes || "") + (r.voiceId ? "  (دارای فایل صوتی)" : "")]
+            ],
+            photos: [].concat(r.images || [], r.image ? [r.image] : []).slice(0, 6)
+        };
+    });
+    return {
+        title: "گزارش دفتر روزانه",
+        subtitle: getClassTitleForKey(currentClass),
+        meta: dfSecMeta(),
+        chips: [["کل ثبت‌ها", recs.length], ["روزهای متمایز", Object.keys(days).length]],
+        blocks: [{type:"cards", items: items}]
+    };
+},
+
+experiments: function(){
+    const d = getClassData();
+    const recs = (d.experiments || []).slice();
+    if(!recs.length){ alert("هنوز آزمایشی ثبت نشده است."); return null; }
+    const items = recs.map(function(r){
+        const fields = [
+            ["هدف آزمایش", r.goal],
+            ["وسایل مورد نیاز", r.materials],
+            ["روش اجرا", r.method],
+            ["نتیجه", r.result],
+            ["یادداشت", r.notes]
+        ];
+        if(r.page) fields.unshift(["صفحهٔ کتاب", r.page]);
+        return {
+            head: r.title || "آزمایش",
+            meta: r.date ? ("تاریخ: " + dfSecDate(r.date)) : "",
+            fields: fields,
+            photos: (r.images || []).slice(0, 6)
+        };
+    });
+    return {
+        title: "گزارش آزمایش‌های علوم",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(recs.length) + " آزمایش",
+        meta: dfSecMeta(),
+        chips: [["تعداد آزمایش", recs.length]],
+        blocks: [{type:"cards", items: items}]
+    };
+},
+
+goals: function(){
+    const d = getClassData();
+    const recs = (d.goals || []).slice();
+    if(!recs.length){ alert("هنوز هدفی ثبت نشده است."); return null; }
+    const items = recs.map(function(r){
+        return {
+            head: r.title || "هدف",
+            meta: r.subject ? ("درس: " + r.subject) : "",
+            fields: [["توضیحات", r.notes]],
+            photos: [].concat(r.images || [], r.image ? [r.image] : []).slice(0, 6)
+        };
+    });
+    return {
+        title: "گزارش اهداف آموزشی",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(recs.length) + " هدف",
+        meta: dfSecMeta(),
+        chips: [["تعداد اهداف", recs.length]],
+        blocks: [{type:"cards", items: items}]
+    };
+},
+
+portfolio: function(){
+    const d = getClassData();
+    const sel = document.getElementById("portfolioStudent");
+    let ids;
+    if(sel && sel.value) ids = [sel.value];
+    else ids = (d.students || []).map(function(s){ return s.id; });
+    const blocks = [];
+    let total = 0;
+    ids.forEach(function(id){
+        const recs = (d.portfolio || []).filter(function(p){ return String(p.studentId) === String(id); });
+        if(!recs.length) return;
+        total += recs.length;
+        blocks.push({type:"heading", text:"📁 پوشهٔ " + getStudentName(id)});
+        const bySub = {};
+        recs.forEach(function(p){ const k = p.subject || "سایر"; (bySub[k] = bySub[k] || []).push(p); });
+        Object.keys(bySub).sort().forEach(function(sub){
+            blocks.push({type:"cards", title: sub, items: bySub[sub].slice().reverse().map(function(p){
+                return {
+                    head: p.title || "نمونه‌کار",
+                    meta: "درس: " + (p.subject || sub) + "  •  تاریخ: " + dfSecDate(p.date) + (p.sourceType === "evaluation" ? "  •  ثبت‌شده از ارزشیابی" : "  •  ثبت دستی"),
+                    fields: p.notes ? [["توضیحات", p.notes]] : [],
+                    photos: dfImages(p, "photos", "photo").slice(0, 8)
+                };
+            })});
+        });
+    });
+    if(!total){ alert("هنوز نمونه‌کاری در پوشه‌کار ثبت نشده است."); return null; }
+    return {
+        title: "گزارش پوشه‌کار دانش‌آموزان",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(total) + " نمونه‌کار",
+        meta: dfSecMeta(),
+        chips: [["تعداد نمونه‌کار", total]],
+        blocks: blocks
+    };
+},
+
+weekly: function(){
+    const d = getClassData();
+    const imgs = [].concat(d.weeklyImages || [], d.weeklyImage ? [d.weeklyImage] : []);
+    if(!imgs.length){ alert("هنوز تصویری برای برنامهٔ هفتگی بارگذاری نشده است."); return null; }
+    return {
+        title: "گزارش برنامهٔ هفتگی کلاس",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(imgs.length) + " تصویر",
+        meta: dfSecMeta(),
+        chips: [["تعداد تصویر", imgs.length]],
+        blocks: [
+            {type:"gallery", images: imgs.map(function(s, i){ return {src:s, caption:"برنامهٔ هفتگی " + toPersianNumber(i + 1)}; }), size: 300}
+        ]
+    };
+},
+
+budget: function(){
+    const d = getClassData();
+    const hours = d.budgetHours || {};
+    const subjects = Object.keys(hours).filter(function(k){ return (hours[k] || []).some(function(v){ return Number(v) > 0; }); });
+    if(!subjects.length){ alert("هنوز بودجه‌بندی ساعاتی ثبت نشده است."); return null; }
+    const cols = [{label:"درس",w:200}];
+    for(let g = 1; g <= 6; g++) cols.push({label:"کلاس " + toPersianNumber(g), w:150});
+    const rows = subjects.map(function(sub){
+        const row = [{text: sub, align: "right", bold: true}];
+        for(let g = 0; g < 6; g++){
+            const v = Number((hours[sub] || [])[g] || 0);
+            row.push(v > 0 ? toPersianNumber(v) : "—");
+        }
+        return row;
+    });
+    return {
+        title: "گزارش بودجه‌بندی ساعات تدریس",
+        subtitle: getClassTitleForKey(currentClass) + "  —  " + toPersianNumber(subjects.length) + " درس",
+        meta: dfSecMeta(),
+        chips: [["تعداد دروس", subjects.length]],
+        blocks: [{type:"table", columns: cols, rows: rows}]
+    };
+},
+
+bookBudget: function(){
+    const d = getClassData();
+    const books = d.bookBudgets || {};
+    const months = (typeof BOOK_BUDGET_MONTHS !== "undefined" && BOOK_BUDGET_MONTHS) ? BOOK_BUDGET_MONTHS : ["مهر","آبان","آذر","دی","بهمن","اسفند","فروردین","اردیبهشت"];
+    const subjects = (typeof BOOK_BUDGET_SUBJECTS !== "undefined" && BOOK_BUDGET_SUBJECTS) ? BOOK_BUDGET_SUBJECTS : ["قرآن","هدیه‌های آسمان","فارسی","علوم تجربی","ریاضی","مطالعات اجتماعی"];
+    const blocks = [];
+    let any = false;
+    for(let g = 1; g <= 6; g++){
+        const key = String(g);
+        const book = books[key];
+        if(!book) continue;
+        let has = false;
+        months.forEach(function(mn){
+            const mrow = book[mn] || {};
+            subjects.forEach(function(sj){ if(String(mrow[sj] || "").trim()) has = true; });
+        });
+        if(book.notes && String(book.notes).trim()) has = true;
+        if(!has) continue;
+        any = true;
+        blocks.push({type:"heading", text:"کلاس " + toPersianNumber(g)});
+        const cols = [{label:"ماه",w:140}];
+        subjects.forEach(function(sj){ cols.push({label:sj, w:160}); });
+        const rows = months.map(function(mn){
+            const mrow = book[mn] || {};
+            const row = [{text: mn, align: "right", bold: true}];
+            subjects.forEach(function(sj){
+                const v = String(mrow[sj] || "").trim();
+                row.push({text: v || "—", align: "center"});
+            });
+            return row;
+        });
+        blocks.push({type:"table", columns: cols, rows: rows, maxLines: 4});
+        if(book.notes && String(book.notes).trim()) blocks.push({type:"note", text:"یادداشت کلاس " + toPersianNumber(g) + ": " + String(book.notes).trim()});
+        const imgs = (d.bookBudgetImages && d.bookBudgetImages[key]) || [];
+        if(imgs.length) blocks.push({type:"gallery", images: imgs, size: 260, captions: false});
+    }
+    if(!any){ alert("هنوز بودجه‌بندی کتابی ثبت نشده است."); return null; }
+    return {
+        title: "گزارش بودجه‌بندی تدریس کتاب",
+        subtitle: getClassTitleForKey(currentClass),
+        meta: dfSecMeta(),
+        blocks: blocks
+    };
+},
+
+studentFile: function(){
+    const d = getClassData();
+    const sel = document.getElementById("studentFileSelect");
+    if(!sel || !sel.value){ alert("ابتدا یک دانش‌آموز را انتخاب کنید."); return null; }
+    const id = sel.value;
+    const s = getStudent(id);
+    if(!s){ alert("دانش‌آموز یافت نشد."); return null; }
+    const mine = function(arr){ return (arr || []).filter(function(x){ return String(x.studentId) === String(id); }); };
+    const name = ((s.firstName || "") + " " + (s.lastName || "")).trim();
+    const blocks = [];
+    blocks.push({type:"kv", items: [
+        ["نام و نام خانوادگی", name],
+        ["کد دانش‌آموزی", s.studentCode ? toPersianNumber(s.studentCode) : ""],
+        ["تاریخ تولد", s.birthDate ? toPersianNumber(s.birthDate) : ""],
+        ["نام پدر", s.fatherName || ""],
+        ["تلفن پدر", s.fatherPhone ? toPersianNumber(s.fatherPhone) : ""],
+        ["تلفن مادر", s.motherPhone ? toPersianNumber(s.motherPhone) : ""],
+        ["یادداشت ثبت‌نام", s.notes || ""]
+    ]});
+    const att = mine(d.attendance);
+    const cnt = {"حاضر":0, "غایب":0, "تأخیر":0};
+    att.forEach(function(r){ if(cnt[r.status] != null) cnt[r.status]++; });
+    blocks.push({type:"heading", text:"خلاصهٔ حضور و غیاب"});
+    blocks.push({type:"table", columns:[{label:"تاریخ",w:170},{label:"وضعیت",w:170},{label:"دلیل",w:760}], rows:
+        att.slice().sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); }).slice(0, 20).map(function(r){
+            return [dfSecDate(r.date), {pill: r.status || "ثبت نشده"}, {text: r.reason || "—", align: "right"}];
+        })
+    });
+    const evs = mine(d.evaluations);
+    if(evs.length){
+        blocks.push({type:"heading", text:"ارزشیابی‌ها (۲۰ مورد آخر)"});
+        blocks.push({type:"table", columns:[{label:"تاریخ",w:150},{label:"درس",w:170},{label:"سطح",w:180},{label:"توضیحات",w:600}], rows:
+            evs.slice().sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); }).slice(0, 20).map(function(r){
+                return [dfSecDate(r.date), r.subject || "—", r.level ? {pill: r.level} : "—", {text: r.notes || "—", align: "right"}];
+            })
+        });
+    }
+    const hw = mine(d.homework).filter(function(r){ return r.status || r.feedback; });
+    if(hw.length){
+        blocks.push({type:"heading", text:"وضعیت تکالیف (۲۰ مورد آخر)"});
+        blocks.push({type:"table", columns:[{label:"تاریخ",w:170},{label:"وضعیت",w:180},{label:"بازخورد",w:750}], rows:
+            hw.slice().sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); }).slice(0, 20).map(function(r){
+                return [dfSecDate(r.date), {pill: r.status || "ثبت نشده"}, {text: r.feedback || "—", align: "right"}];
+            })
+        });
+    }
+    const fbs = mine(d.feedback);
+    if(fbs.length){
+        blocks.push({type:"heading", text:"بازخوردها (۲۰ مورد آخر)"});
+        blocks.push({type:"table", columns:[{label:"تاریخ",w:160},{label:"موضوع",w:200},{label:"بازخورد",w:740}], rows:
+            fbs.slice().sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); }).slice(0, 20).map(function(r){
+                return [dfSecDate(r.date), r.subject || "—", {text: r.notes || "—", align: "right"}];
+            })
+        });
+    }
+    const pfs = mine(d.portfolio);
+    if(pfs.length){
+        blocks.push({type:"heading", text:"پوشه‌کار (۱۵ مورد آخر)"});
+        blocks.push({type:"table", columns:[{label:"تاریخ",w:160},{label:"درس",w:200},{label:"عنوان نمونه‌کار",w:740}], rows:
+            pfs.slice().sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); }).slice(0, 15).map(function(p){
+                return [dfSecDate(p.date), p.subject || "—", {text: p.title || "—", align: "right"}];
+            })
+        });
+    }
+    const grs = mine(d.grades);
+    if(grs.length){
+        blocks.push({type:"heading", text:"ارزشیابی کیفی (۲۰ مورد آخر)"});
+        blocks.push({type:"table", columns:[{label:"تاریخ",w:150},{label:"درس",w:170},{label:"سطح",w:180},{label:"توضیحات",w:600}], rows:
+            grs.slice().sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); }).slice(0, 20).map(function(r){
+                return [dfSecDate(r.date), r.subject || "—", r.level ? {pill: r.level} : "—", {text: r.notes || "—", align: "right"}];
+            })
+        });
+    }
+    const ints = mine(d.interests);
+    if(ints.length) blocks.push({type:"note", text:"علاقه‌مندی: " + ints.map(function(r){ return r.text || r.interest || ""; }).filter(Boolean).join(" — ")});
+    return {
+        title: "گزارش کارتابل دانش‌آموز",
+        subtitle: name + "  —  " + getClassTitleForKey(currentClass),
+        meta: dfSecMeta(),
+        chips: [["حاضر", cnt["حاضر"]], ["غایب", cnt["غایب"]], ["تأخیر", cnt["تأخیر"]], ["ارزشیابی", evs.length]],
+        blocks: blocks.concat([{type:"note", text:"برای دیدن کامل هر بخش، از خودِ همان بخش خروجی PDF بگیرید."}]),
+        filenameSuffix: "-" + name.replace(/\s+/g, "-")
+    };
+}
+
+};
+
+async function exportSectionPDF(key){
+    try{
+        const fn = DF_SECTION_SPECS[key];
+        if(!fn){ alert("خروجی PDF برای این بخش تعریف نشده است."); return; }
+        const spec = fn();
+        if(!spec) return;
+        const suffix = spec.filenameSuffix || "";
+        spec.filename = safeFileName(spec.title + suffix + "-" + getClassTitleForKey(currentClass)) + ".pdf";
+        const pages = await dfRenderSectionPages(spec);
+        await dfDeliverPdf(spec.filename, pages);
+    }catch(err){
+        console.error(err);
+        alert("ساخت PDF با خطا روبه‌رو شد. لطفاً دوباره تلاش کنید.");
+    }
+}
+
+/* تزریق خودکار دکمهٔ خروجی PDF در همهٔ بخش‌ها */
+(function dfSectionPdfButtons(){
+    const BUTTONS = {
+        students:   ["#studentsTable",   "خروجی PDF فهرست دانش‌آموزان"],
+        homework:   ["#homeworkTable",   "خروجی PDF تکالیف"],
+        evaluation: ["#evaluationTable", "خروجی PDF ارزشیابی‌ها"],
+        grades:     ["#gradesTable",     "خروجی PDF ارزشیابی کیفی"],
+        feedback:   ["#feedbackTable",   "خروجی PDF بازخوردها"],
+        monthly:    ["#monthlyTable",    "خروجی PDF عملکرد ماهانه"],
+        attention:  ["#attentionTable",  "خروجی PDF نیازمند توجه"],
+        parents:    ["#parentsTable",    "خروجی PDF اطلاعات والدین"],
+        interests:  ["#interestsTable",  "خروجی PDF علاقه‌مندی‌ها"],
+        daily:      ["#dailyTable",      "خروجی PDF دفتر روزانه"],
+        weekly:     ["#weeklyImageBox",  "خروجی PDF برنامه هفتگی"],
+        budget:     ["#budgetHoursBody", "خروجی PDF بودجه‌بندی ساعات"],
+        bookBudget: ["#bookBudgetBody",  "خروجی PDF بودجه‌بندی کتاب"],
+        experiments:["#experimentsTable","خروجی PDF آزمایش‌ها"],
+        groups:     ["#groupsTable",     "خروجی PDF گروه‌بندی"],
+        portfolio:  ["#portfolioTable",  "خروجی PDF پوشه‌کار"],
+        studentFile:["#studentFileBody", "خروجی PDF کارتابل دانش‌آموز"]
+    };
+    function install(){
+        Object.keys(BUTTONS).forEach(function(key){
+            if(document.querySelector('[data-df-pdf="' + key + '"]')) return;
+            const el = document.querySelector(BUTTONS[key][0]);
+            if(!el) return;
+            let host = el;
+            if(el.tagName === "TBODY") host = el.closest("table") || el;
+            const row = document.createElement("div");
+            row.className = "attendance-export-row";
+            row.setAttribute("data-df-pdf", key);
+            row.style.margin = "10px 0";
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn btn-blue";
+            btn.textContent = "📄 " + BUTTONS[key][1];
+            btn.onclick = function(){ exportSectionPDF(key); };
+            row.appendChild(btn);
+            host.parentNode.insertBefore(row, host);
+        });
+    }
+    if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", install);
+    else install();
+    window.__dfSectionPdfInstall = install;
+})();
+
 </script>
 
 </body>

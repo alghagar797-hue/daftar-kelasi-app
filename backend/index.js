@@ -1,5 +1,5 @@
 /*
- * دفتر کلاسی — سرور ابری مدرسه (v3.0.0)
+ * دفتر کلاسی — سرور ابری مدرسه (v3.2.0)
  * ---------------------------------------------------------------
  * سرور کامل و سازگار با اپلیکیشن «دفتر کلاسی من» (کلاینت v7.5.1+)
  *
@@ -22,11 +22,16 @@ const compression = require("compression");
 const crypto = require("crypto");
 const path = require("path");
 
-const APP_VERSION = "3.1.0";
+const APP_VERSION = "3.2.0";
 const PORT = Number(process.env.PORT || 3000);
 const DATABASE_URL = (process.env.DATABASE_URL || "").trim();
 const TOKEN_SECRET =
   (process.env.TOKEN_SECRET || process.env.JWT_SECRET || "").trim() || crypto.randomBytes(32).toString("hex");
+if (!(process.env.TOKEN_SECRET || process.env.JWT_SECRET || "").trim()) {
+  console.warn("[daftar] WARNING: TOKEN_SECRET تنظیم نشده است؛ توکن‌ها با کلید تصادفی این اجرا امضا می‌شوند و پس از ری‌استارت همه‌جا نامعتبر می‌شوند.");
+}
+/* فقط وقتی صریحاً اعلام شده باشد به x-forwarded-for اعتماد می‌کنیم (پشت پروکسی واقعی). */
+const TRUST_PROXY_FORWARDED = String(process.env.TRUST_PROXY || "").trim() === "1";
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 30; // ۳۰ روز
 
 /* ============================================================
@@ -91,16 +96,29 @@ class FileStore {
   constructor(dir) {
     this.path = require("path").join(dir, "store.json");
     this.data = { schools: [], teachers: [], snapshots: [], feedback: [], settings: {} };
-    try { this.data = JSON.parse(require("fs").readFileSync(this.path, "utf8")); } catch (e) {}
+    try {
+      this.data = JSON.parse(require("fs").readFileSync(this.path, "utf8"));
+    } catch (e) {
+      if (require("fs").existsSync(this.path)) {
+        /* فایل خراب را بی‌صدا از بین نمی‌بریم؛ کنار می‌گذاریم تا قابل بررسی باشد. */
+        const quarantine = this.path + ".corrupt-" + Date.now();
+        try { require("fs").renameSync(this.path, quarantine); console.error("[daftar] store.json خراب بود و به " + quarantine + " منتقل شد. داده‌های جدید از صفر شروع می‌شوند."); }
+        catch (mvErr) { console.error("[daftar] store.json خراب است و جابه‌جا هم نشد:", mvErr.message); }
+      }
+    }
     this._saveTimer = null;
     console.log("[daftar] storage driver: file (" + this.path + ")");
   }
   _save() {
     clearTimeout(this._saveTimer);
     this._saveTimer = setTimeout(() => {
+      const fs = require("fs"), fp = require("path");
       try {
-        require("fs").mkdirSync(require("path").dirname(this.path), { recursive: true });
-        require("fs").writeFileSync(this.path, JSON.stringify(this.data));
+        fs.mkdirSync(fp.dirname(this.path), { recursive: true });
+        /* نوشتن اتمی: ابتدا در فایل موقت، سپس تغییر نام — قطع برق وسط نوشتن، فایل اصلی را خراب نمی‌کند. */
+        const tmp = this.path + ".tmp-" + process.pid;
+        fs.writeFileSync(tmp, JSON.stringify(this.data));
+        fs.renameSync(tmp, this.path);
       } catch (e) { console.error("[daftar] file save failed:", e.message); }
     }, 120);
   }
@@ -276,6 +294,13 @@ else store = new FileStore(process.env.DATA_DIR || require("path").join(__dirnam
 ============================================================ */
 const app = express();
 app.disable("x-powered-by");
+/* هدرهای امنیتی پایه برای پاسخ‌های API و صفحات استاتیک */
+app.use(function securityHeaders(req, res, next) {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  next();
+});
 app.use(compression({ threshold: 1024 }));
 app.use(express.json({ limit: "40mb" }));
 
@@ -298,12 +323,39 @@ app.use(function cors(req, res, next) {
   next();
 });
 
-/* محدودکنندهٔ سادهٔ نرخ درخواست برای مسیرهای حساس */
+/* محدودکنندهٔ سادهٔ نرخ درخواست برای مسیرهای حساس
+ * - حافظه به‌صورت دوره‌ای پاک‌سازی می‌شود (بدون رشد بی‌کران)
+ * - به x-forwarded-for فقط با TRUST_PROXY=1 اعتماد می‌شود تا با هدر جعلی دور زده نشود
+ */
 const rateBucket = {};
+const RATE_WINDOW_MS = 60 * 1000;
+setInterval(function pruneRateBuckets() {
+  const now = Date.now();
+  for (const ip of Object.keys(rateBucket)) {
+    if (now - rateBucket[ip].t > RATE_WINDOW_MS * 5) delete rateBucket[ip];
+  }
+}, RATE_WINDOW_MS).unref();
+function clientIp(req) {
+  if (TRUST_PROXY_FORWARDED) {
+    const fwd = req.headers["x-forwarded-for"];
+    if (fwd) return String(fwd).split(",")[0].trim();
+  }
+  return req.socket && req.socket.remoteAddress || "ip";
+}
 function rateLimit(req, res, next) {
-  const ip = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "ip").toString().split(",")[0].trim();
-  const now = Date.now(), win = 60 * 1000, max = 40;
+  const ip = clientIp(req);
+  const now = Date.now(), win = RATE_WINDOW_MS, max = 40;
   const b = rateBucket[ip] || (rateBucket[ip] = { n: 0, t: now });
+  if (now - b.t > win) { b.n = 0; b.t = now; }
+  b.n++;
+  if (b.n > max) { res.status(429).json({ error: "درخواست‌های بیش از حد؛ کمی بعد تلاش کنید." }); return; }
+  next();
+}
+/* نرخ ملایم‌تر برای همگام‌سازی/عضویت (کلاینت در هر ذخیره‌سازی صف می‌سازد) */
+function rateLimitSync(req, res, next) {
+  const ip = clientIp(req);
+  const now = Date.now(), win = RATE_WINDOW_MS, max = 120;
+  const b = rateBucket["s:" + ip] || (rateBucket["s:" + ip] = { n: 0, t: now });
   if (now - b.t > win) { b.n = 0; b.t = now; }
   b.n++;
   if (b.n > max) { res.status(429).json({ error: "درخواست‌های بیش از حد؛ کمی بعد تلاش کنید." }); return; }
@@ -378,15 +430,23 @@ app.post("/api/admin/setup", rateLimit, async function (req, res) {
     if (await store.getTeacherByUsername(username)) {
       return res.status(409).json({ error: "USERNAME_EXISTS", message: "این نام کاربری قبلاً ثبت شده است." });
     }
-    const school = await store.createSchool({ name: schoolName, join_code: joinCode(), owner_teacher_id: null });
+    /* ابتدا حساب مدیر ساخته می‌شود تا اگر نام کاربری تکراری بود (23505)، مدرسه‌ای بی‌مانند باقی نماند. */
     const passwordData = hashPassword(password);
-    const admin = await store.createTeacher({ username, password_hash: passwordData.hash, password_salt: passwordData.salt, role: "admin", school_id: school.id });
-    await store.updateTeacher(admin.id, {});
+    const admin = await store.createTeacher({ username, password_hash: passwordData.hash, password_salt: passwordData.salt, role: "admin", school_id: null });
+    let school = null;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        school = await store.createSchool({ name: schoolName, join_code: joinCode(), owner_teacher_id: admin.id });
+        break;
+      } catch (codeErr) {
+        if (codeErr && codeErr.code === "23505" && attempt < 4) continue; /* برخورد کد عضویت: کد تازه */
+        throw codeErr;
+      }
+    }
+    if (!school) throw new Error("JOIN_CODE_GENERATION_FAILED");
+    await store.updateTeacher(admin.id, { school_id: school.id });
     // Initial snapshot is optional for this store; create an empty one so admin panel sees a consistent record.
     await store.saveSnapshot(admin.id, {}, "initial");
-    // Set owner after the admin ID exists, using the same school record and no schema migration.
-    if (store instanceof PgStore) await store.q("UPDATE dk_schools SET owner_teacher_id=$1 WHERE id=$2", [admin.id, school.id]);
-    else { school.owner_teacher_id = admin.id; store._save(); }
     return res.status(201).json({ ok: true, school: { id: school.id, name: school.name, joinCode: school.join_code }, admin: { username: admin.username, role: admin.role } });
   } catch (e) {
     console.error("[admin/setup]", e);
@@ -451,6 +511,8 @@ app.post("/api/auth/register", rateLimit, async function (req, res) {
     res.json({ ok: true, token, teacher: teacherPublic(finalTeacher), school: { id: school.id, name: school.name, join_code: school.join_code } });
   } catch (e) {
     console.error("[register]", e);
+    /* مسابقهٔ ثبت‌نام همزمان: نقض یکتایی نام کاربری باید ۴۰۹ بدهد نه ۵۰۰ */
+    if (e && e.code === "23505") return fail(res, 409, "این نام کاربری قبلاً ثبت شده است.");
     fail(res, 500, "SERVER_ERROR");
   }
 });
@@ -536,7 +598,7 @@ app.get("/api/auth/me", async function (req, res) {
 });
 
 /* ---------- عضویت معلم به مدرسه با کد ---------- */
-app.post("/api/school/join", async function (req, res) {
+app.post("/api/school/join", rateLimitSync, async function (req, res) {
   try {
     const auth = authTeacher(req);
     if (!auth) return fail(res, 401, "UNAUTHORIZED");
@@ -555,7 +617,7 @@ app.post("/api/school/join", async function (req, res) {
 /* ============================================================
    همگام‌سازی داده (پروتکل ۱)
 ============================================================ */
-app.get("/api/sync/pull", async function (req, res) {
+app.get("/api/sync/pull", rateLimitSync, async function (req, res) {
   try {
     const auth = authTeacher(req);
     if (!auth) return fail(res, 401, "UNAUTHORIZED");
@@ -571,10 +633,15 @@ app.get("/api/sync/pull", async function (req, res) {
   }
 });
 
-app.post("/api/sync/push", async function (req, res) {
+/* قفل درون‌پردازشی برای جلوگیری از دو push همزمانِ یک معلم (آخرین‌نویسِ خاموش را نمی‌پذیرد) */
+const pushLocks = {};
+app.post("/api/sync/push", rateLimitSync, async function (req, res) {
+  const auth = authTeacher(req);
+  if (!auth) return fail(res, 401, "UNAUTHORIZED");
+  const lockKey = String(auth.tid);
+  if (pushLocks[lockKey]) return fail(res, 409, "SYNC_BUSY: درخواست همگام‌سازی قبلی این حساب هنوز در جریان است.");
+  pushLocks[lockKey] = true;
   try {
-    const auth = authTeacher(req);
-    if (!auth) return fail(res, 401, "UNAUTHORIZED");
     const body = req.body || {};
     const revision = String(body.revision || "").slice(0, 128);
     const baseRevision = String(body.baseRevision || "initial").slice(0, 128);
@@ -593,11 +660,14 @@ app.post("/api/sync/push", async function (req, res) {
         revision: serverRevision
       });
     }
+    if (JSON.stringify(payload).length > 12 * 1024 * 1024) return fail(res, 413, "حجم دادهٔ همگام‌سازی بیش از حد مجاز است.");
     await store.saveSnapshot(auth.tid, payload, revision);
     res.json({ ok: true, revision, synced_at: nowIso() });
   } catch (e) {
     console.error("[push]", e);
     fail(res, 500, "SERVER_ERROR");
+  } finally {
+    delete pushLocks[lockKey];
   }
 });
 
@@ -651,6 +721,11 @@ app.post("/api/admin/transfer", rateLimit, async function (req, res) {
     if ((target.school_id || null) !== (me.school_id || null)) return fail(res, 403, "انتقال مدیریت فقط به معلمان عضو همین مدرسه ممکن است.");
     await store.updateTeacher(target.id, { role: "admin" });
     await store.updateTeacher(me.id, { role: "teacher" });
+    /* مالک مدرسه هم به‌روز می‌شود تا ثبات owner_teacher_id حفظ بماند. */
+    try {
+      if (store instanceof PgStore) await store.q("UPDATE dk_schools SET owner_teacher_id=$1 WHERE id=$2", [target.id, me.school_id]);
+      else { const sch = await store.getSchoolById(me.school_id); if (sch) { sch.owner_teacher_id = target.id; store._save(); } }
+    } catch (ownerErr) { console.warn("[admin/transfer] owner update failed:", ownerErr.message); }
     console.log("[admin/transfer]", { from: me.username, to: target.username, school: me.school_id });
     const fresh = await store.getTeacherById(target.id);
     res.json({ ok: true, message: "نقش مدیر مدرسه به حساب «" + fresh.username + "» منتقل شد. حساب شما اکنون «معلم» است.", newAdmin: teacherPublic(fresh) });
@@ -774,6 +849,11 @@ app.get("/admin-setup.html", function (req, res) {
 });
 app.get("/", function (req, res) {
   res.sendFile(path.join(PUBLIC_DIR, "index.html"));
+});
+
+/* مسیرهای ناشناختهٔ API: پاسخ JSON (نه HTML پیش‌فرض Express) */
+app.use("/api", function (req, res) {
+  fail(res, 404, "NOT_FOUND");
 });
 
 /* خطاهای JSON نامعتبر */

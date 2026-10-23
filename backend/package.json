@@ -1,6 +1,6 @@
 {
   "name": "daftar-kelasi-server",
-  "version": "3.0.0",
+  "version": "3.2.0",
   "description": "سرور ابری مدرسه برای اپلیکیشن دفتر کلاسی — auth، همگام‌سازی و پنل مدیر مدرسه",
   "main": "index.js",
   "scripts": {

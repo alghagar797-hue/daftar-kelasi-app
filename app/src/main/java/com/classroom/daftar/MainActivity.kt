@@ -86,7 +86,15 @@ class MainActivity : Activity() {
         webView.webViewClient = object : WebViewClientCompat() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val url = request.url
-                return url.scheme != "https" || url.host != "appassets.androidplatform.net"
+                // صفحات داخلی برنامه از طریق WebViewAssetLoader سرو می‌شوند؛ هر چیز دیگر
+                // (مثلاً پیوند سرور مدرسه) در مرورگر بیرونی باز می‌شود، نه اینکه بی‌صدا مسدود شود.
+                if (url.scheme == "https" && url.host == "appassets.androidplatform.net") return false
+                return try {
+                    startActivity(Intent(Intent.ACTION_VIEW, url))
+                    true
+                } catch (e: Exception) {
+                    true // هیچ مرورگری نصب نیست؛ از بازشدن لینک جلوگیری می‌شود ولی صفحه داخلی نمی‌شکند
+                }
             }
 
             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
