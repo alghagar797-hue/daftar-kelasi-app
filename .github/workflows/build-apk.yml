@@ -40,6 +40,7 @@ jobs:
           # Keep the root web app as the single source of truth for the Android WebView.
           cp index.html app/src/main/assets/index.html
           cmp -s index.html app/src/main/assets/index.html
+          node -e "const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const re=/<script([^>]*)>([\s\S]*?)<\/script>/g;let m,n=0,f=0;while((m=re.exec(html))!==null){if(!m[2].trim())continue;const attrs=m[1];if(/type=/i.test(attrs)&&!/type=\"text\/javascript\"|type=\"module\"/i.test(attrs))continue;n++;try{new Function(m[2])}catch(e){f++;console.error('Syntax error in script block '+n+': '+e.message)}}if(f){process.exit(1)}console.log('JS sanity: '+n+' script blocks checked, 0 syntax errors');" || exit 1
           echo "Project OK: Android asset synchronized from root index.html."
 
 
@@ -92,7 +93,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DaftarKelasi-APK-v8.1.1
+          name: DaftarKelasi-APK-v8.3.0
           path: release/DaftarKelasi.apk
           retention-days: 30
 
